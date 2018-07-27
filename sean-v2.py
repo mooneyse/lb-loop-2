@@ -65,7 +65,7 @@ class ReadMs:
 
     def GetMSNamepara(self): return self.msname
 
-def main(msname):
+def main(msname, freq_range = 10):
         ''' This is called by loop 1 (target selection) and calls loop 3 (self-
             calibration). It interfaces with a global h5parm to create a local
             h5parm for each target.

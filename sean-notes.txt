@@ -82,3 +82,9 @@ Loop 2B: - Get the initial model.
   - Take the  final instrument table from loop 3.
   - Generate a new 'best phase solutions' for that direction, which will be a combination of the input and final instrument tables.
   So all the infrastructure for accessing phase tables, adding phase solutions together, writing them back, is a good place to start.
+
+ +------------+
+ | Notes      |
+ +------------+
+
+cep3: module load module load aoflagger casa/5.0.0 casacore lofar losoto/2.0 lsmtool wsclean
