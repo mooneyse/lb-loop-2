@@ -1,0 +1,85 @@
++------------+
+| Loop 1     |
++------------+
+
+- This takes...
+  (1) A list of sources.
+  (2) A list of subbands to be imaged (or the LoTSS catalogue for the field).
+- For one batch of sources...
+  (1) Get the LBCS (and other bright) sources.
+  (2) For each source, make a small dataset and run loop 2, getting the returned source models.
+  (3) Subtract the sources for the unaveraged (1 s, 16 ch/sb) data.
+  (4) Update the global phase/amplitude solution table.
+- For subsequent batches of sources (which are the next layer, down to ~mJy)...
+  (1) Make a small dataset. (The subtracted data from the first run are used.)
+  (2) Correct each dataset with the global phase solution table. (The phase solutions from the first run are used.)
+  (3) Run loop 2 for each source. Loop 2 will update the global solution table and write out maps of the sources.
+
++------------+
+| Loop 2     |
++------------+
+
+- This takes...
+  (1) A dataset on a single source.
+- Imaging and self-calibration are done by loop 3.
+- The global phase solution HDF5 table is updated.*
+
+Loop 2A: - Get the current phase solution table at this position.
+         - Get the data at low resolution (1 s, 12 ch/sb).
+         - Get the closure phase statistic for each station. (This is a proxy for the flux available on different baselines.)
+         - Get the required size of the map of the source. (Look at LoTSS or FIRST. 20" < size < 2'. Pixel size = 0.1".)
+
+Loop 2B: - Get the initial model.
+           1. Look at the closure phase statistics from loop 2.
+           2. Work out the maximum coherent baseline length.
+           3. If the source is resolved in LoTSS:
+                  Use this as the initial model.
+              Else:
+                  Run the model engine.
+                  Use the model engine return value to assess if a two-component model is acceptable.
+                  If it is acceptable:
+                      Accept the model.
+                  Else:
+                      Image the data with the maximum of the 80 km baselines and the maximum coherent baseline length.
+         - Run WSClean (imaging) and phase self-calibration (loop 3) (5 iterations), beginning at the maximum coherent baseline length and finishing at 800 km.**
+         - Run amplitude self-calibration (1 iteration) if coherent solutions are obtained from Loop 3 on almost all stations in the final iteration.
+         - Average the dataset, if needed.
+         - Store the CORRECTED_DATA and the image.
+         - Return the longest baseline that was phase-calibrated.
+
+*  This loop runs in parallel.
+   Updating the global phase solution table simulatneously may not be possible.
+   Temporary storage may be required.
+   The global phase solution table has entries as a function of...
+   (1) Position.
+   (2) Station.
+   Generating a solution table at a particular point is a common task.
+   Different stations can have different origins.
+   (e.g. The DE601 solution could come from an LBCS calibrator, modified b incremental solutions on a closer and fainter source.
+         The UK608 solution could come from an LBCS calibrator only.)
+
+** If coherent solutions are being obtained on the longest baselines imaged, and the total image flux obtained does not start to decrease significantly.
+   Each run of loop 3 adds to the global phase calibration table.
+
++------------+
+| Loop 3     |
++------------+
+
+- This does phase self-calibration on a single source.
+- It updates the global phase solution table.
+
++------------+
+| Questions  |
++------------+
+
+1. Loop 2 outputs h5parms local to each source, and then at the end they're all applied to the global solutions table - or are these h5parms output by loop 3?
+2. Loop 3 takes care of WSClean as well as self-calibration.
+
+- Leah:
+  What would be really useful is all the bits for...
+  - Finding the best phase solutions (i.e. pick the closest calibrator from a list of calibrators) for a direction.
+  - Apply those phase solutions.
+  - Run loop 3.
+  - Take the  final instrument table from loop 3.
+  - Generate a new 'best phase solutions' for that direction, which will be a combination of the input and final instrument tables.
+  So all the infrastructure for accessing phase tables, adding phase solutions together, writing them back, is a good place to start.
