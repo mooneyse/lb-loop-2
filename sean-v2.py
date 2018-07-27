@@ -97,10 +97,21 @@ def find_h5_solutions(target_coo, all_solutions_names):
                 name_min = sol[-1]
 
         print('minimum separation: %s' % sep_min.degree)
-        print('minimum ra, dec:    %s' % coo_sol_min)
+        print('minimum ra, dec:    %s' % coo_sol_min[0], coo_sol_min[1])
         print('minimum name:       %s' % name_min)
 
-    # TODO continue the processing: common for all tiers
+    # TODO continue the processing that is common to all tiers
+
+def writeApplyH5parmParset(h5parmName, parsetname = 'ndppp_applyH5.parset', incol = 'DATA', outcol = 'CORRECTED_DATA', outms = '.'):
+    with open(parsetname, 'w') as f: # overwrites previous files of the same name
+        f.write('msin.datacolumn = %s\n' % incol)
+        f.write('msout = %s\n' % outms)
+        f.write('msout.datacolumn = %s\n' % outcol)
+        f.write('steps = [applycal]\n')
+        f.write('applycal.type = applycal\n')
+        f.write('applycal.parmdb = %s\n' % h5parmName)
+        f.write('applycal.correction = phase000\n')
+    f.close()
 
 def main(msname, all_sol_names, freq_range = 10):
         ''' This is called by loop 1 (target selection) and calls loop 3 (self-
@@ -128,6 +139,12 @@ def main(msname, all_sol_names, freq_range = 10):
 
         # find the best h5parm solutions using the pointing centre
         my_hy5parm = find_h5_solutions(target_direction, all_sol_names)
+
+        # apply these solutions
+        applyParset = 'ndppp_apply_' + tgtname + '.parset'
+        writeApplyH5parmParset(my_h5parm, parsetname = applyParset)
+        s = 'NDPPP %s msin=%s' % (applyParset, msname)
+        # os.system(s)
 
 if __name__ == '__main__':
     sol_avl = [[[277.3825, 48.74611111], 'C10'], [[212.836625, 52.20219444], 'D9'], [[212.835375, 52.20297222], 'B3'], [[24.42208333, 33.15972222], 'A1']] # coo should be tuple and not list
