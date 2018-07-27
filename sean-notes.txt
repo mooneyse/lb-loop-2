@@ -75,7 +75,6 @@ Loop 2B: - Get the initial model.
 1. Loop 2 outputs h5parms local to each source, and then at the end they're all applied to the global solutions table - or are these h5parms output by loop 3?
 2. Loop 3 takes care of WSClean as well as self-calibration.
 
-- Leah:
   What would be really useful is all the bits for...
   - Finding the best phase solutions (i.e. pick the closest calibrator from a list of calibrators) for a direction.
   - Apply those phase solutions.
