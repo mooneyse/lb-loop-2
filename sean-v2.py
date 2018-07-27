@@ -64,3 +64,28 @@ class ReadMs:
         else: return self.freqpara
 
     def GetMSNamepara(self): return self.msname
+
+def main(msname):
+        ''' This is called by loop 1 (target selection) and calls loop 3 (self-
+            calibration). It interfaces with a global h5parm to create a local
+            h5parm for each target.
+        '''
+
+        # 1: housekeeping
+
+        # get information on the MS, like pointing centre and frequency range
+        tgtname = msname.split('.ms')[0].split('_')[0]
+        msinfo = ReadMs(msname)
+        target_direction = msinfo.direction[0]
+        minfreq = np.min(msinfo.msfreqvalues)
+        maxfreq = np.max(msinfo.msfreqvalues)
+        bandwidth = (maxfreq - minfreq) / 1e6 # in MHz
+        if bandwidth > freq_range: # if the bandwidth is too large, split into channels for WSClean
+        	# split into channels for imaging
+    	    nchan = int(np.ceil(bandwidth / freq_range))
+
+        # 2: find the appropriate solutions and apply them
+        # find the best h5parm solutions using the pointing center
+
+if __name__ == '__main__':
+    main('/data/scratch/sean/loop-2/L569711_SB051.ms/')
