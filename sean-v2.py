@@ -142,6 +142,7 @@ def main(msname, all_sol_names, freq_range = 10):
 
         # apply these solutions
         applyParset = 'ndppp_apply_' + tgtname + '.parset'
+        my_h5parm = '/data/scratch/sean/loop-2/ILTJ132737.2+550406.2.h5' # placeholder
         writeApplyH5parmParset(my_h5parm, parsetname = applyParset)
         s = 'NDPPP %s msin=%s' % (applyParset, msname)
         # os.system(s)
