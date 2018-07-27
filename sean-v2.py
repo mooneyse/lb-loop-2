@@ -201,6 +201,7 @@ def main(msname, all_sol_names, freq_range = 10, mosaic_rad_arcsec = 0):
 
     # determine longest coherent baseline using closure phase
     stations = msinfo.stations # get a list of stations
+    print(stations)
     ctel1 = [s for s in stations if 'ST' in s][0]
     rs_tels = [s for s in stations if 'RS' in s]
     ctel2 = rs_tels[0] # taking the 1st RS TODO update to find the best one
