@@ -145,7 +145,7 @@ def main(msname, all_sol_names, freq_range = 10):
         my_h5parm = '/data/scratch/sean/loop-2/ILTJ132737.2+550406.2.h5' # placeholder
         writeApplyH5parmParset(my_h5parm, parsetname = applyParset)
         s = 'NDPPP %s msin=%s' % (applyParset, msname)
-        # os.system(s)
+        os.system(s)
 
 if __name__ == '__main__':
     sol_avl = [[[277.3825, 48.74611111], 'C10'], [[212.836625, 52.20219444], 'D9'], [[212.835375, 52.20297222], 'B3'], [[24.42208333, 33.15972222], 'A1']] # coo should be tuple and not list
