@@ -81,7 +81,7 @@ def find_h5_solutions(target_coo, all_solutions_names):
     if all_solutions_names: # we are not on the brightest calibrators anymore if this list is not empty
         # cone search
             # NB ReadMs gives coo in radian but skycoo can work with all if good unit given?
-        print('target 0, target 1: %s, %s', % (target_coo[0], target_coo[1]))
+        print('target 0, target 1: %s, %s' % (target_coo[0], target_coo[1]))
         coo_tar = SkyCoord(target_coo[0], target_coo[1], unit = 'rad') # TODO check the frame - default: ircs
         # seems to return them in degrees by default
 
