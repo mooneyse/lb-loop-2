@@ -418,7 +418,7 @@ def main(msname, all_sol_names, freq_range = 10, data_col = 'DATA', mosaic_rad_a
     # msname = args.msname
     # h5parm = args.h5parm
     # all_sol_names = args.all_solutions_names
-    # freq_range = args.freq_range 
+    # freq_range = args.freq_range
     # data_col = args.data_col
 
     # main(msname, input2strlist_nomapfile(all_sol_names), freq_range, data_col) # TODO check type
