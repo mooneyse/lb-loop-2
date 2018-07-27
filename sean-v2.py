@@ -80,11 +80,8 @@ def find_h5_solutions(target_coo, all_solutions_names):
     # do phase only (i.e. no matching) if this is the first calibrator
     print('all solution names: %s' % all_solutions_names)
     if all_solutions_names: # we are not on the brightest calibrators anymore if this list is not empty
-        # cone search
-            # NB ReadMs gives coo in radian but skycoo can work with all if good unit given?
-        print('target 0, target 1: %s, %s' % (target_coo[0], target_coo[1]))
-        coo_tar = SkyCoord(target_coo[0], target_coo[1], unit = 'rad') # TODO check the frame - default: ircs
-        # seems to return them in degrees by default
+        coo_tar = SkyCoord(target_coo[0], target_coo[1], unit = 'rad') # degrees by default; ReadMs gives coordinates in radians
+        # TODO check the frame - default: ircs
 
         coo_sol_min = SkyCoord(all_solutions_names[0][0][0], all_solutions_names[0][0][1], unit = 'deg')
         sep_min = coo_tar.separation(coo_sol_min)
@@ -99,48 +96,11 @@ def find_h5_solutions(target_coo, all_solutions_names):
                 coo_sol_min = coo
                 name_min = sol[-1]
 
-        print('final:')
-        print('    minimum separation: %s' % sep_min.degree)
-        print('    coordinates of minimum solution: %s' % coo_sol_min)
-        print('    minimum name: %s' % name_min)
+        print('minimum separation: %s' % sep_min.degree)
+        print('minimum ra, dec:    %s' % coo_sol_min)
+        print('minimum name:       %s' % name_min)
 
-    # Continue the processing: common for all tiers
-    # calc, calc calc
-    # from Martin too
-    #
-    # # TODO rest of the processing common for all tiers?
-    #     # REP wi
-    #     # + cf how to combine / or at worst; put 2 times tests
-    #
-    #     # cone search if fainter sources
-    #     # fg or check for 1st loop to avoid looking for previous solution
-    #         # what is a best? A global fg or check if file exist?
-    #         # other way for bookeeping; list of coo and if list empty; <=> q ​​on 1st loop
-    #         # ms; need to know this list uk lvl sup ie loop 1
-    #         # => have overall direction then check if empty; will be signal for 1st level of calibration
-    #         # RQ: if h5parm ac N already; no need for direction
-    #         # what should be normal pm to the level of the pipeline gene
-    #
-    #          # pb of multithreading though; if all start together okish
-    #          # but if one finish before one start; not valid...
-    #          # TODO deal ac fg
-    #
-    #          # salso deal with gl layer;
-    #          # pw happen q list / dir contains close soil that is being solved or at best
-    #          # => force keep solutions uk level sup
-    #          # pw regler pb fg
-    #
-    #     # phase sol: TODO: even pt?
-    #     # NB ds new fct
-    #
-    #     # merging
-    #
-    # # cone search on name
-    #     # => list of solutions
-    # # solving and merging
-    #     # TODO solving? applying
-    #
-    # # return(0)
+    # TODO continue the processing: common for all tiers
 
 def main(msname, all_sol_names, freq_range = 10):
         ''' This is called by loop 1 (target selection) and calls loop 3 (self-
@@ -160,9 +120,9 @@ def main(msname, all_sol_names, freq_range = 10):
         if bandwidth > freq_range: # if the bandwidth is too large, split into channels for imaging in WSClean
     	    nchan = int(np.ceil(bandwidth / freq_range))
 
-        print('Target name: %s' % tgtname)
-        print('Target RA, dec: %s' % target_direction)
-        print('Bandwidth: %s' % bandwidth)
+        print('Target name:     %s' % tgtname)
+        print('Target RA, dec:  %s' % target_direction)
+        print('Bandwidth (MHz): %s' % bandwidth)
 
         # 2: find the appropriate solutions and apply them
 
