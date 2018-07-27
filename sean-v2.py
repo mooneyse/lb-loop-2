@@ -97,7 +97,7 @@ def find_h5_solutions(target_coo, all_solutions_names):
                 name_min = sol[-1]
 
         print('minimum separation: %s' % sep_min.degree)
-        print('minimum ra, dec:    %s' % coo_sol_min[0], coo_sol_min[1])
+        print('minimum ra, dec:    %s' % coo_sol_min)
         print('minimum name:       %s' % name_min)
 
     # TODO continue the processing that is common to all tiers
