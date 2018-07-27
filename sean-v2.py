@@ -84,6 +84,7 @@ def main(msname):
         	# split into channels for imaging
     	    nchan = int(np.ceil(bandwidth / freq_range))
 
+        print(tgtname, target_direction, bandwidth)
         # 2: find the appropriate solutions and apply them
         # find the best h5parm solutions using the pointing center
 
