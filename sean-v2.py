@@ -86,27 +86,27 @@ def find_h5_solutions(target_coo, all_solutions_names):
         coo_tar = SkyCoord(target_coo[0], target_coo[1], unit = 'rad') # TODO check the frame - default: ircs
         # seems to return them in degrees by default
 
-    #     coo_sol_min = SkyCoord(all_solutions_names[0][0][0], all_solutions_names[0][0][1], unit = 'deg')
-    #     sep_min = coo_tar.separation(coo_sol_min)
-    #     name_min = all_solutions_names[0][1]
-    #
-    #     for sol in all_solutions_names[1:]:
-    #         coo = SkyCoord(sol[0][0], sol[0][1], unit = 'deg')
-    #         sep = coo_tar.separation(coo)
-    #
-    #         if sep.degree < sep_min.degree: # TODO already take care now if pls exactly the same d?
-    #             sep_min = sep
-    #             coo_sol_min = coo
-    #             name_min = sol[-1]
-    #
-    #     # print 'final'
-    #     # print sep_min.degree
-    #     # print coo_sol_min
-    #     # print name_min
-    #
-    # # Continue the processing: common for all tiers
-    # # calc, calc calc
-    # # from Martin too
+        coo_sol_min = SkyCoord(all_solutions_names[0][0][0], all_solutions_names[0][0][1], unit = 'deg')
+        sep_min = coo_tar.separation(coo_sol_min)
+        name_min = all_solutions_names[0][1]
+
+        for sol in all_solutions_names[1:]:
+            coo = SkyCoord(sol[0][0], sol[0][1], unit = 'deg')
+            sep = coo_tar.separation(coo)
+
+            if sep.degree < sep_min.degree: # TODO what if it is exactly the same distance?
+                sep_min = sep
+                coo_sol_min = coo
+                name_min = sol[-1]
+
+        print('final:')
+        print('    minimum separation: %s' % sep_min.degree)
+        print('    coordinates of minimum solution: %s' % coo_sol_min)
+        print('    minimum name: %s' % name_min)
+
+    # Continue the processing: common for all tiers
+    # calc, calc calc
+    # from Martin too
     #
     # # TODO rest of the processing common for all tiers?
     #     # REP wi
@@ -162,13 +162,12 @@ def main(msname, all_sol_names, freq_range = 10):
 
         print('Target name: %s' % tgtname)
         print('Target RA, dec: %s' % target_direction)
-        print('Bandwidth: %s', bandwidth)
+        print('Bandwidth: %s' % bandwidth)
 
         # 2: find the appropriate solutions and apply them
 
         # find the best h5parm solutions using the pointing centre
         my_hy5parm = find_h5_solutions(target_direction, all_sol_names)
-
 
 if __name__ == '__main__':
     sol_avl = [[[277.3825, 48.74611111], 'C10'], [[212.836625, 52.20219444], 'D9'], [[212.835375, 52.20297222], 'B3'], [[24.42208333, 33.15972222], 'A1']] # coo should be tuple and not list
