@@ -55,7 +55,7 @@ def main():
     parser.add_argument('-p', '--h5parm', required = True)
     args = parser.parse_args()
 
-    evaluate_solutions(h5parm)
+    evaluate_solutions(args.h5parm)
 
     make_h5parm()
 
