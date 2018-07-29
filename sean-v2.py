@@ -214,7 +214,7 @@ def main(msname, all_sol_names, freq_range = 10, mosaic_rad_arcsec = 0):
     # get station positions for use in calculating baseline lengths
     positions = msinfo.positions
     st_index = [i for i in np.arange(0, len(stations)) if 'ST' in stations[i]]
-    st_pos = positions[st_index[0]]
+    st_pos = positions[st_index[0]] # NB I AM HERE!
     st_dict = geographic_from_xyz(st_pos)
     intl_index = [i for i, val in enumerate(stations) if val in intl_tels]
     intl_pos = positions[intl_index]
