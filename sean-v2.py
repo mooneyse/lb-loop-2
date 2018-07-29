@@ -208,13 +208,13 @@ def main(msname, all_sol_names, freq_range = 10, mosaic_rad_arcsec = 0):
         print('ST001 not in the MS so I am using a CS instead.')
         ctel1 = [s for s in stations if 'CS' in s][0]
     rs_tels = [s for s in stations if 'RS' in s]
-    ctel2 = rs_tels[0] # taking the 1st RS TODO update to find the best one
+    ctel2 = rs_tels[0] # TODO takes 1st RS but update to find the best one
     intl_tels = [s for s in stations if 'RS' not in s and 'ST' not in s]
 
     # get station positions for use in calculating baseline lengths
     positions = msinfo.positions
     st_index = [i for i in np.arange(0, len(stations)) if 'ST' in stations[i]]
-    st_pos = positions[st_index[0]] # NB I AM HERE!
+    st_pos = positions[st_index[0]] # IndexError: ST001 not in the MS
     st_dict = geographic_from_xyz(st_pos)
     intl_index = [i for i, val in enumerate(stations) if val in intl_tels]
     intl_pos = positions[intl_index]

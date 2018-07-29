@@ -88,3 +88,39 @@ Loop 2B: - Get the initial model.
  +------------+
 
 cep3: module load module load aoflagger casa/5.0.0 casacore lofar losoto/2.0 lsmtool wsclean
+
++------------+
+| From LKM   |
++------------+
+
+General structure:
+
+Starting point: Iteration 1 will have produced phase solutions independently for all directions. Each of these will be its own h5parm.
+Need to create (see subroutine 1): A file containing: h5parm_name, RA, DEC, and one column per antenna with a boolean for "valid solution" or "not valid solution"
+An h5parm for every direction
+
+Subroutines
+1) evaluate solutions
+    input: h5parm with phase solutions
+    function: evaluate solutions for each antenna -- use XX-YY statistic described in the Hybrid mapping section of https://docs.google.com/document/d/1qHICQF1IevEISzKQS4z06TzLQrteuKNW_EvuFyIPBHE/edit -- and determine YES or NO (or some boolean).
+    output: APPEND to master file with h5parm_name, RA, DEC, and one column per antenna with boolean for valid/invalid
+
+2) make h5parm
+    input: direction of measurement set to be self-calibrated, master file with list of h5parms
+    function: find nearest directions, construct a new h5parm that is a combination of best phase solutions from nearest direction, done per antenna.  e.g., if the nearest direction has valid solutions for all but the UK antenna, find the UK solutions from the next nearest direction, etc.
+    output: a new h5parm to be applied to the measurement set
+
+3) apply h5parm
+    input: the output of make h5parm, the measurement set for self-cal
+    function: apply the output of make h5parm to the measurement set
+    output: the measurement set for self-cal with corrected data
+
+(note that loop3 will be run after apply h5parm)
+
+4) combine h5parms
+    input: the initial h5parm (i.e., from make h5parm), the final h5parm from loop3
+    funtion: combine the phase solutions from the initial h5parm and the final h5parm, calls evaluate solutions subroutine to update the master file.
+    output: a new h5parm that is a combination of both these h5parms, a new line in the master file
+
+My questions:
+- Do I have to find the best initial model to pass to loop 3?
