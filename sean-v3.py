@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 
+import argparse
 import numpy as np
 
-def evaluate_solutions():
+def evaluate_solutions(h5parm):
     ''' input:    h5parm with phase solutions
         function: evaluate solutions for each antenna; use XX-YY statistic
-                  described in the Hybrid mapping section of Google Doc and
+                  described in the Hybrid mapping section of the Google Doc and
                   determine validity
         output:   Append to master file with h5parm_name, RA, dec, and one
                   column per antenna with boolean for validity
     '''
-    pass
+
+    print(h5parm)
 
 def make_h5parm():
     ''' input:    direction of measurement set to be self-calibrated; master
@@ -48,7 +50,12 @@ def main():
         independently for all directions, with eachbeing its own h5parm
     '''
 
-    evaluate_solutions()
+    # parse command-line arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--h5parm', required = True)
+    args = parser.parse_args()
+
+    evaluate_solutions(h5parm)
 
     make_h5parm()
 
