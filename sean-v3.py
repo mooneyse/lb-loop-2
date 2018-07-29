@@ -52,6 +52,10 @@ def comibine_h5parm():
         output:   a new h5parm that is a combination of both these h5parms; a
                   new line in the master file
     '''
+
+    # update the master file
+    # evaluate_solutions()
+
     pass
 
 def main():
