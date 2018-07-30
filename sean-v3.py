@@ -1,22 +1,23 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import argparse, h5py
 import numpy as np
 from losoto.h5parm import openSoltab
 
-def evaluate_solutions(h5parm, MTF): # subroutine 1
+def evaluate_solutions(h5parm, mtf):
     ''' input:    h5parm with phase solutions
         function: evaluate solutions for each antenna; use xx-yy statistic
-                  described in the hybrid mapping section of the google doc and
+                  described in the hybrid mapping section of the google doc;
                   determine validity
-        output:   Append to master file with h5parm_name, ra, dec, and one
-                  column per antenna with boolean for validity
+        output:   append h5parm_name, ra, dec, and one column per antenna with
+                  boolean for validity to the master text file
     '''
 
     # get (ra, dec) for the source from the h5parm
-    H = h5py.File(h5parm, 'r')
-    ra_dec = H['/sol000/source'][0][1] # degrees
-    H.close()
+    h = h5py.File(h5parm, 'r')
+    ra_dec = h['/sol000/source'][0][1] # radians
+    ra_dec = np.degrees(np.array(ra_dec))
+    h.close()
 
     # get the phase solutions for each station from the h5parm
     phase = openSoltab(h5parm, 'sol000', 'phase000')
@@ -33,6 +34,7 @@ def evaluate_solutions(h5parm, MTF): # subroutine 1
         for value in phase.val[1, 0, station, 0, :]:
             yy.append(value)
 
+        # calculate xx-yy statistic
         xx = np.degrees(np.array(xx))
         yy = np.degrees(np.array(yy))
         xx_yy = xx - yy
@@ -40,7 +42,7 @@ def evaluate_solutions(h5parm, MTF): # subroutine 1
         evaluations[stations[station]] = mean_xx_yy
 
     # append to master file
-    with open(MTF, 'a') as f:
+    with open(mtf, 'a') as f:
         f.write('{}, {}, {}'.format(h5parm, ra_dec[0], ra_dec[1]))
         for value in evaluations.values():
             f.write(', {}'.format(value)) # NB ensure written in correct order
@@ -88,13 +90,13 @@ def main():
     # parse command-line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--h5parm', required = True)
-    parser.add_argument('-m', '--master', required = True)
+    parser.add_argument('-m', '--mastertextfile', required = True)
     args = parser.parse_args()
     h5parm = args.h5parm
-    MTF = args.master
+    mtf = args.mastertextfile
 
-    # subroutine 1: evaluate the phase solutions in the h5parm
-    evaluate_solutions(h5parm, MTF)
+    # evaluate the phase solutions in the h5parm
+    evaluate_solutions(h5parm, mtf)
 
     make_h5parm()
 
