@@ -2,10 +2,9 @@
 
 import argparse, h5py
 import numpy as np
-from losoto.h5parm import h5parm as losoto_h5parm
 from losoto.h5parm import openSoltab
 
-def evaluate_solutions(h5parm, master): # subroutine 1
+def evaluate_solutions(h5parm, MTF): # subroutine 1
     ''' input:    h5parm with phase solutions
         function: evaluate solutions for each antenna; use xx-yy statistic
                   described in the hybrid mapping section of the google doc and
@@ -16,44 +15,35 @@ def evaluate_solutions(h5parm, master): # subroutine 1
 
     # get (ra, dec) for the source from the h5parm
     H = h5py.File(h5parm, 'r')
-    ra_dec = H['/sol000/source'][0][1] # [ra, dec] in degrees
+    ra_dec = H['/sol000/source'][0][1] # degrees
+    H.close()
 
-    # get the phase solutions for each antenna from the h5parm
-    h = losoto_h5parm(h5parm, readonly = True)
+    # get the phase solutions for each station from the h5parm
     phase = openSoltab(h5parm, 'sol000', 'phase000')
-
     stations = phase.ant[:]
+    evaluations = {}
 
-    # loop over all stations and for each polarisation, I have a list with one
-    # element per per time step, and each time step is a list of values with one
-    # for each subband
-    for station in range(len(stations)):
+    for station in range(len(stations)): # loop over all stations
         xx, yy = [], []
 
-        # [polarisation (xx = 0, yy  = 1), direction (0), station, frequency, time]
-        for value in phase.val[0, 0, station, :, :]:
+        # [polarisation (xx = 0, yy  = 1), direction, station, frequency, time]
+        for value in phase.val[0, 0, station, 0, :]:
             xx.append(value)
 
-        for value in phase.val[1, 0, station, :, :]:
+        for value in phase.val[1, 0, station, 0, :]:
             yy.append(value)
 
-    a = xx[0]
-    print(len(xx))
-    print(a)
-    print(a[0])
-    print(len(a))
-
-    # scatter in XX-YY phase (get all phase solutions on a station, subtract
-    # XX  and yy, reduce difference from -180 to 180, take the mean of the
-    # absolute difference value and multiply by 2/pi)
-
-    evaluations = [1, 0, 1]
+        xx = np.degrees(np.array(xx))
+        yy = np.degrees(np.array(yy))
+        xx_yy = xx - yy
+        mean_xx_yy = np.nanmean(np.abs(xx_yy)) * (2 / np.pi)
+        evaluations[stations[station]] = mean_xx_yy
 
     # append to master file
-    with open(master, 'a') as f:
+    with open(MTF, 'a') as f:
         f.write('{}, {}, {}'.format(h5parm, ra_dec[0], ra_dec[1]))
-        for e in evaluations:
-            f.write(', {}'.format(e))
+        for value in evaluations.values():
+            f.write(', {}'.format(value)) # NB ensure written in correct order
         f.write('\n')
 
 def make_h5parm(): # subroutine 2
@@ -101,10 +91,10 @@ def main():
     parser.add_argument('-m', '--master', required = True)
     args = parser.parse_args()
     h5parm = args.h5parm
-    master = args.master
+    MTF = args.master
 
     # subroutine 1: evaluate the phase solutions in the h5parm
-    evaluate_solutions(h5parm, master)
+    evaluate_solutions(h5parm, MTF)
 
     make_h5parm()
 
