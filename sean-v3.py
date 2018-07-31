@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import argparse, csv, h5py
+import argparse, csv, h5py, os
 import numpy as np
 import pyrap.tables as pt
 from astropy.coordinates import SkyCoord
@@ -47,10 +47,8 @@ def evaluate_solutions(mtf, threshold = 0.25):
         evaluations[stations[station]] = mean_xx_yy # 0 = best, 1 = worst
 
     # append to master file
-    data = open(mtf, 'r')
-    mtf_stations = list(csv.reader(data))[0][3:] # get the stations from the mtf
-
     with open(mtf, 'a') as f:
+        mtf_stations = list(csv.reader(f))[0][3:] # get stations from the mtf
         f.write(', {}, {}'.format(direction[0], direction[1]))
         for mtf_station in mtf_stations:
             # look up the statistic for a station and determine if it is good
@@ -89,19 +87,34 @@ def make_h5parm(mtf, ms):
 
     # get the direction from the master text file
     h5parms, ras, decs = np.genfromtxt(mtf, delimiter = ',', unpack = True, dtype = str, usecols = (0, 1, 2))
-    mtf_directions = []
+    mtf_directions = {}
 
     for h5parm, ra, dec in zip(h5parms, ras, decs):
         mtf_direction = SkyCoord(float(ra), float(dec), unit = 'deg')
         separation = ms_direction.separation(mtf_direction)
-        print(separation.arcminute)
+        mtf_directions[separation] = h5parm
 
-    # find the nearest good h5parm direction to the measurement set direction
-    # and do this for each station
+    # mtf_directions contains the distance from the ms to each h5parm
 
+    # for each station
+    with open(mtf) as f:
+        mtf_stations = list(csv.reader(f))[0][3:] # get stations from the mtf
+        for mtf_station in mtf_stations:
+            for h5parm in h5parms:
+                print(h5parm, mtf_station)
+    #   for each h5parm, from nearest to farthest (sort dictionary?)
+    # will have to get list(dict.values()).sort() and then
+    # check if the boolean is yes, then if so look it up in the dict
+    # to find the corresponding h5parm
 
-    # write the phase solutions for the nearest good h5parms to a new h5parm
+    #       if the boolean is true
+    #           then that is what we will use
+    #       else if the boolean is False
+    #           go to the next station
+    # then write all of these best values to a new h5parm
 
+    ms = os.path.splitext(os.path.normpath(ms))[0]
+    new_h5parm = '{}_{}_{}.h5'.format(ms, ms_direction.ra.deg, ms_direction.dec.deg)
 
 def applyh5parm():
     ''' input:    the output of make_h5parm; the measurement set for self-
@@ -132,9 +145,13 @@ def main():
 
     # parse command-line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--mastertextfile', help = 'master text file', required = True)
-    parser.add_argument('-f', '--measurementset', help = 'measurement set', required = True)
-    parser.add_argument('-t', '--threshold', type = float, help = 'threshold determining the xx-yy statistic goodness', default = 0.25)
+    parser.add_argument('-m', '--mastertextfile', help = 'master text file',
+                        required = True)
+    parser.add_argument('-f', '--measurementset', help = 'measurement set',
+                        required = True)
+    parser.add_argument('-t', '--threshold', type = float,
+                        help = 'threshold determining the xx-yy statistic ' +
+                        'goodness', default = 0.25)
     args = parser.parse_args()
     mtf = args.mastertextfile
     ms = args.measurementset
