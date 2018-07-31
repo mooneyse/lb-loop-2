@@ -2,9 +2,11 @@
 
 import argparse, csv, h5py
 import numpy as np
+import pyrap.tables as pt
+from astropy.coordinates import SkyCoord
 from losoto.h5parm import openSoltab
 
-def evaluate_solutions(mtf, threshold = 0.5):
+def evaluate_solutions(mtf, threshold = 0.25):
     ''' input:    master text file
         function: evaluate solutions for each antenna; use xx-yy statistic
                   described in the hybrid mapping section of the google doc;
@@ -19,8 +21,8 @@ def evaluate_solutions(mtf, threshold = 0.5):
 
     # get the direction from the h5parm
     h = h5py.File(h5parm, 'r')
-    ra_dec = h['/sol000/source'][0][1] # radians
-    ra_dec = np.degrees(np.array(ra_dec))
+    direction = h['/sol000/source'][0][1] # radians
+    direction = np.degrees(np.array(direction))
     h.close()
 
     # get the phase solutions for each station from the h5parm
@@ -49,7 +51,7 @@ def evaluate_solutions(mtf, threshold = 0.5):
     mtf_stations = list(csv.reader(data))[0][3:] # get the stations from the mtf
 
     with open(mtf, 'a') as f:
-        f.write(', {}, {}'.format(ra_dec[0], ra_dec[1]))
+        f.write(', {}, {}'.format(direction[0], direction[1]))
         for mtf_station in mtf_stations:
             # look up the statistic for a station and determine if it is good
             try:
@@ -66,7 +68,7 @@ def evaluate_solutions(mtf, threshold = 0.5):
 
         f.write('\n')
 
-def make_h5parm(): # subroutine 2
+def make_h5parm(mtf, ms):
     ''' input:    direction of measurement set to be self-calibrated; master
                   file with list of h5parms
         function: find nearest directions; construct a new h5parm that is a
@@ -76,9 +78,32 @@ def make_h5parm(): # subroutine 2
                   from the next nearest direction
         output:   a new h5parm to be applied to the measurement set
     '''
-    pass
 
-def applyh5parm(): # subroutine 3
+    # get the direction from the measurement set
+    t  = pt.table(ms, readonly = True, ack = False)
+    field = pt.table(t.getkeyword('FIELD'), readonly = True, ack = False)
+    ms_direction = field.getcell('PHASE_DIR', 0)[0] # radians
+    ms_direction = SkyCoord(ms_direction[0], ms_direction[1], unit = 'rad')
+    field.close()
+    t.close()
+
+    # get the direction from the master text file
+    h5parms, ras, decs = np.genfromtxt(mtf, delimiter = ',', unpack = True, dtype = str, usecols = (0, 1, 2))
+    mtf_directions = []
+
+    for h5parm, ra, dec in zip(h5parms, ras, decs):
+        mtf_direction = SkyCoord(float(ra), float(dec), unit = 'deg')
+        separation = ms_direction.separation(mtf_direction)
+        print(separation.arcminute)
+
+    # find the nearest good h5parm direction to the measurement set direction
+    # and do this for each station
+
+
+    # write the phase solutions for the nearest good h5parms to a new h5parm
+
+
+def applyh5parm():
     ''' input:    the output of make_h5parm; the measurement set for self-
                   calibration
         function: apply the output of make_h5parm to the measurement set
@@ -86,7 +111,7 @@ def applyh5parm(): # subroutine 3
     '''
     pass
 
-def updatelist(): # subroutie 4
+def updatelist():
     ''' input:    the initial h5parm (i.e. from make_h5parm); the final h5parm
                   from loop 3
         function: combine the phase solutions from the initial h5parm and the
@@ -107,16 +132,17 @@ def main():
 
     # parse command-line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--mastertextfile', help = 'the master text file', required = True)
-    parser.add_argument('-t', '--threshold', type = float, help = 'the threshold determining the xx-yy statistic goodness', default = 0.5)
+    parser.add_argument('-m', '--mastertextfile', help = 'master text file', required = True)
+    parser.add_argument('-f', '--measurementset', help = 'measurement set', required = True)
+    parser.add_argument('-t', '--threshold', type = float, help = 'threshold determining the xx-yy statistic goodness', default = 0.25)
     args = parser.parse_args()
     mtf = args.mastertextfile
+    ms = args.measurementset
     threshold = args.threshold
 
-    # evaluate the phase solutions in the h5parm
-    evaluate_solutions(mtf, threshold)
+    # evaluate_solutions(mtf, threshold) # evaluate phase solutions in a h5parm
 
-    make_h5parm()
+    make_h5parm(mtf, ms)
 
     applyh5parm()
 
