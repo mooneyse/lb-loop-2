@@ -1,19 +1,23 @@
 #!/usr/bin/env python
 
-import argparse, h5py
+import argparse, csv, h5py
 import numpy as np
 from losoto.h5parm import openSoltab
 
-def evaluate_solutions(h5parm, mtf):
-    ''' input:    h5parm with phase solutions
+def evaluate_solutions(mtf, threshold = 0.5):
+    ''' input:    master text file
         function: evaluate solutions for each antenna; use xx-yy statistic
                   described in the hybrid mapping section of the google doc;
                   determine validity
-        output:   append h5parm_name, ra, dec, and one column per antenna with
-                  boolean for validity to the master text file
+        output:   append ra, dec, and a boolean for validity per station to the
+                  master text file
     '''
 
-    # get (ra, dec) for the source from the h5parm
+    # get the h5parm from the bottom of the master text file
+    h5parms = np.genfromtxt(mtf, delimiter = ',', unpack = True, dtype = str, usecols = 0)
+    h5parm = h5parms[len(h5parms) - 1]
+
+    # get the direction from the h5parm
     h = h5py.File(h5parm, 'r')
     ra_dec = h['/sol000/source'][0][1] # radians
     ra_dec = np.degrees(np.array(ra_dec))
@@ -22,11 +26,11 @@ def evaluate_solutions(h5parm, mtf):
     # get the phase solutions for each station from the h5parm
     phase = openSoltab(h5parm, 'sol000', 'phase000')
     stations = phase.ant[:]
-    evaluations = {}
+    evaluations = {} # dictionary to hold the statistics for each station
 
-    for station in range(len(stations)): # loop over all stations
+    # calculate xx-yy statistic
+    for station in range(len(stations)):
         xx, yy = [], []
-
         # [polarisation (xx = 0, yy  = 1), direction, station, frequency, time]
         for value in phase.val[0, 0, station, 0, :]:
             xx.append(value)
@@ -34,18 +38,32 @@ def evaluate_solutions(h5parm, mtf):
         for value in phase.val[1, 0, station, 0, :]:
             yy.append(value)
 
-        # calculate xx-yy statistic
-        xx = np.degrees(np.array(xx))
-        yy = np.degrees(np.array(yy))
+        xx = np.array(xx)
+        yy = np.array(yy)
         xx_yy = xx - yy
-        mean_xx_yy = np.nanmean(np.abs(xx_yy)) * (2 / np.pi)
-        evaluations[stations[station]] = mean_xx_yy
+        mean_xx_yy = np.nanmean(np.abs(xx_yy)) * (1 / (2 * np.pi))
+        evaluations[stations[station]] = mean_xx_yy # 0 = best, 1 = worst
 
     # append to master file
+    data = open(mtf, 'r')
+    mtf_stations = list(csv.reader(data))[0][3:] # get the stations from the mtf
+
     with open(mtf, 'a') as f:
-        f.write('{}, {}, {}'.format(h5parm, ra_dec[0], ra_dec[1]))
-        for value in evaluations.values():
-            f.write(', {}'.format(value)) # NB ensure written in correct order
+        f.write(', {}, {}'.format(ra_dec[0], ra_dec[1]))
+        for mtf_station in mtf_stations:
+            # look up the statistic for a station and determine if it is good
+            try:
+                value = evaluations[mtf_station[1:]]
+            except KeyError:
+                value = float('nan')
+
+            if value < threshold: # pass
+                f.write(', {}'.format(int(True)))
+            elif np.isnan(value):
+                f.write(', {}'.format('nan'))
+            else: # fail
+                f.write(', {}'.format(int(False)))
+
         f.write('\n')
 
 def make_h5parm(): # subroutine 2
@@ -89,14 +107,14 @@ def main():
 
     # parse command-line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-p', '--h5parm', required = True)
-    parser.add_argument('-m', '--mastertextfile', required = True)
+    parser.add_argument('-m', '--mastertextfile', help = 'the master text file', required = True)
+    parser.add_argument('-t', '--threshold', type = float, help = 'the threshold determining the xx-yy statistic goodness', default = 0.5)
     args = parser.parse_args()
-    h5parm = args.h5parm
     mtf = args.mastertextfile
+    threshold = args.threshold
 
     # evaluate the phase solutions in the h5parm
-    evaluate_solutions(h5parm, mtf)
+    evaluate_solutions(mtf, threshold)
 
     make_h5parm()
 
