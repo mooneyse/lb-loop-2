@@ -132,35 +132,12 @@ def make_h5parm(mtf, ms):
     # write these best phase solutions to the new h5parm
     h = lh5.h5parm(new_h5parm, readonly = False)
     h.makeSolset(addTables = False)
-
-    # soltab = H.getSolset('solset000').getSoltab('soltab000')
-
     solset = h.getSolset('sol000')
-    # solset.makeSoltab(soltype='amplitude',
-    #     axesNames=['a','b'],
-    #     axesVals=[0,1],
-    #     vals=np.array([0,1]),
-    #     weights=np.array([0,1]),
-    #     parmdbType='c')
-    a = [0, 1]
+    a = [0, 1] # dummy data
     b = np.array([a, a])
-    c = solset.makeSoltab('tec', axesNames = ['a', 'b'], axesVals = [a, a], vals = b, weights = b)
-
-# makeSoltab(soltype=None, soltabName=None, axesNames=[], axesVals=[], chunkShape=None, vals=None, weights=None, parmdbType='')
-# soltype (str) – Solution-type (e.g. amplitude, phase)
-# soltabName (str, optional) – The solution-table name, if not specified is generated from the solution-type
-# axesNames (list) – List with the axes names
-# axesVals (list) – List with the axes values (each is a separate list)
-# chunkShape (list, optional) – List with the chunk shape
-# vals (numpy array) – Array with shape given by the axesVals lenghts
-# weights (numpy array) – Same shape of the vals array 0->FLAGGED, 1->MAX_WEIGHT
-# parmdbType (str) – Original parmdb solution type
-    # asdf = lh5.Solset(h)
+    c = solset.makeSoltab('phase', axesNames = ['freq', 'time'], axesVals = [a, a], vals = b, weights = b)
     h.close()
-    #asdf = lh5.openSoltab(new_h5parm, 'sol000', 'phase000')
-
-    #solset.makeSoltab(soltype = 'phase')
-
+    
 def applyh5parm():
     ''' input:    the output of make_h5parm; the measurement set for self-
                   calibration
