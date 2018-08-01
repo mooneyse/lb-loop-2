@@ -137,7 +137,7 @@ def make_h5parm(mtf, ms):
     b = np.array([a, a])
     c = solset.makeSoltab('phase', axesNames = ['freq', 'time'], axesVals = [a, a], vals = b, weights = b)
     h.close()
-    
+
 def applyh5parm():
     ''' input:    the output of make_h5parm; the measurement set for self-
                   calibration
