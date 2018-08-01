@@ -4,7 +4,8 @@ import argparse, csv, h5py, os
 import numpy as np
 import pyrap.tables as pt
 from astropy.coordinates import SkyCoord
-from losoto.h5parm import openSoltab
+import losoto.h5parm as lh5
+# TODO import logging and print warnings
 
 def evaluate_solutions(mtf, threshold = 0.25):
     ''' input:    master text file
@@ -26,7 +27,7 @@ def evaluate_solutions(mtf, threshold = 0.25):
     h.close()
 
     # get the phase solutions for each station from the h5parm
-    phase = openSoltab(h5parm, 'sol000', 'phase000')
+    phase = lh5.openSoltab(h5parm, 'sol000', 'phase000') # TODO h5parm only closes on exit
     stations = phase.ant[:]
     evaluations = {} # dictionary to hold the statistics for each station
 
@@ -46,9 +47,11 @@ def evaluate_solutions(mtf, threshold = 0.25):
         mean_xx_yy = np.nanmean(np.abs(xx_yy)) * (1 / (2 * np.pi))
         evaluations[stations[station]] = mean_xx_yy # 0 = best, 1 = worst
 
+    with open(mtf) as f:
+        mtf_stations = list(csv.reader(f))[0][3:] # get stations from the mtf
+
     # append to master file
     with open(mtf, 'a') as f:
-        mtf_stations = list(csv.reader(f))[0][3:] # get stations from the mtf
         f.write(', {}, {}'.format(direction[0], direction[1]))
         for mtf_station in mtf_stations:
             # look up the statistic for a station and determine if it is good
@@ -77,6 +80,8 @@ def make_h5parm(mtf, ms):
         output:   a new h5parm to be applied to the measurement set
     '''
 
+    # NOTE pandas could probably do better than this
+
     # get the direction from the measurement set
     t  = pt.table(ms, readonly = True, ack = False)
     field = pt.table(t.getkeyword('FIELD'), readonly = True, ack = False)
@@ -86,35 +91,75 @@ def make_h5parm(mtf, ms):
     t.close()
 
     # get the direction from the master text file
-    h5parms, ras, decs = np.genfromtxt(mtf, delimiter = ',', unpack = True, dtype = str, usecols = (0, 1, 2))
+    # BUG genfromtxt gives empty string for h5parms when names = True is used; importing them separately as a work around
+    data = np.genfromtxt(mtf, delimiter = ',', unpack = True, dtype = float, names = True)
+    h5parms = np.genfromtxt(mtf, delimiter = ',', unpack = True, dtype = str, usecols = 0)
     mtf_directions = {}
 
-    for h5parm, ra, dec in zip(h5parms, ras, decs):
+    # calculate the distance betweeen the ms direction and the h5parm directions
+    for h5parm, ra, dec in zip(h5parms, data['ra'], data['dec']):
         mtf_direction = SkyCoord(float(ra), float(dec), unit = 'deg')
         separation = ms_direction.separation(mtf_direction)
-        mtf_directions[separation] = h5parm
+        mtf_directions[separation] = h5parm # distances from ms to each h5parm
 
-    # mtf_directions contains the distance from the ms to each h5parm
+    # read in the stations from the master text file
+    with open(mtf) as f: # get stations from the mtf
+        mtf_stations = list(csv.reader(f))[0][3:] # skipping h5parm, ra, and dec
+        mtf_stations = [x.lstrip() for x in mtf_stations] # remove leading space
 
-    # for each station
-    with open(mtf) as f:
-        mtf_stations = list(csv.reader(f))[0][3:] # get stations from the mtf
-        for mtf_station in mtf_stations:
-            for h5parm in h5parms:
-                print(h5parm, mtf_station)
-    #   for each h5parm, from nearest to farthest (sort dictionary?)
-    # will have to get list(dict.values()).sort() and then
-    # check if the boolean is yes, then if so look it up in the dict
-    # to find the corresponding h5parm
+    # find the closest h5parm which has an acceptable solution for each station
+    # these print statements are for testing only
+    print('for this direction in the ms, make a new h5parm consisting of...')
+    print('Station\t\tSeparation\th5parm\t\tRow\tBoolean')
+    successful_stations = []
 
-    #       if the boolean is true
-    #           then that is what we will use
-    #       else if the boolean is False
-    #           go to the next station
-    # then write all of these best values to a new h5parm
+    for mtf_station in mtf_stations: # for each station
+        for key in sorted(mtf_directions.keys()): # starting with shortest separations
+            h5parm = mtf_directions[key]
+            row = list(h5parms).index(h5parm) # row in mtf
+            value = data[mtf_station][row] # boolean value for h5parm and station
+            if value == 1 and mtf_station not in successful_stations:
+                if mtf_station == 'ST001':
+                    print('{}\t\t{}\t{}\t{}\t{}'.format(mtf_station, round(key.deg, 6), h5parm, row, int(value)))
+                else:
+                    print('{}\t{}\t{}\t{}\t{}'.format(mtf_station, round(key.deg, 6), h5parm, row, int(value)))
+                successful_stations.append(mtf_station)
 
+    # create a new h5parm
     ms = os.path.splitext(os.path.normpath(ms))[0]
     new_h5parm = '{}_{}_{}.h5'.format(ms, ms_direction.ra.deg, ms_direction.dec.deg)
+
+    # write these best phase solutions to the new h5parm
+    h = lh5.h5parm(new_h5parm, readonly = False)
+    h.makeSolset(addTables = False)
+
+    # soltab = H.getSolset('solset000').getSoltab('soltab000')
+
+    solset = h.getSolset('sol000')
+    # solset.makeSoltab(soltype='amplitude',
+    #     axesNames=['a','b'],
+    #     axesVals=[0,1],
+    #     vals=np.array([0,1]),
+    #     weights=np.array([0,1]),
+    #     parmdbType='c')
+    a = [0, 1]
+    b = np.array([a, a])
+    c = solset.makeSoltab('tec', axesNames = ['a', 'b'], axesVals = [a, a], vals = b, weights = b)
+
+# makeSoltab(soltype=None, soltabName=None, axesNames=[], axesVals=[], chunkShape=None, vals=None, weights=None, parmdbType='')
+# soltype (str) – Solution-type (e.g. amplitude, phase)
+# soltabName (str, optional) – The solution-table name, if not specified is generated from the solution-type
+# axesNames (list) – List with the axes names
+# axesVals (list) – List with the axes values (each is a separate list)
+# chunkShape (list, optional) – List with the chunk shape
+# vals (numpy array) – Array with shape given by the axesVals lenghts
+# weights (numpy array) – Same shape of the vals array 0->FLAGGED, 1->MAX_WEIGHT
+# parmdbType (str) – Original parmdb solution type
+    # asdf = lh5.Solset(h)
+    h.close()
+    #asdf = lh5.openSoltab(new_h5parm, 'sol000', 'phase000')
+
+    #solset.makeSoltab(soltype = 'phase')
 
 def applyh5parm():
     ''' input:    the output of make_h5parm; the measurement set for self-
@@ -145,13 +190,9 @@ def main():
 
     # parse command-line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--mastertextfile', help = 'master text file',
-                        required = True)
-    parser.add_argument('-f', '--measurementset', help = 'measurement set',
-                        required = True)
-    parser.add_argument('-t', '--threshold', type = float,
-                        help = 'threshold determining the xx-yy statistic ' +
-                        'goodness', default = 0.25)
+    parser.add_argument('-m', '--mastertextfile', required = True, help = 'master text file')
+    parser.add_argument('-f', '--measurementset', required = True, help = 'measurement set')
+    parser.add_argument('-t', '--threshold', type = float, default = 0.25, help = 'threshold determining the xx-yy statistic goodness')
     args = parser.parse_args()
     mtf = args.mastertextfile
     ms = args.measurementset
