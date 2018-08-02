@@ -8,12 +8,20 @@ import losoto.h5parm as lh5
 # TODO import logging and print warnings
 
 def evaluate_solutions(mtf, threshold = 0.25):
-    ''' input:    master text file
-        function: evaluate solutions for each antenna; use xx-yy statistic
-                  described in the hybrid mapping section of the google doc;
-                  determine validity
-        output:   append ra, dec, and a boolean for validity per station to the
-                  master text file
+    '''
+    Description:
+    - read the name of the h5parm from the master text file
+    - get the direction from the h5parm
+    - evaluate the phase solutions in the h5parm for each station using the xx-yy statistic
+    - determine the validity of each xx-yy statistic that was calculated statistic
+    - append the right ascension, declination, and validity to the master text file
+
+    Parameters:
+    - mtf      (str)            : master text file
+    - thresold (float, optional): threshold to determine the goodness of the xx-yy statistic
+
+    Returns:
+    - None
     '''
 
     # get the h5parm from the bottom of the master text file
@@ -70,17 +78,22 @@ def evaluate_solutions(mtf, threshold = 0.25):
         f.write('\n')
 
 def make_h5parm(mtf, ms):
-    ''' input:    direction of measurement set to be self-calibrated; master
-                  file with list of h5parms
-        function: find nearest directions; construct a new h5parm that is a
-                  combination of best phase solutions from nearest direction,
-                  done per antenna. e.g. if the nearest direction has valid
-                  solutions for all but the uk antenna, find the uk solutions
-                  from the next nearest direction
-        output:   a new h5parm to be applied to the measurement set
     '''
+    Description:
+    - get the direction from the measurement set
+    - get the directions of the h5parms from the master text file
+    - calculate the separation between the measurement set direction and the h5parm directions
+    - for each station, find the h5parm of smallest separation which has valid phase solutions
+    - create a new h5parm
+    - write these phase solutions to this new h5parm
 
-    # NOTE pandas could probably do better than this
+    Parameters:
+    - mtf (str): master text file with list of h5parms
+    - ms  (str): measurement set to be self-calibrated
+
+    Returns:
+    - new_h5parm (str): the new h5parm to be applied to the measurement set
+    '''
 
     # get the direction from the measurement set
     t  = pt.table(ms, readonly = True, ack = False)
@@ -108,6 +121,7 @@ def make_h5parm(mtf, ms):
         mtf_stations = [x.lstrip() for x in mtf_stations] # remove leading space
 
     # find the closest h5parm which has an acceptable solution for each station
+    # NOTE pandas could probably do better than this
     # these print statements are for testing only
     print('for this direction in the ms, make a new h5parm consisting of...')
     print('Station\t\tSeparation\th5parm\t\tRow\tBoolean')
@@ -138,6 +152,8 @@ def make_h5parm(mtf, ms):
     c = solset.makeSoltab('phase', axesNames = ['freq', 'time'], axesVals = [a, a], vals = b, weights = b)
     h.close()
 
+    return new_h5parm
+
 def applyh5parm():
     ''' input:    the output of make_h5parm; the measurement set for self-
                   calibration
@@ -157,7 +173,7 @@ def updatelist():
     '''
 
     # update the master file
-    # evaluate_solutions()
+    # evaluate_solutions(mtf, threshold)
     pass
 
 def main():
@@ -175,15 +191,15 @@ def main():
     ms = args.measurementset
     threshold = args.threshold
 
-    # evaluate_solutions(mtf, threshold) # evaluate phase solutions in a h5parm
+    evaluate_solutions(mtf, threshold) # evaluate phase solutions in a h5parm
 
-    make_h5parm(mtf, ms)
+    new_h5parm = make_h5parm(mtf, ms) # create a new h5parm of the best solutions
 
-    applyh5parm()
+    applyh5parm(new_h5parm, ms)
 
     # loop 3
 
-    updatelist()
+    updatelist(new_h5parm)
 
 if __name__ == '__main__':
     main()
