@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
-import argparse, csv, h5py, os
+import argparse, csv, h5py, logging, os
 import numpy as np
 import pyrap.tables as pt
-from astropy.coordinates import SkyCoord
 import losoto.h5parm as lh5
-# TODO import logging and print warnings
+from astropy.coordinates import SkyCoord
+
+# TODO add logging statements
 
 def evaluate_solutions(mtf, threshold = 0.25):
     '''
