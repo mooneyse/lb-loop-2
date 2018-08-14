@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+'''
+A collection of functions for modifying HDF5 files.
+'''
+
 import argparse, csv, h5py, logging, os
 import numpy as np
 import pyrap.tables as pt
@@ -8,26 +12,41 @@ from astropy.coordinates import SkyCoord
 
 # TODO add logging statements
 
-def evaluate_solutions(mtf, threshold = 0.25):
+def loop3():
     '''
-    Description:
-    - read the name of the h5parm from the master text file
+    description:
+    - calls loop 3
+
+    parameters:
+
+    returns:
+    - None
+    '''
+
+    logging.info('running loop 3')
+    logging.info('loop 3 finished')
+
+def evaluate_solutions(h5parm, mtf, threshold = 0.25):
+    '''
+    description:
     - get the direction from the h5parm
     - evaluate the phase solutions in the h5parm for each station using the xx-yy statistic
     - determine the validity of each xx-yy statistic that was calculated statistic
     - append the right ascension, declination, and validity to the master text file
 
-    Parameters:
+    parameters:
+    - h5parm   (str)            : lofar hdf5 parameter file
     - mtf      (str)            : master text file
     - thresold (float, optional): threshold to determine the goodness of the xx-yy statistic
 
-    Returns:
+    returns:
     - None
     '''
 
-    # get the h5parm from the bottom of the master text file
-    h5parms = np.genfromtxt(mtf, delimiter = ',', unpack = True, dtype = str, usecols = 0)
-    h5parm = h5parms[len(h5parms) - 1]
+    logging.info('evaluating the solutions')
+    # CHANGED get the h5parm from the bottom of the master text file
+    # h5parms = np.genfromtxt(mtf, delimiter = ',', unpack = True, dtype = str, usecols = 0)
+    # h5parm = h5parms[len(h5parms) - 1]
 
     # get the direction from the h5parm
     h = h5py.File(h5parm, 'r')
@@ -36,11 +55,18 @@ def evaluate_solutions(mtf, threshold = 0.25):
     h.close()
 
     # get the phase solutions for each station from the h5parm
-    phase = lh5.openSoltab(h5parm, 'sol000', 'phase000') # TODO h5parm only closes on exit
+    logging.info('opening {}'.format(h5parm))
+    # NOTE the convenience function openSoltab does not close the h5parm so it is not used here
+    lo = lh5.h5parm(h5parm, readonly = False)
+    phase = lo.getSolset('sol000').getSoltab('phase000')
+    logging.info('got the phase solution tab (phase000) from {}'.format(h5parm))
     stations = phase.ant[:]
+    logging.info('got the stations (i.e. antennas) from {}'.format(h5parm))
     evaluations = {} # dictionary to hold the statistics for each station
 
     # calculate xx-yy statistic
+    logging.info('evaluating the xx-yy statistic for {}'.format(h5parm))
+    logging.info('values < {} are good (1), otherwise the value is bad (0)'.format(threshold))
     for station in range(len(stations)):
         xx, yy = [], []
         # [polarisation (xx = 0, yy  = 1), direction, station, frequency, time]
@@ -60,8 +86,9 @@ def evaluate_solutions(mtf, threshold = 0.25):
         mtf_stations = list(csv.reader(f))[0][3:] # get stations from the mtf
 
     # append to master file
+    logging.info('writing the results to the master text file {}'.format(mtf))
     with open(mtf, 'a') as f:
-        f.write(', {}, {}'.format(direction[0], direction[1]))
+        f.write('{}, {}, {}'.format(h5parm, direction[0], direction[1]))
         for mtf_station in mtf_stations:
             # look up the statistic for a station and determine if it is good
             try:
@@ -77,6 +104,36 @@ def evaluate_solutions(mtf, threshold = 0.25):
                 f.write(', {}'.format(int(False)))
 
         f.write('\n')
+
+    lo.close()
+    logging.info('finished evaluating the solutions')
+
+    # IDEA check if the h5parm is in the mtf
+    #      if it is, append the values to that specific line
+    #      (i.e. should be able to write to any line in the file)
+    #      if it is not, append the h5parm and the values
+    # with open(mtf, 'r+') as f:
+    #     for line in f:
+    #         if h5parm in line:
+    #            break
+    #     else: # not found, we are at the eof
+    #         file.write(h5parm) # append
+
+    # TODO should be able to write to any line in the file
+    # def replace_line(file_name, line_number, text):
+    #     lines = open(file_name, 'r').readlines()
+    #     lines[line_number] = text
+    #     out = open(file_name, 'w')
+    #     out.writelines(lines)
+    #     out.close()
+
+    # IDEA if the h5parm is in the mtf, remove this line so there is only one
+    #      set of results per h5parm in the mtf
+    # h5parms = [h5parm]
+    # with open(mtf) as oldfile, open('new' + mtf, 'w') as newfile:
+    #     for line in oldfile:
+    #         if not any(bad_word in line for bad_word in bad_words):
+    #             newfile.write(line)
 
 def make_h5parm(mtf, ms):
     '''
@@ -96,6 +153,7 @@ def make_h5parm(mtf, ms):
     - new_h5parm (str): the new h5parm to be applied to the measurement set
     '''
 
+    logging.info('making a new h5parm')
     # get the direction from the measurement set
     t  = pt.table(ms, readonly = True, ack = False)
     field = pt.table(t.getkeyword('FIELD'), readonly = True, ack = False)
@@ -105,7 +163,7 @@ def make_h5parm(mtf, ms):
     t.close()
 
     # get the direction from the master text file
-    # BUG genfromtxt gives empty string for h5parms when names = True is used; importing them separately as a work around
+    # HACK genfromtxt gives empty string for h5parms when names = True is used; importing them separately as a work around
     data = np.genfromtxt(mtf, delimiter = ',', unpack = True, dtype = float, names = True)
     h5parms = np.genfromtxt(mtf, delimiter = ',', unpack = True, dtype = str, usecols = 0)
     mtf_directions = {}
@@ -124,8 +182,8 @@ def make_h5parm(mtf, ms):
     # find the closest h5parm which has an acceptable solution for each station
     # NOTE pandas could probably do better than this
     # these print statements are for testing only
-    print('for this direction in the ms, make a new h5parm consisting of...')
-    print('Station\t\tSeparation\th5parm\t\tRow\tBoolean')
+    logging.info('for this direction in the ms, make a new h5parm consisting of the following:')
+    logging.info('\tStation\t\tSeparation\th5parm\t\tRow\tBoolean')
     successful_stations = []
 
     for mtf_station in mtf_stations: # for each station
@@ -135,9 +193,9 @@ def make_h5parm(mtf, ms):
             value = data[mtf_station][row] # boolean value for h5parm and station
             if value == 1 and mtf_station not in successful_stations:
                 if mtf_station == 'ST001':
-                    print('{}\t\t{}\t{}\t{}\t{}'.format(mtf_station, round(key.deg, 6), h5parm, row, int(value)))
+                    logging.info('\t{}\t\t{}\t{}\t{}\t{}'.format(mtf_station, round(key.deg, 6), h5parm, row, int(value)))
                 else:
-                    print('{}\t{}\t{}\t{}\t{}'.format(mtf_station, round(key.deg, 6), h5parm, row, int(value)))
+                    logging.info('\t{}\t{}\t{}\t{}\t{}'.format(mtf_station, round(key.deg, 6), h5parm, row, int(value)))
                 successful_stations.append(mtf_station)
 
     # create a new h5parm
@@ -153,17 +211,20 @@ def make_h5parm(mtf, ms):
     c = solset.makeSoltab('phase', axesNames = ['freq', 'time'], axesVals = [a, a], vals = b, weights = b)
     h.close()
 
+    logging.info('finished making the h5parm {}'.format(new_h5parm))
     return new_h5parm
 
-def applyh5parm():
+def applyh5parm(new_h5parm, ms):
     ''' input:    the output of make_h5parm; the measurement set for self-
                   calibration
         function: apply the output of make_h5parm to the measurement set
         output:   the measurement set for self-calibration with corrected data
     '''
-    pass
 
-def updatelist():
+    logging.info('apply the {} to {}'.format(new_h5parm, ms))
+    logging.info('finished applying {} to {}'.format(new_h5parm, ms))
+
+def updatelist(new_h5parm, mtf):
     ''' input:    the initial h5parm (i.e. from make_h5parm); the final h5parm
                   from loop 3
         function: combine the phase solutions from the initial h5parm and the
@@ -173,26 +234,34 @@ def updatelist():
                   new line in the master file
     '''
 
+    logging.info('updating {}'.format(mtf))
     # update the master file
-    # evaluate_solutions(mtf, threshold)
-    pass
+
+    logging.info('evaluating the {} solutions'.format(new_h5parm))
+    # evaluate_solutions(h5parm, mtf, threshold)
+    logging.info('finished updating {}'.format(mtf))
 
 def main():
-    ''' starting point: 1st iteration will have produced phase solutions
+    ''' starting point: first iteration will have produced phase solutions
         independently for all directions, with each being its own h5parm
     '''
 
-    # parse command-line arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--mastertextfile', required = True, help = 'master text file')
-    parser.add_argument('-f', '--measurementset', required = True, help = 'measurement set')
+    logging.basicConfig(format = '\033[1m%(asctime)s \033[31m%(levelname)s \033[00m%(message)s', datefmt = '%Y/%m/%d %H:%M:%S', level = logging.INFO)
+
+    parser = argparse.ArgumentParser(description = __doc__, formatter_class = argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('-m', '--mtf', required = True, help = 'master text file')
+    parser.add_argument('-p', '--h5parm', required = True, help = 'hdf5 file')
+    parser.add_argument('-f', '--ms', required = True, help = 'measurement set')
     parser.add_argument('-t', '--threshold', type = float, default = 0.25, help = 'threshold determining the xx-yy statistic goodness')
     args = parser.parse_args()
-    mtf = args.mastertextfile
-    ms = args.measurementset
+    mtf = args.mtf
+    h5parm = args.h5parm
+    ms = args.ms
     threshold = args.threshold
 
-    evaluate_solutions(mtf, threshold) # evaluate phase solutions in a h5parm
+    loop3() # run loop 3 to generate h5parm
+
+    evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
 
     new_h5parm = make_h5parm(mtf, ms) # create a new h5parm of the best solutions
 
@@ -200,7 +269,7 @@ def main():
 
     # loop 3
 
-    updatelist(new_h5parm)
+    updatelist(new_h5parm, ms)
 
 if __name__ == '__main__':
     main()
