@@ -4,13 +4,12 @@
 A collection of functions for modifying HDF5 files.
 '''
 
-import argparse, csv, h5py, logging, os
+import argparse, csv, datetime, h5py, logging, os, subprocess, sys
 import numpy as np
 import pyrap.tables as pt
 import losoto.h5parm as lh5
 from astropy.coordinates import SkyCoord
-
-# TODO add logging statements
+from pathlib import Path
 
 def loop3():
     '''
@@ -31,7 +30,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     description:
     - get the direction from the h5parm
     - evaluate the phase solutions in the h5parm for each station using the xx-yy statistic
-    - determine the validity of each xx-yy statistic that was calculated statistic
+    - determine the validity of each xx-yy statistic that was calculated
     - append the right ascension, declination, and validity to the master text file
 
     parameters:
@@ -49,7 +48,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     # h5parm = h5parms[len(h5parms) - 1]
 
     # get the direction from the h5parm
-    h = h5py.File(h5parm, 'r')
+    h = h5py.File(h5parm, 'r') # TODO should probably use losoto for this
     direction = h['/sol000/source'][0][1] # radians
     direction = np.degrees(np.array(direction))
     h.close()
@@ -135,9 +134,9 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     #         if not any(bad_word in line for bad_word in bad_words):
     #             newfile.write(line)
 
-def make_h5parm(mtf, ms):
+def make_h5parm(mtf, ms, clobber = False):
     '''
-    Description:
+    description:
     - get the direction from the measurement set
     - get the directions of the h5parms from the master text file
     - calculate the separation between the measurement set direction and the h5parm directions
@@ -145,11 +144,11 @@ def make_h5parm(mtf, ms):
     - create a new h5parm
     - write these phase solutions to this new h5parm
 
-    Parameters:
+    parameters:
     - mtf (str): master text file with list of h5parms
     - ms  (str): measurement set to be self-calibrated
 
-    Returns:
+    returns:
     - new_h5parm (str): the new h5parm to be applied to the measurement set
     '''
 
@@ -183,7 +182,7 @@ def make_h5parm(mtf, ms):
     # NOTE pandas could probably do better than this
     # these print statements are for testing only
     logging.info('for this direction in the ms, make a new h5parm consisting of the following:')
-    logging.info('\tStation\t\tSeparation\th5parm\t\tRow\tBoolean')
+    logging.info('\tstation\t\tseparation\th5parm\t\t\t\t\t\t\trow\tboolean')
     successful_stations = []
 
     for mtf_station in mtf_stations: # for each station
@@ -192,24 +191,80 @@ def make_h5parm(mtf, ms):
             row = list(h5parms).index(h5parm) # row in mtf
             value = data[mtf_station][row] # boolean value for h5parm and station
             if value == 1 and mtf_station not in successful_stations:
-                if mtf_station == 'ST001':
-                    logging.info('\t{}\t\t{}\t{}\t{}\t{}'.format(mtf_station, round(key.deg, 6), h5parm, row, int(value)))
-                else:
-                    logging.info('\t{}\t{}\t{}\t{}\t{}'.format(mtf_station, round(key.deg, 6), h5parm, row, int(value)))
+                logging.info('\t{}\t{}\t{}\t{}\t{}'.format(mtf_station.ljust(8), round(key.deg, 6), h5parm, row, int(value)))
                 successful_stations.append(mtf_station)
 
     # create a new h5parm
     ms = os.path.splitext(os.path.normpath(ms))[0]
     new_h5parm = '{}_{}_{}.h5'.format(ms, ms_direction.ra.deg, ms_direction.dec.deg)
 
+    # if h5parm already exists, then exit
+    if Path(new_h5parm).is_file():
+        if clobber:
+            logging.warn('h5parm {} already exists but it will be overwritten (clobber = {})'.format(new_h5parm, clobber))
+            os.remove(new_h5parm)
+        else:
+            logging.error('the {} h5parm already exists and overwriting not enabled (clobber = {}), so exiting'.format(new_h5parm, clobber))
+            sys.exit()
+    else:
+        logging.info('h5parm {} does not exist yet, so creating it'.format(new_h5parm))
+
     # write these best phase solutions to the new h5parm
     h = lh5.h5parm(new_h5parm, readonly = False)
-    h.makeSolset(addTables = False)
+    h.makeSolset(addTables = False) # creates sol000
+    # FIXME using 'addTables = False' because the default 'addTables = True' gives
+    #       'NotImplementedError: structured arrays with columns with type description ``<U16`` are not supported yet, sorry'
     solset = h.getSolset('sol000')
-    a = [0, 1] # dummy data
-    b = np.array([a, a])
-    c = solset.makeSoltab('phase', axesNames = ['freq', 'time'], axesVals = [a, a], vals = b, weights = b)
+
+    # --------------------------------------------------------------------------
+    # TODO get a h5parm with a result I am going to copy across
+    my_h5parm = mtf_directions[sorted(mtf_directions.keys())[0]]
+    # get the station for which the result is valid
+    my_station = mtf_stations[0]
+    # use the h5parm and the station to get the relevant data
+    # print('-------------------------------------------------------------------')
+    # print(my_h5parm, my_station)
+    lo = lh5.h5parm(my_h5parm, readonly = False)
+    phase = lo.getSolset('sol000').getSoltab('phase000')
+    # print('phase:', phase)
+    # for s in phase.ant[:]: # stations
+    #     if s == my_station:
+    #         print('phase.val:')
+    #         print(phase.val[:,:,:,:])
+    #         print(phase.val.shape)
+    lo.close()
+    # copy this data into the new h5parm
+    # make sure this new h5parm has the same format as the standard lofar h5parms
+
+    # dummy data
+    # NOTE having a string here gives 'TypeError: Array objects cannot currently deal with void, unicode or object arrays'
+    #      so encoding as ascii
+    def ascii(x):
+        return x.encode('ascii', 'ignore')
+
+    pol = [ascii('XX'), ascii('YY')]
+    dir = [ascii('pointing')]
+    ant = [ascii(mtf_station) for mtf_station in mtf_stations]
+    freq = [1.3300628662109375E8]
+    time = list(range(1686))
+    vals = np.zeros((len(pol), len(dir), len(ant), len(freq), len(time)))
+    weights = vals
+    c = solset.makeSoltab('phase',
+                          axesNames = ['pol', 'dir', 'ant', 'freq', 'time'],
+                          axesVals = [pol, dir, ant, freq, time],
+                          vals = vals,
+                          weights = weights) # creates phase000
     h.close()
+
+    # HACK a work around for the comment on line 215
+    #      but they are not the correct table format
+    with h5py.File(new_h5parm, 'a') as hf:
+        hf.create_dataset('sol000/antenna',  data = np.array([1,2,3,4,5]))
+        hf.create_dataset('sol000/source',  data = np.array([1,2,3,4,5]))
+
+    # h5file = open_file(new_h5parm, mode="a", title="Test file")
+    # group = h5file.create_group("/", 'sol000', 'Detector information')
+    # table = h5file.create_table('/sol000', 'readout', Particle(), 'asd')
 
     logging.info('finished making the h5parm {}'.format(new_h5parm))
     return new_h5parm
@@ -221,7 +276,45 @@ def applyh5parm(new_h5parm, ms):
         output:   the measurement set for self-calibration with corrected data
     '''
 
-    logging.info('apply the {} to {}'.format(new_h5parm, ms))
+    # parset is saved in same directory as the h5parm
+    parset = os.path.dirname(new_h5parm) + '/applyh5parm.parset'
+    column_in = 'DATA'
+    column_out = 'CORRECTED_DATA'
+
+    # if parset already exists, warn user
+    if Path(parset).is_file():
+        logging.warn('parset {} already exists but it will be overwritten'.format(parset))
+    #     else:
+    #         logging.error('the {} h5parm already exists and overwriting not enabled (clobber = {}), so exiting'.format(new_h5parm, clobber))
+    #         sys.exit()
+    else:
+        logging.info('creating parset {}'.format(parset))
+
+    # create the parset
+    with open(parset, 'w') as f:
+        f.write('# applyh5parm function created this parset at {}\n'.format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+        f.write('msin                = {}\n'.format(ms))
+        f.write('msin.datacolumn     = {}\n'.format(column_in))
+        f.write('msout               = .\n')
+        f.write('msout.datacolumn    = %s\n' % column_out)
+        f.write('steps               = [applycal]\n')
+        f.write('applycal.type       = applycal\n')
+        f.write('applycal.parmdb     = %s\n' % new_h5parm)
+        f.write('applycal.correction = phase000\n')
+    f.close()
+
+    # apply the h5parm
+    logging.info('apply the {} to {} with NDPPP'.format(new_h5parm, ms))
+    ndppp_output = subprocess.check_output(['NDPPP', parset])
+    ndppp_output = subprocess.check_output(['df', '-h']) # NOTE for testing only
+
+    # format and log the output
+    ndppp_output = ndppp_output.decode('utf-8')
+    ndppp_output = ndppp_output.split('\n')
+    for line in ndppp_output:
+        if line: # do not print blank line
+            logging.info(line)
+
     logging.info('finished applying {} to {}'.format(new_h5parm, ms))
 
 def updatelist(new_h5parm, mtf):
@@ -253,23 +346,27 @@ def main():
     parser.add_argument('-p', '--h5parm', required = True, help = 'hdf5 file')
     parser.add_argument('-f', '--ms', required = True, help = 'measurement set')
     parser.add_argument('-t', '--threshold', type = float, default = 0.25, help = 'threshold determining the xx-yy statistic goodness')
+    parser.add_argument('-c', '--clobber', help = 'overwrite the new h5parm if it exists', action = 'store_true')
     args = parser.parse_args()
     mtf = args.mtf
     h5parm = args.h5parm
     ms = args.ms
     threshold = args.threshold
+    clobber = args.clobber
 
     loop3() # run loop 3 to generate h5parm
 
     evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
 
-    new_h5parm = make_h5parm(mtf, ms) # create a new h5parm of the best solutions
+    new_h5parm = make_h5parm(mtf, ms, clobber = clobber) # create a new h5parm of the best solutions
 
     applyh5parm(new_h5parm, ms)
 
     # loop 3
 
     updatelist(new_h5parm, ms)
+
+    logging.info('finished successfully')
 
 if __name__ == '__main__':
     main()
