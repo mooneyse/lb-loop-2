@@ -4,7 +4,7 @@
 A collection of functions for modifying HDF5 files.
 '''
 
-import argparse, csv, datetime, h5py, logging, os, subprocess, sys
+import argparse, csv, datetime, h5py, logging, os, subprocess, sys, threading
 import numpy as np
 import pyrap.tables as pt
 import losoto.h5parm as lh5
@@ -284,9 +284,6 @@ def applyh5parm(new_h5parm, ms):
     # if parset already exists, warn user
     if Path(parset).is_file():
         logging.warn('parset {} already exists but it will be overwritten'.format(parset))
-    #     else:
-    #         logging.error('the {} h5parm already exists and overwriting not enabled (clobber = {}), so exiting'.format(new_h5parm, clobber))
-    #         sys.exit()
     else:
         logging.info('creating parset {}'.format(parset))
 
@@ -305,15 +302,19 @@ def applyh5parm(new_h5parm, ms):
 
     # apply the h5parm
     logging.info('apply the {} to {} with NDPPP'.format(new_h5parm, ms))
-    ndppp_output = subprocess.check_output(['NDPPP', parset])
-    ndppp_output = subprocess.check_output(['df', '-h']) # NOTE for testing only
+    ndppp_output = subprocess.check_output(['NDPPP', '--help']) # NOTE set to parset
 
     # format and log the output
+    # might not be the best way of handling this given the output could be large
     ndppp_output = ndppp_output.decode('utf-8')
     ndppp_output = ndppp_output.split('\n')
     for line in ndppp_output:
         if line: # do not print blank line
             logging.info(line)
+
+    # TODO get ndppp output to logging module
+    #      see https://codereview.stackexchange.com/a/17959
+    #      and https://stackoverflow.com/a/15108096
 
     logging.info('finished applying {} to {}'.format(new_h5parm, ms))
 
