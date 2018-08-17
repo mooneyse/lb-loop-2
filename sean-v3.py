@@ -11,6 +11,18 @@ import losoto.h5parm as lh5
 from astropy.coordinates import SkyCoord
 from pathlib import Path
 
+def does_it_exist(the_file, clobber = False):
+    # if h5parm already exists, then exit
+    if Path(the_file).is_file():
+        if clobber:
+            logging.warn('{} already exists but it will be overwritten (clobber = {})'.format(the_file, clobber))
+            os.remove(the_file)
+        else:
+            logging.error('{} already exists and overwriting not enabled (clobber = {}), so exiting'.format(the_file, clobber))
+            sys.exit()
+    else:
+        logging.info('{} does not exist yet, so creating it'.format(the_file))
+
 def loop3():
     '''
     description:
@@ -19,11 +31,13 @@ def loop3():
     parameters:
 
     returns:
-    - None
+    - loop3_h5parm (str): h5parm resulting from loop 3
     '''
 
     logging.info('running loop 3')
     logging.info('loop 3 finished')
+
+    return '/data/scratch/sean/h5parms/loop3_h5parm.h5'
 
 def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     '''
@@ -39,7 +53,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     - thresold (float, optional): threshold to determine the goodness of the xx-yy statistic
 
     returns:
-    - None
+    - none
     '''
 
     logging.info('evaluating the solutions')
@@ -152,7 +166,6 @@ def make_h5parm(mtf, ms, clobber = False):
     - new_h5parm (str): the new h5parm to be applied to the measurement set
     '''
 
-    logging.info('making a new h5parm')
     # get the direction from the measurement set
     t  = pt.table(ms, readonly = True, ack = False)
     field = pt.table(t.getkeyword('FIELD'), readonly = True, ack = False)
@@ -195,19 +208,11 @@ def make_h5parm(mtf, ms, clobber = False):
                 successful_stations.append(mtf_station)
 
     # create a new h5parm
+    logging.info('making a new h5parm')
     ms = os.path.splitext(os.path.normpath(ms))[0]
     new_h5parm = '{}_{}_{}.h5'.format(ms, ms_direction.ra.deg, ms_direction.dec.deg)
 
-    # if h5parm already exists, then exit
-    if Path(new_h5parm).is_file():
-        if clobber:
-            logging.warn('h5parm {} already exists but it will be overwritten (clobber = {})'.format(new_h5parm, clobber))
-            os.remove(new_h5parm)
-        else:
-            logging.error('the {} h5parm already exists and overwriting not enabled (clobber = {}), so exiting'.format(new_h5parm, clobber))
-            sys.exit()
-    else:
-        logging.info('h5parm {} does not exist yet, so creating it'.format(new_h5parm))
+    does_it_exist(new_h5parm, clobber = clobber) # check if the h5parm exists
 
     # write these best phase solutions to the new h5parm
     h = lh5.h5parm(new_h5parm, readonly = False)
@@ -269,11 +274,18 @@ def make_h5parm(mtf, ms, clobber = False):
     logging.info('finished making the h5parm {}'.format(new_h5parm))
     return new_h5parm
 
-def applyh5parm(new_h5parm, ms):
-    ''' input:    the output of make_h5parm; the measurement set for self-
-                  calibration
-        function: apply the output of make_h5parm to the measurement set
-        output:   the measurement set for self-calibration with corrected data
+def applyh5parm(new_h5parm, ms, clobber = False):
+    '''
+    description:
+    - create ndppp parset
+    - apply the output of make_h5parm to the measurement set
+
+    parameters:
+    - new_h5parm (str): the output of make_h5parm
+    - ms         (str): the measurement set for self-calibration
+
+    returns:
+    - ms (str): measurement set for self-calibration with corrected data
     '''
 
     # parset is saved in same directory as the h5parm
@@ -281,11 +293,7 @@ def applyh5parm(new_h5parm, ms):
     column_in = 'DATA'
     column_out = 'CORRECTED_DATA'
 
-    # if parset already exists, warn user
-    if Path(parset).is_file():
-        logging.warn('parset {} already exists but it will be overwritten'.format(parset))
-    else:
-        logging.info('creating parset {}'.format(parset))
+    does_it_exist(parset, clobber = clobber) # if parset already exists, warn user
 
     # create the parset
     with open(parset, 'w') as f:
@@ -305,7 +313,7 @@ def applyh5parm(new_h5parm, ms):
     ndppp_output = subprocess.check_output(['NDPPP', '--help']) # NOTE set to parset
 
     # format and log the output
-    # might not be the best way of handling this given the output could be large
+    # NOTE might not be the best way of handling this given the text output could be large
     ndppp_output = ndppp_output.decode('utf-8')
     ndppp_output = ndppp_output.split('\n')
     for line in ndppp_output:
@@ -317,23 +325,47 @@ def applyh5parm(new_h5parm, ms):
     #      and https://stackoverflow.com/a/15108096
 
     logging.info('finished applying {} to {}'.format(new_h5parm, ms))
+    return ms
 
-def updatelist(new_h5parm, mtf):
-    ''' input:    the initial h5parm (i.e. from make_h5parm); the final h5parm
-                  from loop 3
-        function: combine the phase solutions from the initial h5parm and the
-                  final h5parm; calls evaluate_solutions to update the master
-                  file
-        output:   a new h5parm that is a combination of both these h5parms; a
-                  new line in the master file
+def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False):
+    '''
+    description:
+    - combine the phase solutions from the initial h5parm and the final h5parm
+    - calls evaluate_solutions to update the master file with a new line appended
+
+    parameters:
+    - new_h5parm   (str): the initial h5parm (i.e. from make_h5parm)
+    - loop3_h5parm (str): the final h5parm from loop 3
+    - mtf          (str): master text file
+
+    returns:
+    - combined_h5parm (str): a new h5parm that is a combination of new_h5parm and loop3_h5par
     '''
 
-    logging.info('updating {}'.format(mtf))
-    # update the master file
+    # create new h5parm
+    logging.info('combining phase solutions from {} and {}'.format(new_h5parm, loop3_h5parm))
+    combined_h5parm = '{}-{}'.format(os.path.splitext(new_h5parm)[0], os.path.basename(loop3_h5parm))
+    logging.info('new combined h5parm is called {}'.format(combined_h5parm))
+
+    # combine two h5parms
+    does_it_exist(combined_h5parm, clobber = clobber) # if h5parm already exists, then exit
+
+    # write these best phase solutions to the new h5parm
+    h = lh5.h5parm(combined_h5parm, readonly = False)
+    h.makeSolset(addTables = False) # creates sol000
+    # FIXME using 'addTables = False' because the default 'addTables = True' gives
+    #       'NotImplementedError: structured arrays with columns with type description ``<U16`` are not supported yet, sorry'
+    solset = h.getSolset('sol000')
+    h.close()
+
+    # evaluate the solutions and update the master file
+    logging.info('updating {} with the {} solutions'.format(mtf, combined_h5parm))
 
     logging.info('evaluating the {} solutions'.format(new_h5parm))
     # evaluate_solutions(h5parm, mtf, threshold)
     logging.info('finished updating {}'.format(mtf))
+
+    return combined_h5parm
 
 def main():
     ''' starting point: first iteration will have produced phase solutions
@@ -361,11 +393,11 @@ def main():
 
     new_h5parm = make_h5parm(mtf, ms, clobber = clobber) # create a new h5parm of the best solutions
 
-    applyh5parm(new_h5parm, ms)
+    applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
 
-    # loop 3
+    loop3_h5parm = loop3() # run loop 3, returning h5parm
 
-    updatelist(new_h5parm, ms)
+    updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber) # combine h5parms and update mtf
 
     logging.info('finished successfully')
 
