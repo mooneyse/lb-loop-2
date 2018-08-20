@@ -12,7 +12,7 @@ from astropy.coordinates import SkyCoord
 from pathlib import Path
 
 def does_it_exist(the_file, clobber = False):
-    # if h5parm already exists, then exit
+    # convenience function to check if a file already exists
     if Path(the_file).is_file():
         if clobber:
             logging.warn('{} already exists but it will be overwritten (clobber = {})'.format(the_file, clobber))
@@ -22,6 +22,10 @@ def does_it_exist(the_file, clobber = False):
             sys.exit()
     else:
         logging.info('{} does not exist yet, so creating it'.format(the_file))
+
+def ascii(x):
+    # convenience function to encode in ascii
+    return x.encode('ascii', 'ignore')
 
 def loop3():
     '''
@@ -34,9 +38,8 @@ def loop3():
     - loop3_h5parm (str): h5parm resulting from loop 3
     '''
 
-    logging.info('running loop 3')
-    logging.info('loop 3 finished')
-
+    logging.info('executing loop3()')
+    logging.info('loop3() completed')
     return '/data/scratch/sean/h5parms/loop3_h5parm.h5'
 
 def evaluate_solutions(h5parm, mtf, threshold = 0.25):
@@ -56,10 +59,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     - none
     '''
 
-    logging.info('evaluating the solutions')
-    # CHANGED get the h5parm from the bottom of the master text file
-    # h5parms = np.genfromtxt(mtf, delimiter = ',', unpack = True, dtype = str, usecols = 0)
-    # h5parm = h5parms[len(h5parms) - 1]
+    logging.info('executing evaluate_solutions(h5parm = {}, mtf = {}, threshold = {})'.format(h5parm, mtf, threshold))
 
     # get the direction from the h5parm
     h = h5py.File(h5parm, 'r') # TODO should probably use losoto for this
@@ -82,7 +82,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     logging.info('values < {} are good (1), otherwise the value is bad (0)'.format(threshold))
     for station in range(len(stations)):
         xx, yy = [], []
-        # [polarisation (xx = 0, yy  = 1), direction, station, frequency, time]
+        # structure: phase.val[polarisation (xx = 0, yy  = 1), direction, station, frequency, time]
         for value in phase.val[0, 0, station, 0, :]:
             xx.append(value)
 
@@ -109,7 +109,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
             except KeyError:
                 value = float('nan')
 
-            if value < threshold: # pass
+            if value < threshold: # success
                 f.write(', {}'.format(int(True)))
             elif np.isnan(value):
                 f.write(', {}'.format('nan'))
@@ -119,34 +119,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
         f.write('\n')
 
     lo.close()
-    logging.info('finished evaluating the solutions')
-
-    # IDEA check if the h5parm is in the mtf
-    #      if it is, append the values to that specific line
-    #      (i.e. should be able to write to any line in the file)
-    #      if it is not, append the h5parm and the values
-    # with open(mtf, 'r+') as f:
-    #     for line in f:
-    #         if h5parm in line:
-    #            break
-    #     else: # not found, we are at the eof
-    #         file.write(h5parm) # append
-
-    # TODO should be able to write to any line in the file
-    # def replace_line(file_name, line_number, text):
-    #     lines = open(file_name, 'r').readlines()
-    #     lines[line_number] = text
-    #     out = open(file_name, 'w')
-    #     out.writelines(lines)
-    #     out.close()
-
-    # IDEA if the h5parm is in the mtf, remove this line so there is only one
-    #      set of results per h5parm in the mtf
-    # h5parms = [h5parm]
-    # with open(mtf) as oldfile, open('new' + mtf, 'w') as newfile:
-    #     for line in oldfile:
-    #         if not any(bad_word in line for bad_word in bad_words):
-    #             newfile.write(line)
+    logging.info('evaluate_solutions(h5parm = {}, mtf = {}, threshold = {}) completed'.format(h5parm, mtf, threshold))
 
 def make_h5parm(mtf, ms, clobber = False):
     '''
@@ -165,6 +138,8 @@ def make_h5parm(mtf, ms, clobber = False):
     returns:
     - new_h5parm (str): the new h5parm to be applied to the measurement set
     '''
+
+    logging.info('executing make_h5parm(mtf = {}, ms = {}, clobber = {})'.format(mtf, ms, clobber))
 
     # get the direction from the measurement set
     t  = pt.table(ms, readonly = True, ack = False)
@@ -244,8 +219,6 @@ def make_h5parm(mtf, ms, clobber = False):
     # dummy data
     # NOTE having a string here gives 'TypeError: Array objects cannot currently deal with void, unicode or object arrays'
     #      so encoding as ascii
-    def ascii(x):
-        return x.encode('ascii', 'ignore')
 
     pol = [ascii('XX'), ascii('YY')]
     dir = [ascii('pointing')]
@@ -267,11 +240,8 @@ def make_h5parm(mtf, ms, clobber = False):
         hf.create_dataset('sol000/antenna',  data = np.array([1,2,3,4,5]))
         hf.create_dataset('sol000/source',  data = np.array([1,2,3,4,5]))
 
-    # h5file = open_file(new_h5parm, mode="a", title="Test file")
-    # group = h5file.create_group("/", 'sol000', 'Detector information')
-    # table = h5file.create_table('/sol000', 'readout', Particle(), 'asd')
-
     logging.info('finished making the h5parm {}'.format(new_h5parm))
+    logging.info('make_h5parm(mtf = {}, ms = {}, clobber = {}) completed'.format(mtf, ms, clobber))
     return new_h5parm
 
 def applyh5parm(new_h5parm, ms, clobber = False):
@@ -288,6 +258,7 @@ def applyh5parm(new_h5parm, ms, clobber = False):
     - ms (str): measurement set for self-calibration with corrected data
     '''
 
+    logging.info('executing applyh5parm(new_h5parm = {}, ms = {}, clobber = {})'.format(new_h5parm, ms, clobber))
     # parset is saved in same directory as the h5parm
     parset = os.path.dirname(new_h5parm) + '/applyh5parm.parset'
     column_in = 'DATA'
@@ -320,11 +291,8 @@ def applyh5parm(new_h5parm, ms, clobber = False):
         if line: # do not print blank line
             logging.info(line)
 
-    # TODO get ndppp output to logging module
-    #      see https://codereview.stackexchange.com/a/17959
-    #      and https://stackoverflow.com/a/15108096
-
     logging.info('finished applying {} to {}'.format(new_h5parm, ms))
+    logging.info('applyh5parm(new_h5parm = {}, ms = {}, clobber = {}) completed'.format(new_h5parm, ms, clobber))
     return ms
 
 def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False):
@@ -342,6 +310,7 @@ def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False):
     - combined_h5parm (str): a new h5parm that is a combination of new_h5parm and loop3_h5par
     '''
 
+    logging.info('executing updatelist(new_h5parm = {}, loop3_h5parm = {}, mtf = {}, clobber = {})'.format(new_h5parm, loop3_h5parm, mtf, clobber))
     # create new h5parm
     logging.info('combining phase solutions from {} and {}'.format(new_h5parm, loop3_h5parm))
     combined_h5parm = '{}-{}'.format(os.path.splitext(new_h5parm)[0], os.path.basename(loop3_h5parm))
@@ -364,15 +333,12 @@ def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False):
     logging.info('evaluating the {} solutions'.format(new_h5parm))
     # evaluate_solutions(h5parm, mtf, threshold)
     logging.info('finished updating {}'.format(mtf))
-
+    logging.info('updatelist(new_h5parm = {}, loop3_h5parm = {}, mtf = {}, clobber = {}) completed'.format(new_h5parm, loop3_h5parm, mtf, clobber))
     return combined_h5parm
 
 def main():
-    ''' starting point: first iteration will have produced phase solutions
-        independently for all directions, with each being its own h5parm
-    '''
-
     logging.basicConfig(format = '\033[1m%(asctime)s \033[31m%(levelname)s \033[00m%(message)s', datefmt = '%Y/%m/%d %H:%M:%S', level = logging.INFO)
+    logging.info('executing main()')
 
     parser = argparse.ArgumentParser(description = __doc__, formatter_class = argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-m', '--mtf', required = True, help = 'master text file')
@@ -388,18 +354,12 @@ def main():
     clobber = args.clobber
 
     loop3() # run loop 3 to generate h5parm
-
     evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
-
     new_h5parm = make_h5parm(mtf, ms, clobber = clobber) # create a new h5parm of the best solutions
-
     applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
-
     loop3_h5parm = loop3() # run loop 3, returning h5parm
-
     updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber) # combine h5parms and update mtf
-
-    logging.info('finished successfully')
+    logging.info('main() completed')
 
 if __name__ == '__main__':
     main()
