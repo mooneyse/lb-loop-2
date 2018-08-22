@@ -218,15 +218,15 @@ def make_h5parm(mtf, ms, clobber = False):
     for s in phase.ant[:]: # stations
         if s == my_station:
             logging.info('{} has {} dimensions, (pol, dir, ant, freq, time): {}'.format(my_h5parm, phase.val.ndim, phase.val.shape))
-            polVals = phase.val[:,0,0,0,0] #  polarisation
-            dirVals = phase.val[0,:,0,0,0] # direction
-            antVals = phase.val[0,0,:,0,0] # station
-            freqVals = phase.val[0,0,0,:,0] # frequency
-            timeVals = phase.val[0,0,0,0,:] # time
+            # polVals = phase.val[:,0,0,0,0] #  polarisation
+            # dirVals = phase.val[0,:,0,0,0] # direction
+            # antVals = phase.val[0,0,:,0,0] # station
+            # freqVals = phase.val[0,0,0,:,0] # frequency
+            # timeVals = phase.val[0,0,0,0,:] # time
             vals = phase.val[:,:,:,:,:]
-            print(len(vals))
     lo.close()
 
+    print(phase.val['XX',:,:,:,:])
     # TODO copy this data into the new h5parm
     # TODO make sure this new h5parm has the same format as the standard lofar h5parms
 
@@ -236,11 +236,8 @@ def make_h5parm(mtf, ms, clobber = False):
     pol = [ascii('XX'), ascii('YY')]
     dir = [ascii('pointing')]
     ant = [ascii(mtf_station) for mtf_station in mtf_stations]
-    print(antVals)
-    print(len(ant))
     freq = [1.3300628662109375E8]
     time = list(range(1686))
-    print(len(vals))
     weights = vals
     c = solset.makeSoltab('phase',
                           axesNames = ['pol', 'dir', 'ant', 'freq', 'time'],
