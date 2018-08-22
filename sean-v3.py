@@ -231,14 +231,12 @@ def make_h5parm(mtf, ms, clobber = False):
     lo.close()
 
     asdf = np.concatenate((polVals, dirVals, antVals, freqVals, timeVals))
-    print(asdf.shape, 'bloop')
-    print(asdf.ndim, 'bloop')
+    print('bloop', asdf.shape, asdf.ndim)
     print('bloop', len(asdf), len(polVals)+len(dirVals) +len(antVals)+len(freqVals)+len(timeVals))
-    print(asdf)
-    asd = np.reshape(asdf, (polVals, dirVals, antVals, freqVals, timeVals))
+
+    # asd = np.reshape(asdf, (polVals, dirVals, antVals, freqVals, timeVals))
     asd = np.reshape(asdf, (2, 1, 23, 1, 1686))
-    print(asd.shape, 'asd')
-    print(asd.ndim, 'asd')
+    print('bleep', asd.shape, asd.ndim)
     # TODO copy this data into the new h5parm
     # TODO make sure this new h5parm has the same format as the standard lofar h5parms
 
