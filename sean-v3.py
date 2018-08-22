@@ -234,7 +234,7 @@ def make_h5parm(mtf, ms, clobber = False):
     print('bloop', asdf.shape, asdf.ndim, len(asdf),len(asdf), len(polVals)+len(dirVals) +len(antVals)+len(freqVals)+len(timeVals), np.sum((2, 1, 23, 1, 1686)))
 
     # asd = np.reshape(asdf, (polVals, dirVals, antVals, freqVals, timeVals))
-    asd = np.reshape(asdf, (,1713))
+    asd = np.reshape(asdf, (0,1713))
     # asd = np.reshape(asdf, (2, 1, 23, 1, 1686))
     print('bleep', asd.shape, asd.ndim)
     # TODO copy this data into the new h5parm
