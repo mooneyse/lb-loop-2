@@ -220,6 +220,8 @@ def make_h5parm(mtf, ms, clobber = False):
             # print(phase.val[:,:,:,:,:]) # structure: phase.val[polarisation (xx = 0, yy  = 1), direction, station, frequency, time]
             print(phase.val.shape)
             print(phase.val[:,0,0,0,0])
+            print(phase.val[0,:,0,0,0])
+            print(phase.val[0,:,0,:,0])
             # print('asdfasdfasdfasdfasdfasdfasdf', phase.val[0,:,:,:,:])
     lo.close()
 
