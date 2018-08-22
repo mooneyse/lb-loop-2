@@ -223,8 +223,8 @@ def make_h5parm(mtf, ms, clobber = False):
             # antVals = phase.val[0,0,:,0,0] # station
             # freqVals = phase.val[0,0,0,:,0] # frequency
             vals = phase.val[:,:,:,:,:]
-            print(phase.val[:,:,0,:,:])
-            phase.val[0,0,:,0,0]
+            print(phase.val[:,:,:,0,:])
+            phase.val[0,0,0,:,0]
     lo.close()
 
     # TODO copy this data into the new h5parm
