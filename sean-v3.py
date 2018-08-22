@@ -175,9 +175,9 @@ def make_h5parm(mtf, ms, clobber = False):
 
     # find the closest h5parm which has an acceptable solution for each station
     # NOTE pandas could probably do better than this
-    # these print statements are for testing only
+
     logging.info('for this direction in the ms, make a new h5parm consisting of the following:')
-    logging.info('\tstation\t\tseparation\th5parm\trow\tboolean')
+    logging.info('\tstation \tseparation\tboolean\trow\t5parm')
     successful_stations = []
 
     for mtf_station in mtf_stations: # for each station
@@ -186,7 +186,7 @@ def make_h5parm(mtf, ms, clobber = False):
             row = list(h5parms).index(h5parm) # row in mtf
             value = data[mtf_station][row] # boolean value for h5parm and station
             if value == 1 and mtf_station not in successful_stations:
-                logging.info('\t{}\t{}\t{}\t{}\t{}'.format(mtf_station.ljust(8), round(key.deg, 6), h5parm, row, int(value)))
+                logging.info('\t{}\t{}\t{}\t{}\t{}'.format(mtf_station.ljust(8), round(key.deg, 6), int(value), row, h5parm))
                 successful_stations.append(mtf_station)
 
     # create a new h5parm
@@ -202,30 +202,33 @@ def make_h5parm(mtf, ms, clobber = False):
     #       'NotImplementedError: structured arrays with columns with type description ``<U16`` are not supported yet, sorry'
     solset = h.getSolset('sol000')
 
-    # --------------------------------------------------------------------------
-    # TODO get a h5parm with a result I am going to copy across
+    # get a h5parm with a result I am going to copy across
+    # TODO extend this to loop over all h5parms to be copied
     my_h5parm = mtf_directions[sorted(mtf_directions.keys())[0]]
+
     # get the station for which the result is valid
+    # TODO right now, just taking one station by way of example
     my_station = mtf_stations[0]
-    # use the h5parm and the station to get the relevant data
-    # print('-------------------------------------------------------------------')
-    # print(my_h5parm, my_station)
+    logging.info('copying {} data from {} to {}'.format(my_station, my_h5parm, new_h5parm))
+
+# NB THIS IS WHERE I AM AT THE MOMENT!
+    # TODO use the h5parm and the station to get the relevant data
     lo = lh5.h5parm(my_h5parm, readonly = False)
     phase = lo.getSolset('sol000').getSoltab('phase000')
-    # print('phase:', phase)
-    # for s in phase.ant[:]: # stations
-    #     if s == my_station:
-    #         print('phase.val:')
-    #         print(phase.val[:,:,:,:])
-    #         print(phase.val.shape)
+    for s in phase.ant[:]: # stations
+        if s == my_station:
+            print('phase.val:')
+            print(phase.val[:,:,:,:,:]) # structure: phase.val[polarisation (xx = 0, yy  = 1), direction, station, frequency, time]
+            print(phase.val.shape)
+            print('asdfasdfasdfasdfasdfasdfasdf', phase.val[0,:,:,:,:])
     lo.close()
-    # copy this data into the new h5parm
-    # make sure this new h5parm has the same format as the standard lofar h5parms
+
+    # TODO copy this data into the new h5parm
+    # TODO make sure this new h5parm has the same format as the standard lofar h5parms
 
     # dummy data
     # NOTE having a string here gives 'TypeError: Array objects cannot currently deal with void, unicode or object arrays'
     #      so encoding as ascii
-
     pol = [ascii('XX'), ascii('YY')]
     dir = [ascii('pointing')]
     ant = [ascii(mtf_station) for mtf_station in mtf_stations]
@@ -240,11 +243,6 @@ def make_h5parm(mtf, ms, clobber = False):
                           weights = weights) # creates phase000
     h.close()
 
-    # HACK a work around for the comment on line 215
-    #      but they are not the correct table format
-    with h5py.File(new_h5parm, 'a') as hf:
-        hf.create_dataset('sol000/antenna',  data = np.array([1,2,3,4,5]))
-        hf.create_dataset('sol000/source',  data = np.array([1,2,3,4,5]))
 
     logging.info('finished making the h5parm {}'.format(new_h5parm))
     logging.info('make_h5parm(mtf = {}, ms = {}, clobber = {}) completed'.format(mtf, ms, clobber))
