@@ -230,7 +230,7 @@ def make_h5parm(mtf, ms, clobber = False):
             print(timeVals, len(timeVals))
     lo.close()
 
-    asdf = numpy.concatenate([polVals, dirVals, antVals, freqVals, timeVals])
+    asdf = np.concatenate([polVals, dirVals, antVals, freqVals, timeVals])
     asdf.shape
     asdf.ndim
     # TODO copy this data into the new h5parm
