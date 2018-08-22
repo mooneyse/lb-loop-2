@@ -222,7 +222,7 @@ def make_h5parm(mtf, ms, clobber = False):
             # dirVals = phase.val[0,:,0,0,0] # direction
             # antVals = phase.val[0,0,:,0,0] # station
             # freqVals = phase.val[0,0,0,:,0] # frequency
-            pol = phase.pol[]
+            pol = phase.pol[:]
             print(pol)
             vals = phase.val[:,:,:,:,:]
             # print(phase.val[:,:,:,0,:])
