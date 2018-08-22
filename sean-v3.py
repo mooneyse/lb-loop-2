@@ -249,6 +249,7 @@ def make_h5parm(mtf, ms, clobber = False):
     pol = [ascii('XX'), ascii('YY')]
     dir = [ascii('pointing')]
     ant = [ascii(mtf_station) for mtf_station in mtf_stations]
+    print(len(ant))
     freq = [1.3300628662109375E8]
     time = list(range(1686))
     vals = np.zeros((len(pol), len(dir), len(ant), len(freq), len(time)))
