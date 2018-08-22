@@ -11,17 +11,21 @@ import losoto.h5parm as lh5
 from astropy.coordinates import SkyCoord
 from pathlib import Path
 
-def does_it_exist(the_file, clobber = False):
+def does_it_exist(the_file, clobber = False, append = False):
     # convenience function to check if a file already exists
     if Path(the_file).is_file():
-        if clobber:
+        if append:
+            logging.warn('{} already exists and it will be appended to (append = {})'.format(the_file, append))
+        elif clobber:
             logging.warn('{} already exists but it will be overwritten (clobber = {})'.format(the_file, clobber))
             os.remove(the_file)
         else:
-            logging.error('{} already exists and overwriting not enabled (clobber = {}), so exiting'.format(the_file, clobber))
+            logging.error('{} already exists and it will not be overwritten (clobber = {})'.format(the_file, clobber))
             sys.exit()
+        return True
     else:
-        logging.info('{} does not exist yet, so creating it'.format(the_file))
+        logging.info('{} does not exist'.format(the_file))
+        return False
 
 def ascii(x):
     # convenience function to encode in ascii
@@ -95,11 +99,14 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
         mean_xx_yy = np.nanmean(np.abs(xx_yy)) * (1 / (2 * np.pi))
         evaluations[stations[station]] = mean_xx_yy # 0 = best, 1 = worst
 
+    # append to master file if it exists, else write
+    if not does_it_exist(mtf, append = True):
+        lo.close()
+        sys.exit()
+    logging.info('writing the results to the master text file {}'.format(mtf))
     with open(mtf) as f:
         mtf_stations = list(csv.reader(f))[0][3:] # get stations from the mtf
 
-    # append to master file
-    logging.info('writing the results to the master text file {}'.format(mtf))
     with open(mtf, 'a') as f:
         f.write('{}, {}, {}'.format(h5parm, direction[0], direction[1]))
         for mtf_station in mtf_stations:
@@ -334,6 +341,13 @@ def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False):
     # evaluate_solutions(h5parm, mtf, threshold)
     logging.info('finished updating {}'.format(mtf))
     logging.info('updatelist(new_h5parm = {}, loop3_h5parm = {}, mtf = {}, clobber = {}) completed'.format(new_h5parm, loop3_h5parm, mtf, clobber))
+
+    # One can then merge the two h5parms in a single file (this is needed if you want to interpolate/rescale/copy solutions in time/freq from the cal to the target):
+    # https://support.astron.nl/LOFARImagingCookbook/losoto.html
+    # H5parm_merge.py -v cal.h5:sol000 tgt.h5:cal000
+    # One can create a h5parm also from a single SB
+    # H5parm_importer.py -v LXXXXX_3c295.h5 LXXXXX_3c295.MS
+
     return combined_h5parm
 
 def main():
@@ -353,13 +367,13 @@ def main():
     threshold = args.threshold
     clobber = args.clobber
 
-    loop3() # run loop 3 to generate h5parm
+    # loop3() # run loop 3 to generate h5parm
     evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
-    new_h5parm = make_h5parm(mtf, ms, clobber = clobber) # create a new h5parm of the best solutions
-    applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
-    loop3_h5parm = loop3() # run loop 3, returning h5parm
-    updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber) # combine h5parms and update mtf
-    logging.info('main() completed')
+    # new_h5parm = make_h5parm(mtf, ms, clobber = clobber) # create a new h5parm of the best solutions
+    # applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
+    # loop3_h5parm = loop3() # run loop 3, returning h5parm
+    # updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber) # combine h5parms and update mtf
+    # logging.info('main() completed')
 
 if __name__ == '__main__':
     main()
