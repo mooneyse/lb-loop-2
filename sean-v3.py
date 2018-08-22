@@ -177,7 +177,7 @@ def make_h5parm(mtf, ms, clobber = False):
     # NOTE pandas could probably do better than this
     # these print statements are for testing only
     logging.info('for this direction in the ms, make a new h5parm consisting of the following:')
-    logging.info('\tstation\t\tseparation\tboolean\trow\th5parm')
+    logging.info('\tstation\t\tseparation\th5parm\trow\tboolean')
     successful_stations = []
 
     for mtf_station in mtf_stations: # for each station
@@ -186,13 +186,13 @@ def make_h5parm(mtf, ms, clobber = False):
             row = list(h5parms).index(h5parm) # row in mtf
             value = data[mtf_station][row] # boolean value for h5parm and station
             if value == 1 and mtf_station not in successful_stations:
-                logging.info('\t{}\t{}\t{}\t{}\t{}'.format(mtf_station.ljust(8), round(key.deg, 6), int(value), row, h5parm))
+                logging.info('\t{}\t{}\t{}\t{}\t{}'.format(mtf_station.ljust(8), round(key.deg, 6), h5parm, row, int(value)))
                 successful_stations.append(mtf_station)
 
     # create a new h5parm
     ms = os.path.splitext(os.path.normpath(ms))[0]
     new_h5parm = '{}_{}_{}.h5'.format(ms, ms_direction.ra.deg, ms_direction.dec.deg)
-    logging.info('making a new h5parm {}'.format(nwe_h5parm))
+    logging.info('making a new h5parm {}'.format(new_h5parm))
     does_it_exist(new_h5parm, clobber = clobber) # check if the h5parm exists
 
     # write these best phase solutions to the new h5parm
