@@ -252,6 +252,7 @@ def make_h5parm(mtf, ms, clobber = False):
     freq = [1.3300628662109375E8]
     time = list(range(1686))
     vals = np.zeros((len(pol), len(dir), len(ant), len(freq), len(time)))
+    print(len(vals))
     weights = vals
     c = solset.makeSoltab('phase',
                           axesNames = ['pol', 'dir', 'ant', 'freq', 'time'],
