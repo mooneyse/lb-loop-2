@@ -224,6 +224,8 @@ def make_h5parm(mtf, ms, clobber = False):
             freqVals = phase.val[0,0,0,:,0] # frequency
             timeVals = phase.val[0,0,0,0,:] # time
             print(type(timeVals), 'typetypetypetype')
+            vals = phase.val[:,:,:,:,:]
+            print(len(vals))
             # print(polVals, len(polVals))
             # print(dirVals, len(dirVals))
             # print(antVals, len(antVals))
