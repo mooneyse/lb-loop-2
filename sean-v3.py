@@ -217,12 +217,13 @@ def make_h5parm(mtf, ms, clobber = False):
     phase = lo.getSolset('sol000').getSoltab('phase000')
     for s in phase.ant[:]: # stations
         if s == my_station:
-            print(s)
             logging.info('{} has {} dimensions, (pol, dir, ant, freq, time): {}'.format(my_h5parm, phase.val.ndim, phase.val.shape))
             # polVals = phase.val[:,0,0,0,0] #  polarisation
             # dirVals = phase.val[0,:,0,0,0] # direction
             # antVals = phase.val[0,0,:,0,0] # station
             # freqVals = phase.val[0,0,0,:,0] # frequency
+            pol = phase.pol[]
+            print(pol)
             vals = phase.val[:,:,:,:,:]
             # print(phase.val[:,:,:,0,:])
             weights = phase.weight[:,:,:,:,:]
