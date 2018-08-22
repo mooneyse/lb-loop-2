@@ -223,23 +223,10 @@ def make_h5parm(mtf, ms, clobber = False):
             antVals = phase.val[0,0,:,0,0] # station
             freqVals = phase.val[0,0,0,:,0] # frequency
             timeVals = phase.val[0,0,0,0,:] # time
-            print(type(timeVals), 'typetypetypetype')
             vals = phase.val[:,:,:,:,:]
             print(len(vals))
-            # print(polVals, len(polVals))
-            # print(dirVals, len(dirVals))
-            # print(antVals, len(antVals))
-            # print(freqVals, len(freqVals))
-            # print(timeVals, len(timeVals))
     lo.close()
 
-    asdf = np.concatenate((polVals, dirVals, antVals, freqVals, timeVals))
-    print('bloop', asdf.shape, asdf.ndim, len(asdf),len(asdf), len(polVals)+len(dirVals) +len(antVals)+len(freqVals)+len(timeVals), np.sum((2, 1, 23, 1, 1686)))
-
-    # asd = np.reshape(asdf, (polVals, dirVals, antVals, freqVals, timeVals))
-    # asd = np.reshape(asdf, (0,1713))
-    # asd = np.reshape(asdf, (2, 1, 23, 1, 1686))
-    # print('bleep', asd.shape, asd.ndim)
     # TODO copy this data into the new h5parm
     # TODO make sure this new h5parm has the same format as the standard lofar h5parms
 
@@ -249,10 +236,10 @@ def make_h5parm(mtf, ms, clobber = False):
     pol = [ascii('XX'), ascii('YY')]
     dir = [ascii('pointing')]
     ant = [ascii(mtf_station) for mtf_station in mtf_stations]
+    print(antVals)
     print(len(ant))
     freq = [1.3300628662109375E8]
     time = list(range(1686))
-    # vals = np.zeros((len(pol), len(dir), len(ant), len(freq), len(time)))
     print(len(vals))
     weights = vals
     c = solset.makeSoltab('phase',
