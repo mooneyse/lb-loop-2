@@ -83,7 +83,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
 
     # calculate xx-yy statistic
     logging.info('evaluating the xx-yy statistic for {}'.format(h5parm))
-    logging.info('values < {} are good (1), otherwise the value is bad (0)'.format(threshold))
+    logging.info('a value < {} is good (1), otherwise the value is bad (0)'.format(threshold))
     for station in range(len(stations)):
         xx, yy = [], []
         # structure: phase.val[polarisation (xx = 0, yy  = 1), direction, station, frequency, time]
@@ -177,7 +177,7 @@ def make_h5parm(mtf, ms, clobber = False):
     # NOTE pandas could probably do better than this
     # these print statements are for testing only
     logging.info('for this direction in the ms, make a new h5parm consisting of the following:')
-    logging.info('\tstation\t\tseparation\th5parm\t\t\t\t\t\t\trow\tboolean')
+    logging.info('\tstation\t\tseparation\tboolean\trow\th5parm')
     successful_stations = []
 
     for mtf_station in mtf_stations: # for each station
@@ -186,7 +186,7 @@ def make_h5parm(mtf, ms, clobber = False):
             row = list(h5parms).index(h5parm) # row in mtf
             value = data[mtf_station][row] # boolean value for h5parm and station
             if value == 1 and mtf_station not in successful_stations:
-                logging.info('\t{}\t{}\t{}\t{}\t{}'.format(mtf_station.ljust(8), round(key.deg, 6), h5parm, row, int(value)))
+                logging.info('\t{}\t{}\t{}\t{}\t{}'.format(mtf_station.ljust(8), round(key.deg, 6), int(value), row, h5parm))
                 successful_stations.append(mtf_station)
 
     # create a new h5parm
@@ -352,7 +352,6 @@ def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False):
 
 def main():
     logging.basicConfig(format = '\033[1m%(asctime)s \033[31m%(levelname)s \033[00m%(message)s', datefmt = '%Y/%m/%d %H:%M:%S', level = logging.INFO)
-    logging.info('executing main()')
 
     parser = argparse.ArgumentParser(description = __doc__, formatter_class = argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-m', '--mtf', required = True, help = 'master text file')
@@ -367,13 +366,14 @@ def main():
     threshold = args.threshold
     clobber = args.clobber
 
+    logging.info('executing main()')
     # loop3() # run loop 3 to generate h5parm
     evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
-    # new_h5parm = make_h5parm(mtf, ms, clobber = clobber) # create a new h5parm of the best solutions
-    # applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
-    # loop3_h5parm = loop3() # run loop 3, returning h5parm
-    # updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber) # combine h5parms and update mtf
-    # logging.info('main() completed')
+    new_h5parm = make_h5parm(mtf, ms, clobber = clobber) # create a new h5parm of the best solutions
+    applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
+    loop3_h5parm = loop3() # run loop 3, returning h5parm
+    updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber) # combine h5parms and update mtf
+    logging.info('main() completed')
 
 if __name__ == '__main__':
     main()
