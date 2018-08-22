@@ -231,7 +231,7 @@ def make_h5parm(mtf, ms, clobber = False):
     lo.close()
 
     asdf = np.concatenate((polVals, dirVals, antVals, freqVals, timeVals))
-    print('bloop', asdf.shape, asdf.ndim)
+    print('bloop', asdf.shape, asdf.ndim, len(asdf))
     print('bloop', len(asdf), len(polVals)+len(dirVals) +len(antVals)+len(freqVals)+len(timeVals))
 
     # asd = np.reshape(asdf, (polVals, dirVals, antVals, freqVals, timeVals))
