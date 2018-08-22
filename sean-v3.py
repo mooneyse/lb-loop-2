@@ -217,10 +217,9 @@ def make_h5parm(mtf, ms, clobber = False):
     phase = lo.getSolset('sol000').getSoltab('phase000')
     for s in phase.ant[:]: # stations
         if s == my_station:
-            print('phase.val:')
-            print(phase.val[:,:,:,:,:]) # structure: phase.val[polarisation (xx = 0, yy  = 1), direction, station, frequency, time]
+            # print(phase.val[:,:,:,:,:]) # structure: phase.val[polarisation (xx = 0, yy  = 1), direction, station, frequency, time]
             print(phase.val.shape)
-            print('asdfasdfasdfasdfasdfasdfasdf', phase.val[0,:,:,:,:])
+            # print('asdfasdfasdfasdfasdfasdfasdf', phase.val[0,:,:,:,:])
     lo.close()
 
     # TODO copy this data into the new h5parm
