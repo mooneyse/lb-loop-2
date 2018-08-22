@@ -222,11 +222,10 @@ def make_h5parm(mtf, ms, clobber = False):
             # dirVals = phase.val[0,:,0,0,0] # direction
             # antVals = phase.val[0,0,:,0,0] # station
             # freqVals = phase.val[0,0,0,:,0] # frequency
-            # timeVals = phase.val[0,0,0,0,:] # time
+            print(phase.val['XX',:,:,:,:])
             vals = phase.val[:,:,:,:,:]
     lo.close()
 
-    print(phase.val['XX',:,:,:,:])
     # TODO copy this data into the new h5parm
     # TODO make sure this new h5parm has the same format as the standard lofar h5parms
 
