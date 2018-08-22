@@ -190,10 +190,9 @@ def make_h5parm(mtf, ms, clobber = False):
                 successful_stations.append(mtf_station)
 
     # create a new h5parm
-    logging.info('making a new h5parm')
     ms = os.path.splitext(os.path.normpath(ms))[0]
     new_h5parm = '{}_{}_{}.h5'.format(ms, ms_direction.ra.deg, ms_direction.dec.deg)
-
+    logging.info('making a new h5parm {}'.format(nwe_h5parm))
     does_it_exist(new_h5parm, clobber = clobber) # check if the h5parm exists
 
     # write these best phase solutions to the new h5parm
