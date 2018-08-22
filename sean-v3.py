@@ -223,8 +223,9 @@ def make_h5parm(mtf, ms, clobber = False):
             # antVals = phase.val[0,0,:,0,0] # station
             # freqVals = phase.val[0,0,0,:,0] # frequency
             vals = phase.val[:,:,:,:,:]
-            print(phase.val[:,:,:,0,:])
-            phase.val[0,0,0,:,0]
+            # print(phase.val[:,:,:,0,:])
+            weights = phase.weight[:,:,:,:,:]
+            # asdf = phase.
     lo.close()
 
     # TODO copy this data into the new h5parm
@@ -238,7 +239,7 @@ def make_h5parm(mtf, ms, clobber = False):
     ant = [ascii(mtf_station) for mtf_station in mtf_stations]
     freq = [1.3300628662109375E8]
     time = list(range(1686))
-    weights = vals
+    # weights = vals
     c = solset.makeSoltab('phase',
                           axesNames = ['pol', 'dir', 'ant', 'freq', 'time'],
                           axesVals = [pol, dir, ant, freq, time],
