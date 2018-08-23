@@ -228,7 +228,6 @@ def make_h5parm(mtf, ms, clobber = False):
             # print(phase.val[:,:,:,0,:])
             weights = phase.weight[:,:,:,:,:]
             # asdf = phase.
-    lo.close()
 
     # TODO copy this data into the new h5parm
     # TODO make sure this new h5parm has the same format as the standard lofar h5parms
@@ -236,17 +235,26 @@ def make_h5parm(mtf, ms, clobber = False):
     # dummy data
     # NOTE having a string here gives 'TypeError: Array objects cannot currently deal with void, unicode or object arrays'
     #      so encoding as ascii
+    pol = phase.pol[:]
+    dir = phase.dir[:]
+    print('dir', dir)
+    ant = phase.ant[:]
+    time = phase.time[:]
+    freq = phase.freq[:]
+
     pol = [ascii('XX'), ascii('YY')]
     dir = [ascii('pointing')]
     ant = [ascii(mtf_station) for mtf_station in mtf_stations]
     freq = [1.3300628662109375E8]
     time = list(range(1686))
     # weights = vals
+
     c = solset.makeSoltab('phase',
                           axesNames = ['pol', 'dir', 'ant', 'freq', 'time'],
                           axesVals = [pol, dir, ant, freq, time],
                           vals = vals,
                           weights = weights) # creates phase000
+    lo.close()
     h.close()
 
 
