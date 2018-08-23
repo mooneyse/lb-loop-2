@@ -216,14 +216,15 @@ def make_h5parm(mtf, ms, clobber = False):
         if phase.ant[s] == my_station:
             print('need to loop over stations to just get the one I am interested in')
             val = phase.val[:, :, s, :, :]
-            print('+-----------+\n| val query |', val.ndim, val.shape, len(val), '\n+-----------+')
 
-    valium = [val, val, val, val, val, val, val, val, val, val, val, val,
-              val, val, val, val, val, val, val, val, val, val, val]
+    lists = []
+    for i in range(len(phase.ant[:])):
+        lists.append(val)
 
-    asdf = np.concatenate(valium, axis = 0)
-    fdsa = np.reshape(asdf, (2, 1, 23, 1, 1686))
-    print('+-----------+\n| fdsa query |', fdsa.ndim, fdsa.shape, len(fdsa), '\n+-----------+')
+    lists = np.concatenate(lists, axis = 0)
+    lists = np.reshape(lists, phase.val.shape)
+
+    print('+------------+\n| fdsa query |', lists.ndim, lists.shape, len(lists), '\n+------------+')
     # TODO copy this data into the new h5parm
     # TODO make sure this new h5parm has the same format as the standard lofar h5parms
     pol = phase.pol[:]
