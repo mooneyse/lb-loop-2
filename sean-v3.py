@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 A collection of functions for modifying HDF5 files.
@@ -222,6 +222,7 @@ def make_h5parm(mtf, ms, clobber = False):
 
     asdf = np.concatenate(valium, axis = 0)
     fdsa = np.reshape(asdf, (2, 1, 23, 1, 1686))
+    print('+-----------+\n| fdsa query |', fdsa.ndim, fdsa.shape, len(fdsa), '\n+-----------+')
     # TODO copy this data into the new h5parm
     # TODO make sure this new h5parm has the same format as the standard lofar h5parms
     pol = phase.pol[:]
