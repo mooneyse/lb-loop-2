@@ -215,6 +215,9 @@ def make_h5parm(mtf, ms, clobber = False):
         if phase.ant[s] == my_station:
             print('need to loop over stations to just get the one I am interested in')
             print(s, phase.ant[s])
+            val = phase.val[:, :, s, :, :]
+            print(val)
+            print(val.ndim, val.shape, len(val))
 
     # TODO copy this data into the new h5parm
     # TODO make sure this new h5parm has the same format as the standard lofar h5parms
