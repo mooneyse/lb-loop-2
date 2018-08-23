@@ -332,6 +332,7 @@ def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False):
     h.makeSolset(addTables = False) # creates sol000
     # FIXME using 'addTables = False' because the default 'addTables = True' gives
     #       'NotImplementedError: structured arrays with columns with type description ``<U16`` are not supported yet, sorry'
+    #       $ H5parm_merge.py --help
     solset = h.getSolset('sol000')
     h.close()
 
