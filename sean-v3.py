@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 '''
 A collection of functions for modifying HDF5 files.
@@ -10,6 +10,7 @@ import pyrap.tables as pt
 import losoto.h5parm as lh5
 from astropy.coordinates import SkyCoord
 from pathlib import Path
+from __future__ import print_function
 
 def does_it_exist(the_file, clobber = False, append = False):
     # convenience function to check if a file already exists
