@@ -160,18 +160,17 @@ def make_h5parm(mtf, ms, clobber = False):
     mtf_directions = {}
 
     # calculate the distance betweeen the ms direction and the h5parm directions
+    # NB so there is one entry in mtf_directions for each line in the mtf - makes sense
     for h5parm, ra, dec in zip(h5parms, data['ra'], data['dec']):
-        print('bloop')
         mtf_direction = SkyCoord(float(ra), float(dec), unit = 'deg')
         separation = ms_direction.separation(mtf_direction)
         mtf_directions[separation] = h5parm # distances from ms to each h5parm
-    print('line161',mtf_directions)
 
     # read in the stations from the master text file
     with open(mtf) as f: # get stations from the mtf
         mtf_stations = list(csv.reader(f))[0][3:] # skipping h5parm, ra, and dec
         mtf_stations = [x.lstrip() for x in mtf_stations] # remove leading space
-
+    print(mtf_stations)
     # find the closest h5parm which has an acceptable solution for each station
     # NOTE pandas could probably do better than this
 
