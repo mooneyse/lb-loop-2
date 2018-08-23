@@ -201,6 +201,8 @@ def make_h5parm(mtf, ms, clobber = False):
 
     # get a h5parm with a result I am going to copy across
     # TODO extend this to loop over all h5parms to be copied
+    # NB here now addressing this
+    print('+------------+\n|', mtf_directions[sorted(mtf_directions.keys())[:]], '\n+------------+')
     my_h5parm = mtf_directions[sorted(mtf_directions.keys())[0]]
 
     # get the station for which the result is valid
@@ -217,6 +219,7 @@ def make_h5parm(mtf, ms, clobber = False):
             print('need to loop over stations to just get the one I am interested in')
             val = phase.val[:, :, s, :, :]
 
+    # for testing, making up data for each antenna
     lists = []
     for i in range(len(phase.ant[:])):
         lists.append(val)
