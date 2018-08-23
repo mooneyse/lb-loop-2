@@ -27,10 +27,6 @@ def does_it_exist(the_file, clobber = False, append = False):
         logging.info('{} does not exist'.format(the_file))
         return False
 
-def ascii(x):
-    # convenience function to encode in ascii
-    return x.encode('ascii', 'ignore')
-
 def loop3():
     '''
     description:
@@ -211,43 +207,23 @@ def make_h5parm(mtf, ms, clobber = False):
     my_station = mtf_stations[0]
     logging.info('copying {} data from {} to {}'.format(my_station, my_h5parm, new_h5parm))
 
-# NB THIS IS WHERE I AM AT THE MOMENT!
     # TODO use the h5parm and the station to get the relevant data
     lo = lh5.h5parm(my_h5parm, readonly = False)
     phase = lo.getSolset('sol000').getSoltab('phase000')
+    logging.info('{} has {} dimensions, (pol, dir, ant, freq, time): {}'.format(my_h5parm, phase.val.ndim, phase.val.shape))
     for s in phase.ant[:]: # stations
         if s == my_station:
-            logging.info('{} has {} dimensions, (pol, dir, ant, freq, time): {}'.format(my_h5parm, phase.val.ndim, phase.val.shape))
-            # polVals = phase.val[:,0,0,0,0] #  polarisation
-            # dirVals = phase.val[0,:,0,0,0] # direction
-            # antVals = phase.val[0,0,:,0,0] # station
-            # freqVals = phase.val[0,0,0,:,0] # frequency
-            pol = phase.pol[:]
-            print(pol)
-            vals = phase.val[:,:,:,:,:]
-            # print(phase.val[:,:,:,0,:])
-            weights = phase.weight[:,:,:,:,:]
-            # asdf = phase.
+            print('need to loop over stations to just get the one I am interested in')
 
     # TODO copy this data into the new h5parm
     # TODO make sure this new h5parm has the same format as the standard lofar h5parms
-
-    # dummy data
-    # NOTE having a string here gives 'TypeError: Array objects cannot currently deal with void, unicode or object arrays'
-    #      so encoding as ascii
     pol = phase.pol[:]
     dir = phase.dir[:]
-    print('dir', dir)
     ant = phase.ant[:]
     time = phase.time[:]
     freq = phase.freq[:]
-
-    # pol = [ascii('XX'), ascii('YY')]
-    # dir = [ascii('pointing')]
-    # ant = [ascii(mtf_station) for mtf_station in mtf_stations]
-    # freq = [1.3300628662109375E8]
-    # time = list(range(1686))
-    # weights = vals
+    vals = phase.val[:, :, :, :, :]
+    weights = phase.weight[:, :, :, :, :]
 
     c = solset.makeSoltab('phase',
                           axesNames = ['pol', 'dir', 'ant', 'freq', 'time'],
@@ -256,7 +232,6 @@ def make_h5parm(mtf, ms, clobber = False):
                           weights = weights) # creates phase000
     lo.close()
     h.close()
-
 
     logging.info('finished making the h5parm {}'.format(new_h5parm))
     logging.info('make_h5parm(mtf = {}, ms = {}, clobber = {}) completed'.format(mtf, ms, clobber))
