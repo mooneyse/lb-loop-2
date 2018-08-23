@@ -179,7 +179,6 @@ def make_h5parm(mtf, ms, clobber = False):
 
     for mtf_station in mtf_stations: # for each station NB all 23 stations - fine
         for key in sorted(mtf_directions.keys()): # starting with shortest separations
-            print('for key in sorted(mtf_directions.keys()):', key)
             h5parm = mtf_directions[key]
             row = list(h5parms).index(h5parm) # row in mtf
             value = data[mtf_station][row] # boolean value for h5parm and station
