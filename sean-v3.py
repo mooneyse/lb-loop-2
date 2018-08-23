@@ -160,12 +160,12 @@ def make_h5parm(mtf, ms, clobber = False):
     mtf_directions = {}
 
     # calculate the distance betweeen the ms direction and the h5parm directions
-    # NB so there is one entry in mtf_directions for each line in the mtf - makes sense
+    # NB so there is one entry in mtf_directions for each unique line in the mtf - makes sense
     for h5parm, ra, dec in zip(h5parms, data['ra'], data['dec']):
         mtf_direction = SkyCoord(float(ra), float(dec), unit = 'deg')
         separation = ms_direction.separation(mtf_direction)
         mtf_directions[separation] = h5parm # distances from ms to each h5parm
-    print('line 168', mtf_directions)
+
     # read in the stations from the master text file
     # NB get the 23 stations - grand
     with open(mtf) as f: # get stations from the mtf
