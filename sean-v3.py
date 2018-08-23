@@ -211,8 +211,8 @@ def make_h5parm(mtf, ms, clobber = False):
     lo = lh5.h5parm(my_h5parm, readonly = False)
     phase = lo.getSolset('sol000').getSoltab('phase000')
     logging.info('{} has {} dimensions, (pol, dir, ant, freq, time): {}'.format(my_h5parm, phase.val.ndim, phase.val.shape))
-    for s in phase.ant[:]: # stations
-        if s == my_station:
+    for s in range(len(phase.ant[:])): # stations
+        if phase.ant[s] == my_station:
             print('need to loop over stations to just get the one I am interested in')
 
     # TODO copy this data into the new h5parm
