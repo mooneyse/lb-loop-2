@@ -4,13 +4,13 @@
 A collection of functions for modifying HDF5 files.
 '''
 
+from __future__ import print_function
 import argparse, csv, datetime, h5py, logging, os, subprocess, sys, threading
 import numpy as np
 import pyrap.tables as pt
 import losoto.h5parm as lh5
 from astropy.coordinates import SkyCoord
 from pathlib import Path
-from __future__ import print_function
 
 def does_it_exist(the_file, clobber = False, append = False):
     # convenience function to check if a file already exists
