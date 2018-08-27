@@ -242,9 +242,9 @@ def make_h5parm(mtf, ms, clobber = False):
 
         lo.close()
 
-    Pvals = np.concatenate(Pval, axis = 1)
+    Pvals = np.concatenate(Pval, axis = 2) # axis = 1, shape = (2, 22, 1, 1686)
     print('+-+-+-+-+-+-+-+-+-+-+-+-+', Pvals.shape)
-    Pvals = np.reshape(Pvals, (2, 1, 23, 1, 1686)) # Pvals.ndim = 5, Pvals.shape = (2, 1, 23, 1, 1686), len(Pvals) = 2
+    # Pvals = np.reshape(Pvals, (2, 1, 23, 1, 1686)) # Pvals.ndim = 5, Pvals.shape = (2, 1, 23, 1, 1686), len(Pvals) = 2
 
     # for testing, making up data for each antenna
     lo = lh5.h5parm(my_h5parm, readonly = False)
