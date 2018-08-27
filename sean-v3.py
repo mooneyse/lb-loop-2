@@ -213,7 +213,7 @@ def make_h5parm(mtf, ms, clobber = False):
     working_data = np.genfromtxt(working_file, delimiter = '\t', dtype = str)
     val = []
 
-    for my_line in range(len(working_file_data)):
+    for my_line in range(len(working_data)):
         # get the station and h5parm for which the result is valid
         my_station = working_data[my_line][0]
         my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
