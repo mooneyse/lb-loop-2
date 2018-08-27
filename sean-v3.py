@@ -192,7 +192,7 @@ def make_h5parm(mtf, ms, clobber = False):
                 successful_stations.append(mtf_station)
 
     f.close()
-    
+
     # create a new h5parm
     ms = os.path.splitext(os.path.normpath(ms))[0]
     new_h5parm = '{}_{}_{}.h5'.format(ms, ms_direction.ra.deg, ms_direction.dec.deg)
@@ -308,7 +308,8 @@ def applyh5parm(new_h5parm, ms, clobber = False):
         if line: # do not print blank line
             logging.info(line)
 
-    logging.info('finished applying {} to {}'.format(new_h5parm, ms))
+    logging.info('finished applying {} to {}, removing {}'.format(new_h5parm, ms, parset))
+    os.remove(parset)
     logging.info('applyh5parm(new_h5parm = {}, ms = {}, clobber = {}) completed'.format(new_h5parm, ms, clobber))
     return ms
 
