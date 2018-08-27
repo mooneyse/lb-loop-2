@@ -211,7 +211,7 @@ def make_h5parm(mtf, ms, clobber = False):
 
     # write these best phase solutions to the new h5parm
     working_data = np.genfromtxt(working_file, delimiter = '\t', dtype = str)
-    val = []
+    val, weight = [], []
 
     for my_line in range(len(working_data)):
         # get the station and h5parm for which the result is valid
@@ -227,12 +227,14 @@ def make_h5parm(mtf, ms, clobber = False):
         for s in range(len(phase.ant[:])): # stations
             if phase.ant[s] == my_station.strip():
                 val.append(phase.val[:, :, s, :, :])
+                weight.append(phase.weight[:, :, s, :, :])
 
         lo.close()
 
     vals = np.concatenate(val, axis = 2) # axis = 1, shape = (2, 23, 1, 1686); axis = 2, shape = (2, 1, 23, 1686)
     vals = np.expand_dims(vals, axis = 3) # shape = (2, 1, 23, 1, 1686) as desired
-    # np.stack creates a new dimension (also have hstack and vstack)
+    weights = np.concatenate(weight, axis = 2) # np.stack creates a new dimension (also have hstack and vstack)
+    weights = np.expand_dims(weights, axis = 3)
 
     # for testing, making up data for each antenna
     lo = lh5.h5parm(my_h5parm, readonly = False)
@@ -243,8 +245,7 @@ def make_h5parm(mtf, ms, clobber = False):
     ant = phase.ant[:]
     time = phase.time[:]
     freq = phase.freq[:]
-    # vals = phase.val[:, :, :, :, :]
-    weights = phase.weight[:, :, :, :, :]
+    # weights = phase.weight[:, :, :, :, :]
 
     c = solset.makeSoltab('phase',
                           axesNames = ['pol', 'dir', 'ant', 'freq', 'time'],
