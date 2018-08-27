@@ -231,7 +231,7 @@ def make_h5parm(mtf, ms, clobber = False):
 
         lo.close()
 
-        if my_line == len(working_data):
+        if my_line == len(working_data) - 1:
             print('LLLLLLLLLLLLLLLLLLLAST TIEM>?????')
 
     vals = np.concatenate(val, axis = 2) # axis = 1, shape = (2, 23, 1, 1686); axis = 2, shape = (2, 1, 23, 1686)
