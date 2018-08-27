@@ -188,7 +188,7 @@ def make_h5parm(mtf, ms, clobber = False):
             if value == 1 and mtf_station not in successful_stations:
                 working_information = '\t{}\t{}\t{}\t{}\t{}'.format(mtf_station.ljust(8), round(key.deg, 6), int(value), row, h5parm)
                 logging.info(working_information)
-                f.write(working_information)
+                f.write('{}\n'.format(working_information))
                 successful_stations.append(mtf_station)
 
     f.close()
