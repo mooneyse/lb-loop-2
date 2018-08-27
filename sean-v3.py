@@ -178,7 +178,7 @@ def make_h5parm(mtf, ms, clobber = False):
     successful_stations = []
 
      # = 'make_h5parm.txt'
-    working_file = os.path.splitext(os.path.normpath(ms))[0]
+    working_file = os.path.dirname(ms)
     print('+++++++++++++++++++++++++', working_file)
     #     new_h5parm = '{}_{}_{}.h5'.format(ms, ms_direction.ra.deg, ms_direction.dec.deg)
     # logging.info('creating working file {}'.format(working_file))
