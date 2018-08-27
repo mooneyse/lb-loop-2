@@ -211,16 +211,16 @@ def make_h5parm(mtf, ms, clobber = False):
 
     # write these best phase solutions to the new h5parm
     # TODO extend this to loop over all h5parms to be copied
-    my_h5parm = mtf_directions[sorted(mtf_directions.keys())[0]]
+    # my_h5parm = mtf_directions[sorted(mtf_directions.keys())[0]]
 
-    working_file_data = np.genfromtxt(working_file, delimiter='\t', dtype = str)
+    working_file_data = np.genfromtxt(working_file, delimiter = '\t', dtype = str)
     for bloop in range(len(working_file_data)):
         my_station = working_file_data[bloop][0]
         my_h5parm = working_file_data[bloop][len(working_file_data[bloop]) - 1]
 
     # get the station for which the result is valid
     # TODO right now, just taking one station by way of example
-    my_station = mtf_stations[0]
+    # my_station = mtf_stations[0]
     logging.info('copying {} data from {} to {}'.format(my_station, my_h5parm, new_h5parm))
 
     # TODO use the h5parm and the station to get the relevant data
