@@ -204,7 +204,7 @@ def make_h5parm(mtf, ms, clobber = False):
     # NB   here now addressing this
     my_h5parm = mtf_directions[sorted(mtf_directions.keys())[0]]
     for i in range(len(sorted(mtf_directions.keys()))):
-        print(i, mtf_directions[sorted(mtf_directions.values())[i]], mtf_directions[sorted(mtf_directions.keys())[i]])
+        print(i, sorted(mtf_directions.values())[i], mtf_directions[sorted(mtf_directions.keys())[i]])
 
     # get the station for which the result is valid
     # TODO right now, just taking one station by way of example
