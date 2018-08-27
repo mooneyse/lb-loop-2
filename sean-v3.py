@@ -203,8 +203,10 @@ def make_h5parm(mtf, ms, clobber = False):
     # TODO extend this to loop over all h5parms to be copied
     # NB   here now addressing this
     my_h5parm = mtf_directions[sorted(mtf_directions.keys())[0]]
+    logging.info('we have the following unique best h5parms from the master text file:')
+    logging.info('\tcount\tseparation\th5parm')
     for i in range(len(sorted(mtf_directions.keys()))):
-        print(i, sorted(mtf_directions.keys())[i], mtf_directions[sorted(mtf_directions.keys())[i]])
+        print('\t', i, '\t', sorted(mtf_directions.keys())[i], '\t', mtf_directions[sorted(mtf_directions.keys())[i]])
 
     # get the station for which the result is valid
     # TODO right now, just taking one station by way of example
