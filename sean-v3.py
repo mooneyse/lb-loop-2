@@ -210,24 +210,13 @@ def make_h5parm(mtf, ms, clobber = False):
     # then i am writing the new h5parm now so then the goal will be to get these in the right format
 
     # write these best phase solutions to the new h5parm
-    # TODO extend this to loop over all h5parms to be copied
+    working_data = np.genfromtxt(working_file, delimiter = '\t', dtype = str)
+    val = []
 
-    working_file_data = np.genfromtxt(working_file, delimiter = '\t', dtype = str)
-
-# alist = []
-# for i in range(0,3):
-#     arrayToAppend = totalArray = np.zeros((4, 200))
-#     alist.append(arrayToAppend)
-# arr = np.concatenate(alist, axis=1)   # to get (4,600)
-# hstack does the same thing
-# vstack is the same, but with axis=0   # (12,200)
-# stack creates new dimension,   # (3,4,200), (4,3,200) etc
-
-    # get the station and h5parm for which the result is valid
-    Pval = []
-    for each_line in range(len(working_file_data)):
-        my_station = working_file_data[each_line][0]
-        my_h5parm = working_file_data[each_line][len(working_file_data[each_line]) - 1]
+    for my_line in range(len(working_file_data)):
+        # get the station and h5parm for which the result is valid
+        my_station = working_data[my_line][0]
+        my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
         logging.info('copying {} data from {} to {}'.format(my_station, my_h5parm, new_h5parm))
 
         # use the h5parm and the station to get the relevant data
@@ -237,12 +226,13 @@ def make_h5parm(mtf, ms, clobber = False):
 
         for s in range(len(phase.ant[:])): # stations
             if phase.ant[s] == my_station.strip():
-                Pval.append(phase.val[:, :, s, :, :])
+                val.append(phase.val[:, :, s, :, :])
 
         lo.close()
 
-    Pvals = np.concatenate(Pval, axis = 2) # axis = 1, shape = (2, 23, 1, 1686); axis = 2, shape = (2, 1, 23, 1686)
-    Pvals = np.expand_dims(Pvals, axis = 3) # shape = (2, 1, 23, 1, 1686) as desired
+    vals = np.concatenate(val, axis = 2) # axis = 1, shape = (2, 23, 1, 1686); axis = 2, shape = (2, 1, 23, 1686)
+    vals = np.expand_dims(vals, axis = 3) # shape = (2, 1, 23, 1, 1686) as desired
+    # np.stack creates a new dimension (also have hstack and vstack)
 
     # for testing, making up data for each antenna
     lo = lh5.h5parm(my_h5parm, readonly = False)
@@ -253,8 +243,7 @@ def make_h5parm(mtf, ms, clobber = False):
     ant = phase.ant[:]
     time = phase.time[:]
     freq = phase.freq[:]
-    vals = phase.val[:, :, :, :, :]
-    vals = Pvals
+    # vals = phase.val[:, :, :, :, :]
     weights = phase.weight[:, :, :, :, :]
 
     c = solset.makeSoltab('phase',
