@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 '''
-A collection of functions for modifying HDF5 files.
+a collection of functions for modifying HDF5 files
 '''
 
 from __future__ import print_function
@@ -315,7 +315,7 @@ def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False):
     - mtf          (str): master text file
 
     returns:
-    - combined_h5parm (str): a new h5parm that is a combination of new_h5parm and loop3_h5par
+    - combined_h5parm (str): a new h5parm that is a combination of new_h5parm and loop3_h5parm
     '''
 
     logging.info('executing updatelist(new_h5parm = {}, loop3_h5parm = {}, mtf = {}, clobber = {})'.format(new_h5parm, loop3_h5parm, mtf, clobber))
