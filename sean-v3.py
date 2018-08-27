@@ -206,7 +206,7 @@ def make_h5parm(mtf, ms, clobber = False):
     logging.info('we have the following unique best h5parms from the master text file:')
     logging.info('\tcount\tseparation\th5parm')
     for i in range(len(sorted(mtf_directions.keys()))):
-        print('\t', i, '\t', sorted(mtf_directions.keys())[i], '\t', mtf_directions[sorted(mtf_directions.keys())[i]])
+        logging.info('\t', i, '\t', sorted(mtf_directions.keys())[i], '\t', mtf_directions[sorted(mtf_directions.keys())[i]])
 
     # get the station for which the result is valid
     # TODO right now, just taking one station by way of example
