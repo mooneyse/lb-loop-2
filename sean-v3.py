@@ -216,6 +216,8 @@ def make_h5parm(mtf, ms, clobber = False):
     working_file_data = np.genfromtxt(working_file, delimiter='\t', dtype = str)
     for bloop in range(len(working_file_data)):
         print('++++++++++++++++++++', working_file_data[bloop])
+        print(len(working_file_data[bloop]))
+        print('=======', working_file_data[bloop][0], working_file_data[bloop][len(working_file_data)])
 
     # get the station for which the result is valid
     # TODO right now, just taking one station by way of example
