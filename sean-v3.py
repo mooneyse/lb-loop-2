@@ -211,26 +211,39 @@ def make_h5parm(mtf, ms, clobber = False):
 
     # write these best phase solutions to the new h5parm
     # TODO extend this to loop over all h5parms to be copied
-    # my_h5parm = mtf_directions[sorted(mtf_directions.keys())[0]]
 
     working_file_data = np.genfromtxt(working_file, delimiter = '\t', dtype = str)
-    for bloop in range(len(working_file_data)):
-        my_station = working_file_data[bloop][0]
-        my_h5parm = working_file_data[bloop][len(working_file_data[bloop]) - 1]
 
-    # get the station for which the result is valid
-    # TODO right now, just taking one station by way of example
-    # my_station = mtf_stations[0]
-    logging.info('copying {} data from {} to {}'.format(my_station, my_h5parm, new_h5parm))
+# alist = []
+# for i in range(0,3):
+#     arrayToAppend = totalArray = np.zeros((4, 200))
+#     alist.append(arrayToAppend)
+# arr = np.concatenate(alist, axis=1)   # to get (4,600)
+# hstack does the same thing
+# vstack is the same, but with axis=0   # (12,200)
+# stack creates new dimension,   # (3,4,200), (4,3,200) etc
 
-    # TODO use the h5parm and the station to get the relevant data
-    lo = lh5.h5parm(my_h5parm, readonly = False)
-    phase = lo.getSolset('sol000').getSoltab('phase000')
-    logging.info('{} has {} dimensions, (pol, dir, ant, freq, time): {}'.format(my_h5parm, phase.val.ndim, phase.val.shape))
-    for s in range(len(phase.ant[:])): # stations
-        if phase.ant[s] == my_station:
-            # TODO need to loop over stations to just get the one I am interested in
-            val = phase.val[:, :, s, :, :]
+    # get the station and h5parm for which the result is valid
+    Pval = []
+    for each_line in range(len(working_file_data)):
+        my_station = working_file_data[each_line][0]
+        my_h5parm = working_file_data[each_line][len(working_file_data[each_line]) - 1]
+        logging.info('copying {} data from {} to {}'.format(my_station, my_h5parm, new_h5parm))
+
+        # use the h5parm and the station to get the relevant data
+        lo = lh5.h5parm(my_h5parm, readonly = False)
+        phase = lo.getSolset('sol000').getSoltab('phase000')
+        logging.info('{} has {} dimensions, (pol, dir, ant, freq, time): {}'.format(my_h5parm, phase.val.ndim, phase.val.shape))
+
+        for s in range(len(phase.ant[:])): # stations
+            if phase.ant[s] == my_station:
+                # TODO need to loop over stations to just get the one I am interested in
+                Pval.append(phase.val[:, :, s, :, :])
+
+        lo.close()
+
+    Pvals = np.concatenate(Pval, axis = 1)
+    print('+++++++++++++===', Pvals.shape)
 
     # for testing, making up data for each antenna
     lists = []
@@ -255,7 +268,7 @@ def make_h5parm(mtf, ms, clobber = False):
                           axesVals = [pol, dir, ant, freq, time],
                           vals = vals,
                           weights = weights) # creates phase000
-    lo.close()
+
     h.close()
 
     logging.info('finished making the h5parm {}'.format(new_h5parm))
