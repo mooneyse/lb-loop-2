@@ -369,7 +369,7 @@ def main():
     clobber = args.clobber
 
     logging.info('executing main()')
-    # loop3() # run loop 3 to generate h5parm
+    loop3() # run loop 3 to generate h5parm
     evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
     new_h5parm = make_h5parm(mtf, ms, clobber = clobber) # create a new h5parm of the best solutions
     applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
