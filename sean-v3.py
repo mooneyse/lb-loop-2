@@ -160,14 +160,13 @@ def make_h5parm(mtf, ms, clobber = False):
     mtf_directions = {}
 
     # calculate the distance betweeen the ms direction and the h5parm directions
-    # NB so there is one entry in mtf_directions for each unique line in the mtf - makes sense
+    # there is one entry in mtf_directions for each unique line in the mtf (makes sense)
     for h5parm, ra, dec in zip(h5parms, data['ra'], data['dec']):
         mtf_direction = SkyCoord(float(ra), float(dec), unit = 'deg')
         separation = ms_direction.separation(mtf_direction)
         mtf_directions[separation] = h5parm # distances from ms to each h5parm
 
-    # read in the stations from the master text file
-    # NB get the 23 stations - grand
+    # read in the stations from the master text file (gets the 23 stations)
     with open(mtf) as f: # get stations from the mtf
         mtf_stations = list(csv.reader(f))[0][3:] # skipping h5parm, ra, and dec
         mtf_stations = [x.lstrip() for x in mtf_stations] # remove leading space
@@ -199,21 +198,23 @@ def make_h5parm(mtf, ms, clobber = False):
     logging.info('making a new h5parm {}'.format(new_h5parm))
     does_it_exist(new_h5parm, clobber = clobber) # check if the h5parm exists
 
-    # write these best phase solutions to the new h5parm
     h = lh5.h5parm(new_h5parm, readonly = False)
     h.makeSolset(addTables = False) # creates sol000
     # FIXME using 'addTables = False' because the default 'addTables = True' gives
     #       'NotImplementedError: structured arrays with columns with type description ``<U16`` are not supported yet, sorry'
     solset = h.getSolset('sol000')
 
-    # get a h5parm with a result I am going to copy across
+    # TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+    # so i have this text file which has a list of the stations i need to copy from the best h5parms
+    # next step would be if i could even get these printed to the terminal, that'd be something
+    # then i am writing the new h5parm now so then the goal will be to get these in the right format
+
+    # write these best phase solutions to the new h5parm
     # TODO extend this to loop over all h5parms to be copied
-    # NB   here now addressing this
     my_h5parm = mtf_directions[sorted(mtf_directions.keys())[0]]
-    logging.info('we have the following unique best h5parms from the master text file:')
-    logging.info('\tcount\tseparation\th5parm')
-    for i in range(len(sorted(mtf_directions.keys()))):
-        logging.info('\t' + str(i) + '\t' + str(sorted(mtf_directions.keys())[i]) + '\t' + str(mtf_directions[sorted(mtf_directions.keys())[i]]))
+
+    working_file_data = np.genfromtxt(working_file, delimiter='\t', dtype = str)
+    print(working_file_data)
 
     # get the station for which the result is valid
     # TODO right now, just taking one station by way of example
