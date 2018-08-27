@@ -236,13 +236,12 @@ def make_h5parm(mtf, ms, clobber = False):
         logging.info('{} has {} dimensions, (pol, dir, ant, freq, time): {}'.format(my_h5parm, phase.val.ndim, phase.val.shape))
 
         for s in range(len(phase.ant[:])): # stations
-            if phase.ant[s] == my_station:
-                # TODO need to loop over stations to just get the one I am interested in
+            if phase.ant[s] == my_station.strip():
                 Pval.append(phase.val[:, :, s, :, :])
 
         lo.close()
 
-    Pvals = np.concatenate(Pval, axis = 2) # axis = 1, shape = (2, 22, 1, 1686)
+    Pvals = np.concatenate(Pval, axis = 2) # axis = 1, shape = (2, 22, 1, 1686); axis = 2, shape = (2, 1, 22, 1686)
     print('+-+-+-+-+-+-+-+-+-+-+-+-+', Pvals.shape)
     # Pvals = np.reshape(Pvals, (2, 1, 23, 1, 1686)) # Pvals.ndim = 5, Pvals.shape = (2, 1, 23, 1, 1686), len(Pvals) = 2
 
