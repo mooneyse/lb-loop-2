@@ -217,7 +217,7 @@ def make_h5parm(mtf, ms, clobber = False):
     for bloop in range(len(working_file_data)):
         print('++++++++++++++++++++', working_file_data[bloop])
         print(len(working_file_data[bloop]))
-        print('=======', working_file_data[bloop][0], working_file_data[bloop][len(working_file_data)])
+        print('=======', working_file_data[bloop][0], len(working_file_data[bloop]))
 
     # get the station for which the result is valid
     # TODO right now, just taking one station by way of example
