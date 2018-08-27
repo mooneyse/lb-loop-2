@@ -241,7 +241,8 @@ def make_h5parm(mtf, ms, clobber = False):
 
         lo.close()
 
-    Pvals = np.concatenate(Pval, axis = 2) # axis = 1, shape = (2, 22, 1, 1686); axis = 2, shape = (2, 1, 22, 1686)
+    Pvals = np.concatenate(Pval, axis = 2) # axis = 1, shape = (2, 23, 1, 1686); axis = 2, shape = (2, 1, 23, 1686)
+    Pvals = np.expand_dims(Pvals, axis = 1)
     print('+-+-+-+-+-+-+-+-+-+-+-+-+', Pvals.shape)
     # Pvals = np.reshape(Pvals, (2, 1, 23, 1, 1686)) # Pvals.ndim = 5, Pvals.shape = (2, 1, 23, 1, 1686), len(Pvals) = 2
 
