@@ -229,33 +229,31 @@ def make_h5parm(mtf, ms, clobber = False):
                 val.append(phase.val[:, :, s, :, :])
                 weight.append(phase.weight[:, :, s, :, :])
 
-        lo.close()
-
+        # NOTE pol, dir, ant, time, freq should be the same in all h5parms so using
+        # the last one in the loop for that information
         if my_line == len(working_data) - 1:
-            print('LLLLLLLLLLLLLLLLLLLAST TIEM>?????')
+            pol = phase.pol[:]
+            dir = phase.dir[:]
+            ant = phase.ant[:]
+            time = phase.time[:]
+            freq = phase.freq[:]
+
+        lo.close()
 
     vals = np.concatenate(val, axis = 2) # axis = 1, shape = (2, 23, 1, 1686); axis = 2, shape = (2, 1, 23, 1686)
     vals = np.expand_dims(vals, axis = 3) # shape = (2, 1, 23, 1, 1686) as desired
     weights = np.concatenate(weight, axis = 2) # np.stack creates a new dimension (also have hstack and vstack)
     weights = np.expand_dims(weights, axis = 3)
 
-    # NOTE pol, dir, ant, time, freq should be the same in all h5parms so using
-    # the last one in the loop for that information
-    lo = lh5.h5parm(my_h5parm, readonly = False)
-    phase = lo.getSolset('sol000').getSoltab('phase000')
-
-    pol = phase.pol[:]
-    dir = phase.dir[:]
-    ant = phase.ant[:]
-    time = phase.time[:]
-    freq = phase.freq[:]
+    # lo = lh5.h5parm(my_h5parm, readonly = False)
+    # phase = lo.getSolset('sol000').getSoltab('phase000')
 
     c = solset.makeSoltab('phase',
                           axesNames = ['pol', 'dir', 'ant', 'freq', 'time'],
                           axesVals = [pol, dir, ant, freq, time],
                           vals = vals,
                           weights = weights) # creates phase000
-    lo.close()
+    # lo.close()
     h.close()
 
     logging.info('finished making the h5parm {}'.format(new_h5parm))
