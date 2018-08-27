@@ -202,7 +202,6 @@ def make_h5parm(mtf, ms, clobber = False):
     # get a h5parm with a result I am going to copy across
     # TODO extend this to loop over all h5parms to be copied
     # NB here now addressing this
-    print('+------------+\n|', sorted(mtf_directions.keys()), '\n+------------+')
     my_h5parm = mtf_directions[sorted(mtf_directions.keys())[0]]
     for i in range(len(sorted(mtf_directions.keys()))):
         print(mtf_directions[sorted(mtf_directions.keys())[i]])
@@ -227,9 +226,8 @@ def make_h5parm(mtf, ms, clobber = False):
         lists.append(val)
 
     lists = np.concatenate(lists, axis = 0)
-    lists = np.reshape(lists, phase.val.shape)
+    lists = np.reshape(lists, phase.val.shape) # lists.ndim = 5, lists.shape = (2, 1, 23, 1, 1686), len(lists) = 2
 
-    print('+------------+\n| fdsa query |', lists.ndim, lists.shape, len(lists), '\n+------------+')
     # TODO copy this data into the new h5parm
     # TODO make sure this new h5parm has the same format as the standard lofar h5parms
     pol = phase.pol[:]
