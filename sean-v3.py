@@ -177,15 +177,24 @@ def make_h5parm(mtf, ms, clobber = False):
     logging.info('\tstation \tseparation\tboolean\trow\t5parm')
     successful_stations = []
 
+     # = 'make_h5parm.txt'
+    working_file = os.path.splitext(os.path.normpath(ms))[0]
+    print('+++++++++++++++++++++++++', working_file)
+    #     new_h5parm = '{}_{}_{}.h5'.format(ms, ms_direction.ra.deg, ms_direction.dec.deg)
+    # logging.info('creating working file {}'.format(working_file))
+    # f = open(working_file, 'w')
     for mtf_station in mtf_stations: # for each station NB all 23 stations - fine
         for key in sorted(mtf_directions.keys()): # starting with shortest separations
             h5parm = mtf_directions[key]
             row = list(h5parms).index(h5parm) # row in mtf
             value = data[mtf_station][row] # boolean value for h5parm and station
             if value == 1 and mtf_station not in successful_stations:
-                logging.info('\t{}\t{}\t{}\t{}\t{}'.format(mtf_station.ljust(8), round(key.deg, 6), int(value), row, h5parm))
+                working_information = '\t{}\t{}\t{}\t{}\t{}'.format(mtf_station.ljust(8), round(key.deg, 6), int(value), row, h5parm)
+                logging.info(working_information)
+                # f.write(working_information)
                 successful_stations.append(mtf_station)
 
+    # f.close()
     # create a new h5parm
     ms = os.path.splitext(os.path.normpath(ms))[0]
     new_h5parm = '{}_{}_{}.h5'.format(ms, ms_direction.ra.deg, ms_direction.dec.deg)
@@ -249,6 +258,7 @@ def make_h5parm(mtf, ms, clobber = False):
     h.close()
 
     logging.info('finished making the h5parm {}'.format(new_h5parm))
+    # os.remove(working_file)
     logging.info('make_h5parm(mtf = {}, ms = {}, clobber = {}) completed'.format(mtf, ms, clobber))
     return new_h5parm
 
