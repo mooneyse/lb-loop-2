@@ -247,6 +247,8 @@ def make_h5parm(mtf, ms, clobber = False):
 
     # for testing, making up data for each antenna
     lists = []
+    lo = lh5.h5parm(my_h5parm, readonly = False)
+    phase = lo.getSolset('sol000').getSoltab('phase000')
     for i in range(len(phase.ant[:])):
         lists.append(val)
 
