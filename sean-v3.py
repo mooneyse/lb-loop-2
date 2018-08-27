@@ -192,6 +192,7 @@ def make_h5parm(mtf, ms, clobber = False):
                 successful_stations.append(mtf_station)
 
     f.close()
+    
     # create a new h5parm
     ms = os.path.splitext(os.path.normpath(ms))[0]
     new_h5parm = '{}_{}_{}.h5'.format(ms, ms_direction.ra.deg, ms_direction.dec.deg)
@@ -255,7 +256,8 @@ def make_h5parm(mtf, ms, clobber = False):
     h.close()
 
     logging.info('finished making the h5parm {}'.format(new_h5parm))
-    # os.remove(working_file)
+    logging.info('removing {}'.format(working_file))
+    os.remove(working_file)
     logging.info('make_h5parm(mtf = {}, ms = {}, clobber = {}) completed'.format(mtf, ms, clobber))
     return new_h5parm
 
