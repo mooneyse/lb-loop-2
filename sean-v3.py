@@ -243,20 +243,13 @@ def make_h5parm(mtf, ms, clobber = False):
         lo.close()
 
     Pvals = np.concatenate(Pval, axis = 1)
-    print('+++++++++++++===', Pvals.shape)
+    print('+-+-+-+-+-+-+-+-+-+-+-+-+', Pvals.shape)
+    Pvals = np.reshape(Pvals, (2, 1, 23, 1, 1686)) # Pvals.ndim = 5, Pvals.shape = (2, 1, 23, 1, 1686), len(Pvals) = 2
 
     # for testing, making up data for each antenna
-    lists = []
     lo = lh5.h5parm(my_h5parm, readonly = False)
     phase = lo.getSolset('sol000').getSoltab('phase000')
-    # for i in range(len(phase.ant[:])):
-    #     lists.append(val)
-    #
-    # lists = np.concatenate(lists, axis = 0)
-    # lists = np.reshape(lists, phase.val.shape) # lists.ndim = 5, lists.shape = (2, 1, 23, 1, 1686), len(lists) = 2
 
-    # TODO copy this data into the new h5parm
-    # TODO make sure this new h5parm has the same format as the standard lofar h5parms
     pol = phase.pol[:]
     dir = phase.dir[:]
     ant = phase.ant[:]
@@ -270,7 +263,7 @@ def make_h5parm(mtf, ms, clobber = False):
                           axesVals = [pol, dir, ant, freq, time],
                           vals = vals,
                           weights = weights) # creates phase000
-
+    lo.close()
     h.close()
 
     logging.info('finished making the h5parm {}'.format(new_h5parm))
