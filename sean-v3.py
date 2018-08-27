@@ -186,8 +186,8 @@ def make_h5parm(mtf, ms, clobber = False):
             row = list(h5parms).index(h5parm) # row in mtf
             value = data[mtf_station][row] # boolean value for h5parm and station
             if value == 1 and mtf_station not in successful_stations:
-                working_information = '\t{}\t{}\t{}\t{}\t{}'.format(mtf_station.ljust(8), round(key.deg, 6), int(value), row, h5parm)
-                logging.info(working_information)
+                working_information = '{}\t{}\t{}\t{}\t{}'.format(mtf_station.ljust(8), round(key.deg, 6), int(value), row, h5parm)
+                logging.info('\t{}'.format(working_information))
                 f.write('{}\n'.format(working_information))
                 successful_stations.append(mtf_station)
 
