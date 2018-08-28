@@ -41,7 +41,7 @@ def parallel_function(f, n_cpu): # credit: scott sievert
         pool.close() # not optimal but easy
         pool.join()
         return cleaned
-return partial(easy_parallize, f)
+    return partial(easy_parallize, f)
 
 def source(x, n_cpu):
     source_thread.parallel = parallel_function(source_thread, n_cpu)
