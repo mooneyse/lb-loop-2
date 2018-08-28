@@ -195,13 +195,16 @@ def make_h5parm(mtf, ms, clobber = False):
     # create a new h5parm
     ms = os.path.splitext(os.path.normpath(ms))[0]
     new_h5parm = '{}_{}_{}.h5'.format(ms, ms_direction.ra.deg, ms_direction.dec.deg)
-    logging.info('making a new h5parm {}'.format(new_h5parm))
+    logging.info('creating {}'.format(new_h5parm))
     does_it_exist(new_h5parm, clobber = clobber) # check if the h5parm exists
 
     h = lh5.h5parm(new_h5parm, readonly = False)
-    h.makeSolset()#addTables = False) # creates sol000
-    # FIXME using 'addTables = False' because the default 'addTables = True' gives
-    #       'NotImplementedError: structured arrays with columns with type description ``<U16`` are not supported yet, sorry'
+    try:
+        h.makeSolset() # creates sol000
+    except:
+        h.makeSolset(addTables = False)
+        # on my machine the default 'addTables = True' gives
+        # 'NotImplementedError: structured arrays with columns with type description ``<U16`` are not supported yet, sorry'
     solset = h.getSolset('sol000')
 
     # TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
@@ -338,10 +341,14 @@ def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False):
 
     # write these best phase solutions to the new h5parm
     h = lh5.h5parm(combined_h5parm, readonly = False)
-    h.makeSolset(addTables = False) # creates sol000
-    # FIXME using 'addTables = False' because the default 'addTables = True' gives
-    #       'NotImplementedError: structured arrays with columns with type description ``<U16`` are not supported yet, sorry'
-    #       $ H5parm_merge.py --help
+    try:
+        h.makeSolset() # creates sol000
+    except:
+        h.makeSolset(addTables = False)
+        # on my machine the default 'addTables = True' gives
+        # 'NotImplementedError: structured arrays with columns with type description ``<U16`` are not supported yet, sorry'
+
+    # $ H5parm_merge.py --help
     solset = h.getSolset('sol000')
     h.close()
 
