@@ -238,12 +238,10 @@ def make_h5parm(mtf, ms, clobber = False):
     # gather the results to be copied to the new h5parm
     working_data = np.genfromtxt(working_file, delimiter = '\t', dtype = str)
     val, weight = [], []
-
+    print(working_data) # NB NB NB added just now
     for my_line in range(len(working_data)): # one line per station
         my_station = working_data[my_line][0]
-        print('OLD OLD OLD OLD OLD', my_station)
-        my_station = me_stations[my_line]
-        print('NEW NEW NEW NEW NEW', my_station)        
+        my_station = me_stations[my_line] # NB NB NB added just now
         my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
         logging.info('copying {} data from {} to {}'.format(my_station, my_h5parm, new_h5parm))
 
