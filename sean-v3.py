@@ -183,14 +183,14 @@ def make_h5parm(mtf, ms, clobber = False):
     mtf_directions = {}
 
     # calculate the distance betweeen the ms direction and the h5parm directions
-    # there is one entry in mtf_directions for each unique line in the mtf (makes sense)
+    # there is one entry in mtf_directions for each unique line in the mtf
     for h5parm, ra, dec in zip(h5parms, data['ra'], data['dec']):
         mtf_direction = SkyCoord(float(ra), float(dec), unit = 'deg')
         separation = ms_direction.separation(mtf_direction)
         mtf_directions[separation] = h5parm # distances from ms to each h5parm
 
-    # read in the stations from the master text file (gets the 23 stations)
-    with open(mtf) as f: # get stations from the mtf
+    # read in the stations from the master text file
+    with open(mtf) as f:
         mtf_stations = list(csv.reader(f))[0][3:] # skipping h5parm, ra, and dec
         mtf_stations = [x.lstrip() for x in mtf_stations] # remove leading space
 
@@ -203,7 +203,7 @@ def make_h5parm(mtf, ms, clobber = False):
     logging.info('\tstation \tseparation\tboolean\trow\t5parm')
     successful_stations = []
 
-    for mtf_station in mtf_stations: # for each station NB all 23 stations - fine
+    for mtf_station in mtf_stations: # for each station
         for key in sorted(mtf_directions.keys()): # starting with shortest separations
             h5parm = mtf_directions[key]
             row = list(h5parms).index(h5parm) # row in mtf
@@ -226,7 +226,7 @@ def make_h5parm(mtf, ms, clobber = False):
         h.makeSolset() # creates sol000
     except:
         h.makeSolset(addTables = False)
-        # on my machine the default 'addTables = True' gives
+        # we want the default 'addTables = True' but on my machine that gives
         # 'NotImplementedError: structured arrays with columns with type description ``<U16`` are not supported yet, sorry'
     solset = h.getSolset('sol000')
 
@@ -247,8 +247,13 @@ def make_h5parm(mtf, ms, clobber = False):
         for s in range(len(phase.ant[:])): # stations
             if phase.ant[s] == my_station.strip():
                 # copy values and weights
-                val.append(phase.val[:, :, s, :, :])
-                weight.append(phase.weight[:, :, s, :, :])
+                v = phase.val[:, :, s, :, :]
+                w = phase.weight[:, :, s, :, :]
+                v_expanded = np.expand_dims(v, axis = 2)
+                w_expanded = np.expand_dims(w, axis = 2)
+                print(v_expanded.shape,'=========================', w_expanded.shape)
+                val.append(v_expanded)
+                weight.append(w_expanded)
 
         # WARNING pol, dir, ant, time, freq should be the same in all h5parms so
         # using the last one in the loop for that information (could be a source of error in future)
@@ -261,11 +266,11 @@ def make_h5parm(mtf, ms, clobber = False):
 
         lo.close()
 
+    # vals = np.expand_dims(vals, axis = 2) # shape = (2, 1, 23, 1, 1686) as desired
     vals = np.concatenate(val, axis = 2) # shape = (2, 1, 23, 1686)
-    vals = np.expand_dims(vals, axis = 3) # shape = (2, 1, 23, 1, 1686) as desired
+    # weights = np.expand_dims(weights, axis = 3)
     weights = np.concatenate(weight, axis = 2) # np.stack creates a new dimension (also have hstack and vstack)
-    weights = np.expand_dims(weights, axis = 3)
-
+    print(vals.shape,'+++++++++++++++++++++++++++++++++++++++', weights.shape)
     # write these best phase solutions to the new h5parm
     c = solset.makeSoltab('phase',
                           axesNames = ['pol', 'dir', 'ant', 'freq', 'time'],
@@ -316,7 +321,7 @@ def applyh5parm(new_h5parm, ms, clobber = False, column_out = 'DATA'):
     f.close()
 
     # apply the h5parm
-    logging.info('apply the {} to {} with NDPPP'.format(new_h5parm, ms))
+    logging.info('apply {} to {} with NDPPP'.format(new_h5parm, ms))
     ndppp_output = subprocess.check_output(['NDPPP', '--help']) # NOTE set to parset
 
     # format and log the output
