@@ -251,7 +251,6 @@ def make_h5parm(mtf, ms, clobber = False):
                 w = phase.weight[:, :, s, :, :]
                 v_expanded = np.expand_dims(v, axis = 2)
                 w_expanded = np.expand_dims(w, axis = 2)
-                print(v_expanded.shape,'=========================', w_expanded.shape)
                 val.append(v_expanded)
                 weight.append(w_expanded)
 
@@ -266,11 +265,9 @@ def make_h5parm(mtf, ms, clobber = False):
 
         lo.close()
 
-    # vals = np.expand_dims(vals, axis = 2) # shape = (2, 1, 23, 1, 1686) as desired
-    vals = np.concatenate(val, axis = 2) # shape = (2, 1, 23, 1686)
-    # weights = np.expand_dims(weights, axis = 3)
-    weights = np.concatenate(weight, axis = 2) # np.stack creates a new dimension (also have hstack and vstack)
-    print(vals.shape,'+++++++++++++++++++++++++++++++++++++++', weights.shape)
+    vals = np.concatenate(val, axis = 2)
+    weights = np.concatenate(weight, axis = 2)
+
     # write these best phase solutions to the new h5parm
     c = solset.makeSoltab('phase',
                           axesNames = ['pol', 'dir', 'ant', 'freq', 'time'],
