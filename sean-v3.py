@@ -199,7 +199,7 @@ def make_h5parm(mtf, ms, clobber = False):
     does_it_exist(new_h5parm, clobber = clobber) # check if the h5parm exists
 
     h = lh5.h5parm(new_h5parm, readonly = False)
-    h.makeSolset(addTables = False) # creates sol000
+    h.makeSolset()#addTables = False) # creates sol000
     # FIXME using 'addTables = False' because the default 'addTables = True' gives
     #       'NotImplementedError: structured arrays with columns with type description ``<U16`` are not supported yet, sorry'
     solset = h.getSolset('sol000')
@@ -209,28 +209,28 @@ def make_h5parm(mtf, ms, clobber = False):
     # next step would be if i could even get these printed to the terminal, that'd be something
     # then i am writing the new h5parm now so then the goal will be to get these in the right format
 
-    # write these best phase solutions to the new h5parm
+    # gather the results to be copied to the new h5parm
     working_data = np.genfromtxt(working_file, delimiter = '\t', dtype = str)
     val, weight = [], []
 
-    for my_line in range(len(working_data)):
-        # get the station and h5parm for which the result is valid
+    for my_line in range(len(working_data)): # one line per station
         my_station = working_data[my_line][0]
         my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
         logging.info('copying {} data from {} to {}'.format(my_station, my_h5parm, new_h5parm))
 
-        # use the h5parm and the station to get the relevant data
+        # use the station to get the relevant data to be copied from the h5parm
         lo = lh5.h5parm(my_h5parm, readonly = False)
         phase = lo.getSolset('sol000').getSoltab('phase000')
         logging.info('{} has {} dimensions, (pol, dir, ant, freq, time): {}'.format(my_h5parm, phase.val.ndim, phase.val.shape))
 
         for s in range(len(phase.ant[:])): # stations
             if phase.ant[s] == my_station.strip():
+                # copy values and weights
                 val.append(phase.val[:, :, s, :, :])
                 weight.append(phase.weight[:, :, s, :, :])
 
         # NOTE pol, dir, ant, time, freq should be the same in all h5parms so using
-        # the last one in the loop for that information
+        # the last one in the loop for that information (this could be a source of error in future)
         if my_line == len(working_data) - 1:
             pol = phase.pol[:]
             dir = phase.dir[:]
@@ -245,17 +245,15 @@ def make_h5parm(mtf, ms, clobber = False):
     weights = np.concatenate(weight, axis = 2) # np.stack creates a new dimension (also have hstack and vstack)
     weights = np.expand_dims(weights, axis = 3)
 
-    # lo = lh5.h5parm(my_h5parm, readonly = False)
-    # phase = lo.getSolset('sol000').getSoltab('phase000')
-
+    # write these best phase solutions to the new h5parm
     c = solset.makeSoltab('phase',
                           axesNames = ['pol', 'dir', 'ant', 'freq', 'time'],
                           axesVals = [pol, dir, ant, freq, time],
                           vals = vals,
                           weights = weights) # creates phase000
-    # lo.close()
     h.close()
 
+    # the end, tidying up
     logging.info('finished making the h5parm {}'.format(new_h5parm))
     logging.info('removing {}'.format(working_file))
     os.remove(working_file)
