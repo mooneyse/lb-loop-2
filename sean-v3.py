@@ -244,11 +244,8 @@ def make_h5parm(mtf, ms, clobber = False):
         phase = lo.getSolset('sol000').getSoltab('phase000')
         logging.info('{} has {} dimensions, (pol, dir, ant, freq, time): {}'.format(my_h5parm, phase.val.ndim, phase.val.shape))
 
-        # my_station = []
-
         for s in range(len(phase.ant[:])): # stations
-            if my_station.strip() == phase.ant[s]:
-            # if phase.ant[s] == my_station.strip():
+            if phase.ant[s] == my_station.strip():
                 # copy values and weights
                 v = phase.val[:, :, s, :, :]
                 w = phase.weight[:, :, s, :, :]
@@ -266,11 +263,11 @@ def make_h5parm(mtf, ms, clobber = False):
             time = phase.time[:]
             freq = phase.freq[:]
 
-        # lo.close()
-
-    vals = np.concatenate(val, axis = 2)
+        lo.close()
+    print('!!!!!!!!!!!!!!!!!!!!!!!!!!!',ant)
+    vals = np.concatenate(val, axis = 2) # vals == phase.val?
     weights = np.concatenate(weight, axis = 2)
-    print('=============================\n', vals == phase.val, '\n=============================')
+
     # write these best phase solutions to the new h5parm
     c = solset.makeSoltab('phase',
                           axesNames = ['pol', 'dir', 'ant', 'freq', 'time'],
