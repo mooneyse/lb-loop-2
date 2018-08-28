@@ -8,6 +8,7 @@ from __future__ import print_function
 from functools import partial
 from multiprocessing import Pool
 from pathlib import Path
+from time import sleep
 from astropy.coordinates import SkyCoord
 import pyrap.tables as pt
 import losoto.h5parm as lh5
@@ -213,7 +214,7 @@ def make_h5parm(mtf, ms, clobber = False):
                 f.write('{}\n'.format(working_information))
                 successful_stations.append(mtf_station)
     f.close()
-    time.sleep(5)
+    sleep(5)
 
     # create a new h5parm
     ms = os.path.splitext(os.path.normpath(ms))[0]
