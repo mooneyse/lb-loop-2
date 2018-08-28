@@ -8,7 +8,6 @@ from __future__ import print_function
 from functools import partial
 from multiprocessing import Pool
 from pathlib import Path
-from time import sleep
 from astropy.coordinates import SkyCoord
 import pyrap.tables as pt
 import losoto.h5parm as lh5
@@ -196,13 +195,14 @@ def make_h5parm(mtf, ms, clobber = False):
         mtf_stations = [x.lstrip() for x in mtf_stations] # remove leading space
 
     # find the closest h5parm which has an acceptable solution for each station
+    working_file = '{}/make_h5parm.txt'.format(os.path.dirname(os.path.dirname(ms)))
+    logging.info('creating working file {}'.format(working_file))
+    f = open(working_file, 'w')
+
     logging.info('for this direction in the ms, make a new h5parm consisting of the following:')
     logging.info('\tstation \tseparation\tboolean\trow\t5parm')
     successful_stations = []
 
-    working_file = '{}/make_h5parm.txt'.format(os.path.dirname(os.path.dirname(ms)))
-    logging.info('creating working file {}'.format(working_file))
-    f = open(working_file, 'w')
     for mtf_station in mtf_stations: # for each station NB all 23 stations - fine
         for key in sorted(mtf_directions.keys()): # starting with shortest separations
             h5parm = mtf_directions[key]
@@ -214,7 +214,6 @@ def make_h5parm(mtf, ms, clobber = False):
                 f.write('{}\n'.format(working_information))
                 successful_stations.append(mtf_station)
     f.close()
-    sleep(5)
 
     # create a new h5parm
     ms = os.path.splitext(os.path.normpath(ms))[0]
@@ -282,7 +281,7 @@ def make_h5parm(mtf, ms, clobber = False):
     logging.info('make_h5parm(mtf = {}, ms = {}, clobber = {}) completed'.format(mtf, ms, clobber))
     return new_h5parm
 
-def applyh5parm(new_h5parm, ms, clobber = False):
+def applyh5parm(new_h5parm, ms, clobber = False, column_out = 'DATA'):
     '''
     description:
     - create ndppp parset
@@ -300,7 +299,6 @@ def applyh5parm(new_h5parm, ms, clobber = False):
     # parset is saved in same directory as the h5parm
     parset = os.path.dirname(new_h5parm) + '/applyh5parm.parset'
     column_in = 'DATA'
-    column_out = 'CORRECTED_DATA'
 
     does_it_exist(parset, clobber = clobber) # if parset already exists, warn user
 
