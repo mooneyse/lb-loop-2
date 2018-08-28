@@ -237,10 +237,10 @@ def make_h5parm(mtf, ms, clobber = False):
 
     # gather the results to be copied to the new h5parm
     working_data = np.genfromtxt(working_file, delimiter = '\t', dtype = str)
-
+    print(type(working_data), type(working_data[0]))
     # working_data = sorted(working_data)
     val, weight = [], []
-    print(np.sort(working_data)) # NB NB NB added just now
+
     for my_line in range(len(working_data)): # one line per station
         my_station = working_data[my_line][0]
         print('OLLLLD', my_station)
