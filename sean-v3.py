@@ -5,12 +5,14 @@ a collection of functions for modifying HDF5 files
 '''
 
 from __future__ import print_function
-import argparse, csv, datetime, h5py, logging, os, subprocess, sys, threading
-import numpy as np
+from functools import partial
+from multiprocessing import Pool
+from pathlib import Path
+from astropy.coordinates import SkyCoord
 import pyrap.tables as pt
 import losoto.h5parm as lh5
-from astropy.coordinates import SkyCoord
-from pathlib import Path
+import numpy as np
+import argparse, csv, datetime, h5py, logging, multiprocessing, os, subprocess, sys, threading
 
 def does_it_exist(the_file, clobber = False, append = False):
     # convenience function to check if a file already exists
@@ -27,6 +29,23 @@ def does_it_exist(the_file, clobber = False, append = False):
     else:
         logging.info('{} does not exist'.format(the_file))
         return False
+
+def parallel_function(f, n_cpu): # credit: scott sievert
+    def easy_parallize(f, sequence):
+        n_cores = int(n_cpu)
+        print('Using {} cores'.format(n_cores))
+        pool = Pool(processes = n_cores) # depends on available cores
+        result = pool.map(f, sequence) # for i in sequence: result[i] = f(i)
+        cleaned = [x for x in result if not x is None] # getting results
+        cleaned = np.asarray(cleaned)
+        pool.close() # not optimal but easy
+        pool.join()
+        return cleaned
+return partial(easy_parallize, f)
+
+def source(x, n_cpu):
+    source_thread.parallel = parallel_function(source_thread, n_cpu)
+    parallel_result = source_thread.parallel(x)
 
 def loop3():
     '''
