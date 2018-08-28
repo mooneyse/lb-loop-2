@@ -212,8 +212,8 @@ def make_h5parm(mtf, ms, clobber = False):
                 logging.info('\t{}'.format(working_information))
                 f.write('{}\n'.format(working_information))
                 successful_stations.append(mtf_station)
-
     f.close()
+    time.sleep(5)
 
     # create a new h5parm
     ms = os.path.splitext(os.path.normpath(ms))[0]
