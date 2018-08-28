@@ -237,6 +237,8 @@ def make_h5parm(mtf, ms, clobber = False):
 
     # gather the results to be copied to the new h5parm
     working_data = np.genfromtxt(working_file, delimiter = '\t', dtype = str)
+    print(working_data)
+    print(sorted(working_data.tolist())
     print(type(working_data), type(working_data[0]))
     # working_data = sorted(working_data)
     val, weight = [], []
