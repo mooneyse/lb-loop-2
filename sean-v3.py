@@ -35,9 +35,9 @@ def does_it_exist(the_file, clobber = False, append = False):
 
 def parallel_function(f, n_cpu): # credit: scott sievert
     def easy_parallize(f, sequence):
-        n_cores = int(n_cpu)
-        print('Using {} cores'.format(n_cores))
-        pool = Pool(processes = n_cores) # depends on available cores
+        n_cpu = int(n_cpu)
+        print('Using {} cores'.format(n_cpu))
+        pool = Pool(processes = n_cpu) # depends on available cores
         result = pool.map(f, sequence) # for i in sequence: result[i] = f(i)
         cleaned = [x for x in result if not x is None] # getting results
         cleaned = np.asarray(cleaned)
@@ -230,11 +230,6 @@ def make_h5parm(mtf, ms, clobber = False):
         # 'NotImplementedError: structured arrays with columns with type description ``<U16`` are not supported yet, sorry'
     solset = h.getSolset('sol000')
 
-    # TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-    # so i have this text file which has a list of the stations i need to copy from the best h5parms
-    # next step would be if i could even get these printed to the terminal, that'd be something
-    # then i am writing the new h5parm now so then the goal will be to get these in the right format
-
     # gather the results to be copied to the new h5parm
     working_data = np.genfromtxt(working_file, delimiter = '\t', dtype = str)
     val, weight = [], []
@@ -255,8 +250,8 @@ def make_h5parm(mtf, ms, clobber = False):
                 val.append(phase.val[:, :, s, :, :])
                 weight.append(phase.weight[:, :, s, :, :])
 
-        # NOTE pol, dir, ant, time, freq should be the same in all h5parms so using
-        # the last one in the loop for that information (this could be a source of error in future)
+        # WARNING pol, dir, ant, time, freq should be the same in all h5parms so
+        # using the last one in the loop for that information (could be a source of error in future)
         if my_line == len(working_data) - 1:
             pol = phase.pol[:]
             dir = phase.dir[:]
