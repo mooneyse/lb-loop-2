@@ -30,6 +30,9 @@ def does_it_exist(the_file, clobber = False, append = False):
         logging.info('{} does not exist'.format(the_file))
         return False
 
+# parallel_function and source functions are from
+# https://github.com/lmorabit/long_baseline_pipeline/blob/new/bin/evaluate_potential_delay_calibrators.py
+
 def parallel_function(f, n_cpu): # credit: scott sievert
     def easy_parallize(f, sequence):
         n_cores = int(n_cpu)
@@ -44,7 +47,8 @@ def parallel_function(f, n_cpu): # credit: scott sievert
     return partial(easy_parallize, f)
 
 def source(x, n_cpu):
-    source_thread.parallel = parallel_function(source_thread, n_cpu)
+    f = combine_subbands(inarray, i.split(',')[-1] + '.ms', i, 8, 8)
+    source_thread.parallel = parallel_function(f, n_cpu)
     parallel_result = source_thread.parallel(x)
 
 def loop3():
