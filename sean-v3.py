@@ -230,12 +230,20 @@ def make_h5parm(mtf, ms, clobber = False):
         # 'NotImplementedError: structured arrays with columns with type description ``<U16`` are not supported yet, sorry'
     solset = h.getSolset('sol000')
 
+    me_stations = ['DE601HBA', 'DE602HBA', 'DE603HBA', 'DE604HBA', 'DE605HBA', 'FR606HBA',
+                   'RS106HBA', 'RS205HBA', 'RS208HBA', 'RS210HBA', 'RS305HBA', 'RS306HBA',
+                   'RS307HBA', 'RS310HBA', 'RS406HBA', 'RS407HBA', 'RS409HBA', 'RS503HBA',
+                   'RS508HBA', 'RS509HBA', 'SE607HBA', 'ST001', 'UK608HBA'] # NB NB NB added just now
+
     # gather the results to be copied to the new h5parm
     working_data = np.genfromtxt(working_file, delimiter = '\t', dtype = str)
     val, weight = [], []
 
     for my_line in range(len(working_data)): # one line per station
         my_station = working_data[my_line][0]
+        print('OLD OLD OLD OLD OLD', my_station)
+        my_station = me_stations[my_line]
+        print('NEW NEW NEW NEW NEW', my_station)        
         my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
         logging.info('copying {} data from {} to {}'.format(my_station, my_h5parm, new_h5parm))
 
@@ -264,8 +272,8 @@ def make_h5parm(mtf, ms, clobber = False):
             freq = phase.freq[:]
 
         lo.close()
-    print('!!!!!!!!!!!!!!!!!!!!!!!!!!!',ant)
-    vals = np.concatenate(val, axis = 2) # vals == phase.val?
+
+    vals = np.concatenate(val, axis = 2) # why does vals != phase.val?
     weights = np.concatenate(weight, axis = 2)
 
     # write these best phase solutions to the new h5parm
