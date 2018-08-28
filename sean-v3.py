@@ -224,6 +224,7 @@ def make_h5parm(mtf, ms, clobber = False):
     h = lh5.h5parm(new_h5parm, readonly = False)
     try:
         h.makeSolset() # creates sol000
+        # TODO antenna and source tables are empty and so need to be populated
     except:
         h.makeSolset(addTables = False)
         # we want the default 'addTables = True' but on my machine that gives
