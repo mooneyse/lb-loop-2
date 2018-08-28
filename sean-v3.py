@@ -267,7 +267,7 @@ def make_h5parm(mtf, ms, clobber = False):
 
     vals = np.concatenate(val, axis = 2)
     weights = np.concatenate(weight, axis = 2)
-    print('=============================', vals == phase.val)
+    print('=============================\n', vals == phase.val, '\n=============================')
     # write these best phase solutions to the new h5parm
     c = solset.makeSoltab('phase',
                           axesNames = ['pol', 'dir', 'ant', 'freq', 'time'],
