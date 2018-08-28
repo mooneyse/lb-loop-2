@@ -243,7 +243,7 @@ def make_h5parm(mtf, ms, clobber = False):
 
         lo.close()
 
-    vals = np.concatenate(val, axis = 2) # axis = 1, shape = (2, 23, 1, 1686); axis = 2, shape = (2, 1, 23, 1686)
+    vals = np.concatenate(val, axis = 2) # shape = (2, 1, 23, 1686)
     vals = np.expand_dims(vals, axis = 3) # shape = (2, 1, 23, 1, 1686) as desired
     weights = np.concatenate(weight, axis = 2) # np.stack creates a new dimension (also have hstack and vstack)
     weights = np.expand_dims(weights, axis = 3)
