@@ -240,7 +240,7 @@ def make_h5parm(mtf, ms, clobber = False):
 
     # working_data = sorted(working_data)
     val, weight = [], []
-    print(working_data) # NB NB NB added just now
+    print(np.sort(working_data)) # NB NB NB added just now
     for my_line in range(len(working_data)): # one line per station
         my_station = working_data[my_line][0]
         print('OLLLLD', my_station)
