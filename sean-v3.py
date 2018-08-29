@@ -190,7 +190,7 @@ def make_h5parm(mtf, ms, clobber = False, ms_direction = []):
         field = pt.table(t.getkeyword('FIELD'), readonly = True, ack = False)
         ms_direction = field.getcell('PHASE_DIR', 0)[0] # radians
         ms_direction = SkyCoord(ms_direction[0], ms_direction[1], unit = 'rad')
-        logging.info('no source positions given, using phase center ({}, {}) from {}'.format(ms_direction[0], ms_direction[1], ms))
+        logging.info('no source positions given, using phase center ({}, {}) from {}'.format(ms_direction.ra.deg, ms_direction.dec.deg, ms))
         field.close()
         t.close()
 
