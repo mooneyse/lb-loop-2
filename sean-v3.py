@@ -442,14 +442,14 @@ def main():
     clobber = args.clobber
     directions = args.directions
 
-    if directions: # if a direction is given
-        if len(directions) % 2 == 0: # should be even
-            ra = directions[::2] # every second item, starting at the first element
-            dec = directions[1::2] # every second item, starting at the second element
-            directions = [ra, dec]
-        else:
-            logging.error('uneven number of ra, dec given for source positions')
-            sys.exit()
+    # if directions: # if a direction is given
+    #     if len(directions) % 2 == 0: # should be even
+    #         ra = directions[::2] # every second item, starting at the first element
+    #         dec = directions[1::2] # every second item, starting at the second element
+    #         directions = [ra, dec]
+    #     else:
+    #         logging.error('uneven number of ra, dec given for source positions')
+    #         sys.exit()
 
     logging.info('executing main()')
     loop3() # run loop 3 to generate h5parm
