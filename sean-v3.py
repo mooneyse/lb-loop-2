@@ -140,7 +140,26 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     lo.close()
     logging.info('evaluate_solutions(h5parm = {}, mtf = {}, threshold = {}) completed'.format(h5parm, mtf, threshold))
 
-def make_h5parm(args): # mtf, ms, clobber = False, directions = []):
+def make_h5parm_multiprocessing(args):
+    # unpack arguments
+    if len(args) == 4:
+        mtf, ms, clobber, directions = args
+
+    elif len(args) == 3 and type(args[2]) == list:
+        mtf, ms, directions = args
+        clobber = False
+
+    elif len(args) == 3 and type(args[2]) == bool:
+        mtf, ms, clobber = args
+        directions = []
+
+    elif len(args) == 2:
+        mtf, ms = args
+        clobber, directions = False, []
+
+    return make_h5parm(mtf, ms, clobber, directions)
+
+def make_h5parm(mtf, ms, clobber = False, directions = []):
     '''
     description:
     - get the direction from the measurement set or list provided
@@ -160,7 +179,6 @@ def make_h5parm(args): # mtf, ms, clobber = False, directions = []):
     - new_h5parm (str): the new h5parm to be applied to the measurement set
     '''
 
-    mtf, ms, clobber, directions = args # unpack arguments
     logging.info('executing make_h5parm(mtf = {}, ms = {}, clobber = {}, directions = {})'.format(mtf, ms, clobber, directions))
 
     # get the direction from the measurement set if source position is not given
