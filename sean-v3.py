@@ -438,7 +438,7 @@ def main():
     clobber = args.clobber
     directions = args.directions
 
-    if not directions:
+    if directions:
         print(directions)
         if len(directions) % 2 == 0: # should be even
             ra = directions[::2] # every second item, starting at the first element
