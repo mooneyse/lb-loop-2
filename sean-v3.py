@@ -185,7 +185,7 @@ def make_h5parm(mtf, ms, clobber = False, ms_direction = []):
     logging.info('executing make_h5parm(mtf = {}, ms = {}, clobber = {})'.format(mtf, ms, clobber))
 
     # get the direction from the measurement set if source positions are not given
-    if not positions:
+    if not ms_direction:
         logging.info('no source positions given, getting phase center from {}'.format(ms))
         t  = pt.table(ms, readonly = True, ack = False)
         field = pt.table(t.getkeyword('FIELD'), readonly = True, ack = False)
