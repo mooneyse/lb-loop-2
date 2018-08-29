@@ -429,7 +429,7 @@ def main():
     parser.add_argument('-f', '--ms', required = True, help = 'measurement set')
     parser.add_argument('-t', '--threshold', type = float, default = 0.25, help = 'threshold determining the xx-yy statistic goodness')
     parser.add_argument('-c', '--clobber', help = 'overwrite the new h5parm if it exists', action = 'store_true')
-    parser.add_argument('-d', '--directions', type = float, help = 'ra, dec for source positions (ra1 dec1 ra2 dec2...)', nargs = '+')
+    parser.add_argument('-d', '--directions', type = float, default = 0, help = 'ra, dec for source positions (ra1 dec1 ra2 dec2...)', nargs = '+')
     args = parser.parse_args()
     mtf = args.mtf
     h5parm = args.h5parm
