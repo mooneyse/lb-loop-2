@@ -456,7 +456,7 @@ def main():
 
     i = 1
     for ra, dec in zip(ra_list, dec_list):
-        logging.info('doing run {} with ra, dec = {}, {}', i, ra, dec)
+        logging.info('doing run {} with ra, dec = {}, {}'.format(i, ra, dec))
         directions = [ra, dec]
         new_h5parm = make_h5parm(mtf, ms, clobber = clobber, directions = directions) # create a new h5parm of the best solutions
         i += 1
