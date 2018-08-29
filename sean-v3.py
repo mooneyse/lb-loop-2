@@ -186,11 +186,11 @@ def make_h5parm(mtf, ms, clobber = False, ms_direction = []):
 
     # get the direction from the measurement set if source positions are not given
     if not ms_direction:
-        logging.info('no source positions given, getting phase center from {}'.format(ms))
         t  = pt.table(ms, readonly = True, ack = False)
         field = pt.table(t.getkeyword('FIELD'), readonly = True, ack = False)
         ms_direction = field.getcell('PHASE_DIR', 0)[0] # radians
         ms_direction = SkyCoord(ms_direction[0], ms_direction[1], unit = 'rad')
+        logging.info('no source positions given, using phase center {} from {}'.format(ms_direction, ms))
         field.close()
         t.close()
 
