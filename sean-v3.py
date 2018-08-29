@@ -198,7 +198,7 @@ def make_h5parm(mtf, ms, clobber = False, directions = []):
     else: # NB just taking first one for now!
         directions = np.array(directions)
         for ra, dec in zip(directions[:, 0], directions[:, 1]):
-            directions = SkyCoord(ra, dec, unit = 'deg')
+            directions = SkyCoord(ra=ra, dec=dec, unit = 'deg')
             logging.info('source positions given, using ra {}, dec {}'.format(directions.ra.deg, directions.dec.deg))
 
     # get the direction from the master text file
