@@ -163,7 +163,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     lo.close()
     logging.info('evaluate_solutions(h5parm = {}, mtf = {}, threshold = {}) completed'.format(h5parm, mtf, threshold))
 
-def make_h5parm(mtf, ms, clobber = False):
+def make_h5parm(mtf, ms, clobber = False, ms_direction = []):
     '''
     description:
     - get the direction from the measurement set
@@ -184,19 +184,15 @@ def make_h5parm(mtf, ms, clobber = False):
 
     logging.info('executing make_h5parm(mtf = {}, ms = {}, clobber = {})'.format(mtf, ms, clobber))
 
-    # get the direction from the measurement set
-    t  = pt.table(ms, readonly = True, ack = False)
-    field = pt.table(t.getkeyword('POINTING'), readonly = True, ack = False)
-    for i in range(100):
-        ms_direction = field.getcell('DIRECTION', i)
-        print('+++++++++++++++++++++++++++++++++++++++++++++++++++++', ms_direction)
-    field = pt.table(t.getkeyword('FIELD'), readonly = True, ack = False)
-    ms_direction = field.getcell('PHASE_DIR', 0)[0] # radians
-    print('+++++++++++++++++++++++++++++++++++++++++++++++++++++', ms_direction)
-
-    ms_direction = SkyCoord(ms_direction[0], ms_direction[1], unit = 'rad')
-    field.close()
-    t.close()
+    # get the direction from the measurement set if source positions are not given
+    if not positions:
+        logging.info('no source positions given, getting phase center from {}'.format(ms))
+        t  = pt.table(ms, readonly = True, ack = False)
+        field = pt.table(t.getkeyword('FIELD'), readonly = True, ack = False)
+        ms_direction = field.getcell('PHASE_DIR', 0)[0] # radians
+        ms_direction = SkyCoord(ms_direction[0], ms_direction[1], unit = 'rad')
+        field.close()
+        t.close()
 
     # get the direction from the master text file
     # HACK genfromtxt gives empty string for h5parms when names = True is used; importing them separately as a work around
