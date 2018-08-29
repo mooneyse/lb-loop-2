@@ -182,7 +182,7 @@ def make_h5parm(mtf, ms, clobber = False, directions = []):
     - new_h5parm (str): the new h5parm to be applied to the measurement set
     '''
 
-    logging.info('executing make_h5parm(mtf = {}, ms = {}, clobber = {})'.format(mtf, ms, clobber))
+    logging.info('executing make_h5parm(mtf = {}, ms = {}, clobber = {}, directions = {})'.format(mtf, ms, clobber, directions))
 
     # get the direction from the measurement set if source positions are not given
     if not directions:
