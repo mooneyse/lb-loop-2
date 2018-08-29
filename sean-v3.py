@@ -193,6 +193,8 @@ def make_h5parm(mtf, ms, clobber = False, directions = []):
         logging.info('no source positions given, using phase center {}, {} from {}'.format(directions.ra.deg, directions.dec.deg, ms))
         field.close()
         t.close()
+    else:
+        directions = SkyCoord(directions[0], directions[1], unit = 'rad')
 
     # get the direction from the master text file
     # HACK genfromtxt gives empty string for h5parms when names = True is used; importing them separately as a work around
