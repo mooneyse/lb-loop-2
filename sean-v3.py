@@ -451,7 +451,7 @@ def main():
             logging.error('uneven number of ra, dec given for source positions')
             sys.exit()
 
-    for ra, dec in zip(ra, dec):
+    for ra, dec in zip(ra_list, dec_list):
         print(ra, dec)
 
     logging.info('executing main()')
