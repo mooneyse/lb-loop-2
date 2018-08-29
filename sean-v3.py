@@ -458,28 +458,25 @@ def main():
 # TODO flux and distance threshold limit? even if solutions are nearest, could still be too far away
 # TODO multiprocessing
 # TODO plot h5parm solutions, run this and out outputted solutions -- should be the same
-# def f(x):
-#     return x*x
-#
-# if __name__ == '__main__':
-#     p = Pool(5)
-#     print(p.map(f, [1, 2, 3]))
 
-    try:
-        i = 1
-        for ra, dec in zip(ra_list, dec_list):
-            logging.info('doing run {} of {} with ra, dec = {}, {}'.format(i, len(ra_list), ra, dec))
-            directions = [ra, dec]
-            new_h5parm = make_h5parm(mtf, ms, clobber = clobber, directions = directions) # create a new h5parm of the best solutions
-            i += 1
+    pool = Pool(10) # 10 cores
+    results = pool.map(make_h5parm, [(mtf, ms, clobber, [3.7, 0.9]), (mtf, ms, clobber, [3.6, 0.8])])
 
-    except UnboundLocalError: # local variable 'ra_list' referenced before assignment
-            new_h5parm = make_h5parm(mtf, ms, clobber = clobber, directions = directions)
-
-    applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
-    loop3_h5parm = loop3() # run loop 3, returning h5parm
-    updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber) # combine h5parms and update mtf
-    logging.info('main() completed')
+    # try:
+    #     i = 1
+    #     for ra, dec in zip(ra_list, dec_list):
+    #         logging.info('doing run {} of {} with ra, dec = {}, {}'.format(i, len(ra_list), ra, dec))
+    #         directions = [ra, dec]
+    #         new_h5parm = make_h5parm(mtf, ms, clobber = clobber, directions = directions) # create a new h5parm of the best solutions
+    #         i += 1
+    #
+    # except UnboundLocalError: # local variable 'ra_list' referenced before assignment
+    #         new_h5parm = make_h5parm(mtf, ms, clobber = clobber, directions = directions)
+    #
+    # applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
+    # loop3_h5parm = loop3() # run loop 3, returning h5parm
+    # updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber) # combine h5parms and update mtf
+    # logging.info('main() completed')
 
 if __name__ == '__main__':
     main()
