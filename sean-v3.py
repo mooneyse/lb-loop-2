@@ -454,9 +454,9 @@ def main():
     loop3() # run loop 3 to generate h5parm
     evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
 
-    i = 0
+    i = 1
     for ra, dec in zip(ra_list, dec_list):
-        print('RUN', i)
+        logging.info('doing run {} with ra, dec = {}, {}', i, ra, dec)
         directions = [ra, dec]
         new_h5parm = make_h5parm(mtf, ms, clobber = clobber, directions = directions) # create a new h5parm of the best solutions
         i += 1
