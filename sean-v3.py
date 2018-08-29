@@ -160,8 +160,8 @@ def make_h5parm(args): # mtf, ms, clobber = False, directions = []):
     - new_h5parm (str): the new h5parm to be applied to the measurement set
     '''
 
-    logging.info('executing make_h5parm(mtf = {}, ms = {}, clobber = {}, directions = {})'.format(mtf, ms, clobber, directions))
     mtf, ms, clobber, directions = args # unpack arguments
+    logging.info('executing make_h5parm(mtf = {}, ms = {}, clobber = {}, directions = {})'.format(mtf, ms, clobber, directions))
 
     # get the direction from the measurement set if source position is not given
     if not directions:
@@ -449,7 +449,7 @@ def main():
                               '/data5/sean/home/github/L592773_SB038_uv.MS/',
                               True,
                               [3.6, 0.8])])
-                              
+
     # try:
     #     i = 1
     #     for ra, dec in zip(ra_list, dec_list):
