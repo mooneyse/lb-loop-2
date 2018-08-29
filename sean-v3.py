@@ -435,15 +435,18 @@ def main():
     clobber = args.clobber
     directions = args.directions
 
-    ra = directions[::2]
-    dec = directions[1::2]
-    directions = [ra, dec]
-    print(directions)
+    if len(directions) % 2 == 0: # should be even
+        ra = directions[::2] # every second item, starting at the first element
+        dec = directions[1::2] # every second item, starting at the second element
+        directions = [ra, dec]
+    else
+        logging.info('uneven number of ra, dec given for source positions')
+        sys.exit()
 
     logging.info('executing main()')
     loop3() # run loop 3 to generate h5parm
     evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
-    new_h5parm = make_h5parm(mtf, ms, clobber = clobber, directions = []) # create a new h5parm of the best solutions
+    new_h5parm = make_h5parm(mtf, ms, clobber = clobber, directions = directions) # create a new h5parm of the best solutions
     applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
     loop3_h5parm = loop3() # run loop 3, returning h5parm
     updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber) # combine h5parms and update mtf
