@@ -440,8 +440,16 @@ def main():
 
     cores = 10
     pool = Pool(cores)
-    new_h5parms = pool.map(make_h5parm, [(mtf, ms, clobber, [3.7, 0.9]), (mtf, ms, clobber, [3.6, 0.8])])
-
+    new_h5parms = pool.map(make_h5parm,
+                           [('/data5/sean/home/github/mtf.txt',
+                             '/data5/sean/home/github/L592773_SB038_uv.MS/',
+                             True,
+                             [3.7, 0.9]),
+                            ('/data5/sean/home/github/mtf.txt',
+                              '/data5/sean/home/github/L592773_SB038_uv.MS/',
+                              True,
+                              [3.6, 0.8])])
+                              
     # try:
     #     i = 1
     #     for ra, dec in zip(ra_list, dec_list):
