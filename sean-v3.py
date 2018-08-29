@@ -456,6 +456,8 @@ def main():
     evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
 
 # TODO flux and distance threshold limit? even if solutions are nearest, could still be too far away
+# TODO multiprocessing
+# TODO plot h5parm solutions, run this and out outputted solutions -- should be the same
 # def f(x):
 #     return x*x
 #
