@@ -451,18 +451,20 @@ def main():
         else:
             logging.error('uneven number of ra, dec given for source positions')
             sys.exit()
-    else:
-        ra_list, dec_list = [], []
 
     loop3() # run loop 3 to generate h5parm
     evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
 
-    i = 1
-    for ra, dec in zip(ra_list, dec_list):
-        logging.info('doing run {} with ra, dec = {}, {}'.format(i, ra, dec))
-        directions = [ra, dec]
-        new_h5parm = make_h5parm(mtf, ms, clobber = clobber, directions = directions) # create a new h5parm of the best solutions
-        i += 1
+    try:
+        i = 1
+        for ra, dec in zip(ra_list, dec_list):
+            logging.info('doing run {} with ra, dec = {}, {}'.format(i, ra, dec))
+            directions = [ra, dec]
+            new_h5parm = make_h5parm(mtf, ms, clobber = clobber, directions = directions) # create a new h5parm of the best solutions
+            i += 1
+
+    except UnboundLocalError:
+            new_h5parm = make_h5parm(mtf, ms, clobber = clobber, directions = directions)
 
     applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
     loop3_h5parm = loop3() # run loop 3, returning h5parm
