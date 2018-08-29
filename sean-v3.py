@@ -194,7 +194,7 @@ def make_h5parm(mtf, ms, clobber = False, directions = []):
         field.close()
         t.close()
     else: # NB just taking first one for now!
-        directions = SkyCoord(directions[0][0], directions[1][0], unit = 'rad')
+        directions = SkyCoord(directions[0][0], directions[1][0], unit = 'degree')
         logging.info('source positions given, using {}, {}'.format(directions.ra.deg, directions.dec.deg))
 
     # get the direction from the master text file
@@ -438,8 +438,7 @@ def main():
     clobber = args.clobber
     directions = args.directions
 
-    if directions:
-        print(directions)
+    if directions: # if a direction is given
         if len(directions) % 2 == 0: # should be even
             ra = directions[::2] # every second item, starting at the first element
             dec = directions[1::2] # every second item, starting at the second element
