@@ -434,6 +434,10 @@ def main():
     threshold = args.threshold
     clobber = args.clobber
     directions = args.directions
+
+    ra = directions[::2]
+    dec = directions[1::2]
+    directions = [ra, dec]
     print(directions)
 
     logging.info('executing main()')
