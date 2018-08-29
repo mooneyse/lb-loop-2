@@ -187,7 +187,7 @@ def make_h5parm(mtf, ms, clobber = False):
     # get the direction from the measurement set
     t  = pt.table(ms, readonly = True, ack = False)
     field = pt.table(t.getkeyword('POINTING'), readonly = True, ack = False)
-    for i in range(10):
+    for i in range(100):
         ms_direction = field.getcell('DIRECTION', i)
         print('+++++++++++++++++++++++++++++++++++++++++++++++++++++', ms_direction)
     field = pt.table(t.getkeyword('FIELD'), readonly = True, ack = False)
