@@ -428,6 +428,7 @@ def main():
     parser.add_argument('-p', '--h5parm', required = True, help = 'hdf5 file')
     parser.add_argument('-f', '--ms', required = True, help = 'measurement set')
     parser.add_argument('-t', '--threshold', type = float, default = 0.25, help = 'threshold determining the xx-yy statistic goodness')
+    parser.add_argument('-n', '--cores', type = int, default = 5, help = 'number of cores to use')
     parser.add_argument('-c', '--clobber', help = 'overwrite the new h5parm if it exists', action = 'store_true')
     parser.add_argument('-d', '--directions', type = float, default = 0, help = 'ra, dec for source positions (ra1 dec1 ra2 dec2...)', nargs = '+')
     args = parser.parse_args()
@@ -435,6 +436,7 @@ def main():
     h5parm = args.h5parm
     ms = args.ms
     threshold = args.threshold
+    cores = args.cores
     clobber = args.clobber
     directions = args.directions
 
@@ -455,7 +457,6 @@ def main():
     # TODO plot h5parm solutions, run this and out outputted solutions -- should be the same
 
     # TODO multiprocessing
-    cores = 10
     pool = Pool(cores)
     new_h5parms = pool.map(make_h5parm_multiprocessing,
                            [('/data5/sean/home/github/mtf.txt',
