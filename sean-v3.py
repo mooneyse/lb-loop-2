@@ -188,7 +188,7 @@ def make_h5parm(mtf, ms, clobber = False):
     t  = pt.table(ms, readonly = True, ack = False)
     field = pt.table(t.getkeyword('POINTING'), readonly = True, ack = False)
     for i in range(10):
-        ms_direction = field.getcell('TARGET', i)
+        ms_direction = field.getcell('DIRECTION', i)
         print('+++++++++++++++++++++++++++++++++++++++++++++++++++++', ms_direction)
     field = pt.table(t.getkeyword('FIELD'), readonly = True, ack = False)
     ms_direction = field.getcell('PHASE_DIR', 0)[0] # radians
