@@ -446,18 +446,21 @@ def main():
         if len(directions) % 2 == 0: # should be even
             ra_list = directions[::2] # every second item, starting at the first element
             dec_list = directions[1::2] # every second item, starting at the second element
-            # directions_list = [ra, dec]
         else:
             logging.error('uneven number of ra, dec given for source positions')
             sys.exit()
 
-    for ra, dec in zip(ra_list, dec_list):
-        print(ra, dec)
-
     logging.info('executing main()')
     loop3() # run loop 3 to generate h5parm
     evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
-    new_h5parm = make_h5parm(mtf, ms, clobber = clobber, directions = directions) # create a new h5parm of the best solutions
+
+    i = 0
+    for ra, dec in zip(ra_list, dec_list):
+        print('RUN', i)
+        directions = [ra, dec]
+        new_h5parm = make_h5parm(mtf, ms, clobber = clobber, directions = directions) # create a new h5parm of the best solutions
+        i += 1
+
     applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
     loop3_h5parm = loop3() # run loop 3, returning h5parm
     updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber) # combine h5parms and update mtf
