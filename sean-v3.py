@@ -194,7 +194,7 @@ def make_h5parm(mtf, ms, clobber = False, directions = []):
         field.close()
         t.close()
     else: # NB just taking first one for now!
-        directions = SkyCoord(directions[0][0], directions[1][0], unit = 'degree')
+        directions = SkyCoord(directions[0][0], directions[1][0], unit = u.deg)
         logging.info('source positions given, using {}, {}'.format(directions.ra.deg, directions.dec.deg))
 
     # get the direction from the master text file
