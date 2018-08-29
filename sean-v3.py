@@ -163,7 +163,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     lo.close()
     logging.info('evaluate_solutions(h5parm = {}, mtf = {}, threshold = {}) completed'.format(h5parm, mtf, threshold))
 
-def make_h5parm(mtf, ms, clobber = False, ms_direction = []):
+def make_h5parm(mtf, ms, clobber = False, directions = []):
     '''
     description:
     - get the direction from the measurement set
@@ -185,12 +185,12 @@ def make_h5parm(mtf, ms, clobber = False, ms_direction = []):
     logging.info('executing make_h5parm(mtf = {}, ms = {}, clobber = {})'.format(mtf, ms, clobber))
 
     # get the direction from the measurement set if source positions are not given
-    if not ms_direction:
+    if not directions:
         t  = pt.table(ms, readonly = True, ack = False)
         field = pt.table(t.getkeyword('FIELD'), readonly = True, ack = False)
-        ms_direction = field.getcell('PHASE_DIR', 0)[0] # radians
-        ms_direction = SkyCoord(ms_direction[0], ms_direction[1], unit = 'rad')
-        logging.info('no source positions given, using phase center ({}, {}) from {}'.format(ms_direction.ra.deg, ms_direction.dec.deg, ms))
+        directions = field.getcell('PHASE_DIR', 0)[0] # radians
+        directions = SkyCoord(directions[0], directions[1], unit = 'rad')
+        logging.info('no source positions given, using phase center {}, {} from {}'.format(directions.ra.deg, directions.dec.deg, ms))
         field.close()
         t.close()
 
@@ -204,7 +204,7 @@ def make_h5parm(mtf, ms, clobber = False, ms_direction = []):
     # there is one entry in mtf_directions for each unique line in the mtf
     for h5parm, ra, dec in zip(h5parms, data['ra'], data['dec']):
         mtf_direction = SkyCoord(float(ra), float(dec), unit = 'deg')
-        separation = ms_direction.separation(mtf_direction)
+        separation = directions.separation(mtf_direction)
         mtf_directions[separation] = h5parm # distances from ms to each h5parm
 
     # read in the stations from the master text file
@@ -235,7 +235,7 @@ def make_h5parm(mtf, ms, clobber = False, ms_direction = []):
 
     # create a new h5parm
     ms = os.path.splitext(os.path.normpath(ms))[0]
-    new_h5parm = '{}_{}_{}.h5'.format(ms, ms_direction.ra.deg, ms_direction.dec.deg)
+    new_h5parm = '{}_{}_{}.h5'.format(ms, directions.ra.deg, directions.dec.deg)
     logging.info('creating {}'.format(new_h5parm))
     does_it_exist(new_h5parm, clobber = clobber) # check if the h5parm exists
 
@@ -418,17 +418,19 @@ def main():
     parser.add_argument('-f', '--ms', required = True, help = 'measurement set')
     parser.add_argument('-t', '--threshold', type = float, default = 0.25, help = 'threshold determining the xx-yy statistic goodness')
     parser.add_argument('-c', '--clobber', help = 'overwrite the new h5parm if it exists', action = 'store_true')
+    parser.add_argument('-d', '--directions', type = float, help = 'ra, dec for source positions (ra1 dec1 ra2 dec2...)', nargs = '+')
     args = parser.parse_args()
     mtf = args.mtf
     h5parm = args.h5parm
     ms = args.ms
     threshold = args.threshold
     clobber = args.clobber
+    directions = args.directions
 
     logging.info('executing main()')
     loop3() # run loop 3 to generate h5parm
     evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
-    new_h5parm = make_h5parm(mtf, ms, clobber = clobber) # create a new h5parm of the best solutions
+    new_h5parm = make_h5parm(mtf, ms, clobber = clobber, directions = []) # create a new h5parm of the best solutions
     applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
     loop3_h5parm = loop3() # run loop 3, returning h5parm
     updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber) # combine h5parms and update mtf
