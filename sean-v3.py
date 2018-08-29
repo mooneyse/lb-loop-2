@@ -186,11 +186,13 @@ def make_h5parm(mtf, ms, clobber = False):
 
     # get the direction from the measurement set
     t  = pt.table(ms, readonly = True, ack = False)
+    field = pt.table(t.getkeyword('POINTING'), readonly = True, ack = False)
+    ms_direction = field.getcell('TARGET', 0)
+    print('+++++++++++++++++++++++++++++++++++++++++++++++++++++', len(ms_direction))
     field = pt.table(t.getkeyword('FIELD'), readonly = True, ack = False)
     ms_direction = field.getcell('PHASE_DIR', 0)[0] # radians
     print('+++++++++++++++++++++++++++++++++++++++++++++++++++++', ms_direction)
-    ms_direction = field.getcell('PHASE_DIR', 0)
-    print('+++++++++++++++++++++++++++++++++++++++++++++++++++++', len(ms_direction))  
+
     ms_direction = SkyCoord(ms_direction[0], ms_direction[1], unit = 'rad')
     field.close()
     t.close()
