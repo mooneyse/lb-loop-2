@@ -442,6 +442,8 @@ def main():
     clobber = args.clobber
     directions = args.directions
 
+    logging.info('executing main()')
+
     if directions: # if a direction is given
         if len(directions) % 2 == 0: # should be even
             ra_list = directions[::2] # every second item, starting at the first element
@@ -450,7 +452,6 @@ def main():
             logging.error('uneven number of ra, dec given for source positions')
             sys.exit()
 
-    logging.info('executing main()')
     loop3() # run loop 3 to generate h5parm
     evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
 
