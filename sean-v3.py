@@ -15,7 +15,19 @@ import numpy as np
 import argparse, csv, datetime, h5py, logging, multiprocessing, os, subprocess, sys, threading
 
 def does_it_exist(the_file, clobber = False, append = False):
-    # convenience function to check if a file already exists
+    '''
+    description:
+    - convenience function to check if a file already exists
+
+    parameters:
+    - the_file (str): check if this file exists
+    - clobber (bool): (default = False) overwrite if True
+    - append  (bool): (default = False) append to file if it exists
+
+    returns:
+    - bool: file already exists (True), file does not exist (False)
+    '''
+
     if Path(the_file).is_file():
         if append:
             logging.warn('{} already exists and it will be appended to (append = {})'.format(the_file, append))
@@ -33,6 +45,9 @@ def does_it_exist(the_file, clobber = False, append = False):
 # parallel_function and source functions are from
 # https://github.com/lmorabit/long_baseline_pipeline/blob/new/bin/evaluate_potential_delay_calibrators.py
 
+
+# https://docs.python.org/2/library/multiprocessing.html
+# a prime example of this is the Pool object which offers a convenient means of parallelizing the execution of a function across multiple input values, distributing the input data across processes (data parallelism)
 def parallel_function(f, n_cpu): # credit: scott sievert
     def easy_parallize(f, sequence):
         n_cpu = int(n_cpu)
@@ -47,7 +62,7 @@ def parallel_function(f, n_cpu): # credit: scott sievert
     return partial(easy_parallize, f)
 
 def source(x, n_cpu):
-    f = combine_subbands(inarray, i.split(',')[-1] + '.ms', i, 8, 8)
+    # f = combine_subbands(inarray, i.split(',')[-1] + '.ms', i, 8, 8)
     source_thread.parallel = parallel_function(f, n_cpu)
     parallel_result = source_thread.parallel(x)
 
@@ -159,8 +174,9 @@ def make_h5parm(mtf, ms, clobber = False):
     - write these phase solutions to this new h5parm
 
     parameters:
-    - mtf (str): master text file with list of h5parms
-    - ms  (str): measurement set to be self-calibrated
+    - mtf (str)     : master text file with list of h5parms
+    - ms  (str)     : measurement set to be self-calibrated
+    - clobber (bool): (default = False) overwrite new_h5parm if it exists
 
     returns:
     - new_h5parm (str): the new h5parm to be applied to the measurement set
@@ -172,6 +188,9 @@ def make_h5parm(mtf, ms, clobber = False):
     t  = pt.table(ms, readonly = True, ack = False)
     field = pt.table(t.getkeyword('FIELD'), readonly = True, ack = False)
     ms_direction = field.getcell('PHASE_DIR', 0)[0] # radians
+    print('+++++++++++++++++++++++++++++++++++++++++++++++++++++', ms_direction)
+    ms_direction = field.getcell('PHASE_DIR', 0)
+    print('+++++++++++++++++++++++++++++++++++++++++++++++++++++', len(ms_direction))  
     ms_direction = SkyCoord(ms_direction[0], ms_direction[1], unit = 'rad')
     field.close()
     t.close()
@@ -389,6 +408,9 @@ def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False):
     return combined_h5parm
 
 def main():
+    '''
+
+    '''
     logging.basicConfig(format = '\033[1m%(asctime)s \033[31m%(levelname)s \033[00m%(message)s', datefmt = '%Y/%m/%d %H:%M:%S', level = logging.INFO)
 
     parser = argparse.ArgumentParser(description = __doc__, formatter_class = argparse.RawDescriptionHelpFormatter)
