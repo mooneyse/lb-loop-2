@@ -440,7 +440,7 @@ def main():
         dec = directions[1::2] # every second item, starting at the second element
         directions = [ra, dec]
     else:
-        logging.info('uneven number of ra, dec given for source positions')
+        logging.error('uneven number of ra, dec given for source positions')
         sys.exit()
 
     logging.info('executing main()')
