@@ -441,7 +441,7 @@ def main():
     threshold = args.threshold
     clobber = args.clobber
     directions = args.directions
-
+    print(directions)
     # if directions: # if a direction is given
     #     if len(directions) % 2 == 0: # should be even
     #         ra = directions[::2] # every second item, starting at the first element
