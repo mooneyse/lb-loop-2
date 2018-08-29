@@ -451,6 +451,8 @@ def main():
         else:
             logging.error('uneven number of ra, dec given for source positions')
             sys.exit()
+    else:
+        ra_list, dec_list = [], []
 
     loop3() # run loop 3 to generate h5parm
     evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
