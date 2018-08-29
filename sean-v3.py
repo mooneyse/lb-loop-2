@@ -46,7 +46,6 @@ def does_it_exist(the_file, clobber = False, append = False):
 # parallel_function and source functions are from
 # https://github.com/lmorabit/long_baseline_pipeline/blob/new/bin/evaluate_potential_delay_calibrators.py
 
-
 # https://docs.python.org/2/library/multiprocessing.html
 # a prime example of this is the Pool object which offers a convenient means of parallelizing the execution of a function across multiple input values, distributing the input data across processes (data parallelism)
 def parallel_function(f, n_cpu): # credit: scott sievert
@@ -167,7 +166,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
 def make_h5parm(mtf, ms, clobber = False, directions = []):
     '''
     description:
-    - get the direction from the measurement set
+    - get the direction from the measurement set or list provided
     - get the directions of the h5parms from the master text file
     - calculate the separation between the measurement set direction and the h5parm directions
     - for each station, find the h5parm of smallest separation which has valid phase solutions
@@ -175,9 +174,10 @@ def make_h5parm(mtf, ms, clobber = False, directions = []):
     - write these phase solutions to this new h5parm
 
     parameters:
-    - mtf (str)     : master text file with list of h5parms
-    - ms  (str)     : measurement set to be self-calibrated
-    - clobber (bool): (default = False) overwrite new_h5parm if it exists
+    - mtf        (str) : master text file with list of h5parms
+    - ms         (str) : measurement set to be self-calibrated
+    - clobber    (bool): (default = false) overwrite new_h5parm if it exists
+    - directions (list): (default = []) ra, dec of source (radians)
 
     returns:
     - new_h5parm (str): the new h5parm to be applied to the measurement set
@@ -441,15 +441,18 @@ def main():
     threshold = args.threshold
     clobber = args.clobber
     directions = args.directions
-    print(directions)
-    # if directions: # if a direction is given
-    #     if len(directions) % 2 == 0: # should be even
-    #         ra = directions[::2] # every second item, starting at the first element
-    #         dec = directions[1::2] # every second item, starting at the second element
-    #         directions = [ra, dec]
-    #     else:
-    #         logging.error('uneven number of ra, dec given for source positions')
-    #         sys.exit()
+
+    if directions: # if a direction is given
+        if len(directions) % 2 == 0: # should be even
+            ra_list = directions[::2] # every second item, starting at the first element
+            dec_list = directions[1::2] # every second item, starting at the second element
+            # directions_list = [ra, dec]
+        else:
+            logging.error('uneven number of ra, dec given for source positions')
+            sys.exit()
+
+    for ra, dec in zip(ra, dec):
+        print(ra, dec)
 
     logging.info('executing main()')
     loop3() # run loop 3 to generate h5parm
