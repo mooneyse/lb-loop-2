@@ -185,20 +185,26 @@ def make_h5parm(mtf, ms, clobber = False, directions = []):
 
     logging.info('executing make_h5parm(mtf = {}, ms = {}, clobber = {}, directions = {})'.format(mtf, ms, clobber, directions))
 
-    # get the direction from the measurement set if source positions are not given
+    # get the direction from the measurement set if source position is not given
     if not directions:
         t  = pt.table(ms, readonly = True, ack = False)
         field = pt.table(t.getkeyword('FIELD'), readonly = True, ack = False)
         directions = field.getcell('PHASE_DIR', 0)[0] # radians
-        directions = SkyCoord(directions[0], directions[1], unit = 'rad')
-        logging.info('no source positions given, using phase center {}, {} from {}'.format(directions.ra.deg, directions.dec.deg, ms))
         field.close()
         t.close()
 
-    else: # NB just taking first one for now!
-        for ra, dec in zip(directions[0], directions[1]):
-            directions = SkyCoord(ra, dec, unit = 'deg')
-            logging.info('source positions given, using ra {}, dec {}'.format(directions.ra.deg, directions.dec.deg))
+        logging.info('no source positions given, using {} phase center'.format(ms))
+
+    elif len(directions) != 2:
+        logging.error('ra, dec not passed correctly')
+        sys.exit()
+
+    directions = SkyCoord(directions[0], directions[1], unit = 'rad')
+        # directions.ra.deg, directions.dec.deg,
+        # directions = directions
+    #     for ra, dec in zip(directions[0], directions[1]):
+    #         directions = SkyCoord(ra, dec, unit = 'deg')
+    #         logging.info('source position ra {}, dec {}'.format(directions.ra.deg, directions.dec.deg))
 
     # get the direction from the master text file
     # HACK genfromtxt gives empty string for h5parms when names = True is used; importing them separately as a work around
@@ -219,7 +225,7 @@ def make_h5parm(mtf, ms, clobber = False, directions = []):
         mtf_stations = [x.lstrip() for x in mtf_stations] # remove leading space
 
     # find the closest h5parm which has an acceptable solution for each station
-    working_file = '{}/make_h5parm.txt'.format(os.path.dirname(os.path.dirname(ms)))
+    working_file = '{}/make_h5parm_{}_{}.txt'.format(os.path.dirname(os.path.dirname(ms)), directions.ra.deg, directions.dec.deg)
     logging.info('creating working file {}'.format(working_file))
     f = open(working_file, 'w')
 
