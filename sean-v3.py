@@ -439,7 +439,7 @@ def main():
         ra = directions[::2] # every second item, starting at the first element
         dec = directions[1::2] # every second item, starting at the second element
         directions = [ra, dec]
-    else
+    else:
         logging.info('uneven number of ra, dec given for source positions')
         sys.exit()
 
