@@ -461,7 +461,7 @@ def main():
     pool = Pool(cores)
     new_h5parms = pool.map(make_h5parm_multiprocessing,
                            [(mtf, ms, True, [3.7, 0.9]),
-                            (mtf, ms, True, [3.6, 0.8])])
+                            (mtf, ms, True, [3.6, 0.8])]) # change directions to a list, then put in here 0, 1, 2...
 
     # try:
     #     i = 1
