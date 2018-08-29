@@ -408,8 +408,16 @@ def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False):
 
 def main():
     '''
+    description:
+    - runs loop3, evalate_solutions, make_h5parm, applyh5parm, and updatelist
 
+    parameters:
+    - none
+
+    returns:
+    - none
     '''
+
     logging.basicConfig(format = '\033[1m%(asctime)s \033[31m%(levelname)s \033[00m%(message)s', datefmt = '%Y/%m/%d %H:%M:%S', level = logging.INFO)
 
     parser = argparse.ArgumentParser(description = __doc__, formatter_class = argparse.RawDescriptionHelpFormatter)
@@ -426,6 +434,7 @@ def main():
     threshold = args.threshold
     clobber = args.clobber
     directions = args.directions
+    print(directions)
 
     logging.info('executing main()')
     loop3() # run loop 3 to generate h5parm
