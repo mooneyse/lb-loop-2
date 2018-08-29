@@ -9,6 +9,7 @@ from functools import partial
 from multiprocessing import Pool
 from pathlib import Path
 from astropy.coordinates import SkyCoord
+import astropy.units as u
 import pyrap.tables as pt
 import losoto.h5parm as lh5
 import numpy as np
