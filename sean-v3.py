@@ -43,29 +43,6 @@ def does_it_exist(the_file, clobber = False, append = False):
         logging.info('{} does not exist'.format(the_file))
         return False
 
-# parallel_function and source functions are from
-# https://github.com/lmorabit/long_baseline_pipeline/blob/new/bin/evaluate_potential_delay_calibrators.py
-
-# https://docs.python.org/2/library/multiprocessing.html
-# a prime example of this is the Pool object which offers a convenient means of parallelizing the execution of a function across multiple input values, distributing the input data across processes (data parallelism)
-def parallel_function(f, n_cpu): # credit: scott sievert
-    def easy_parallize(f, sequence):
-        n_cpu = int(n_cpu)
-        print('Using {} cores'.format(n_cpu))
-        pool = Pool(processes = n_cpu) # depends on available cores
-        result = pool.map(f, sequence) # for i in sequence: result[i] = f(i)
-        cleaned = [x for x in result if not x is None] # getting results
-        cleaned = np.asarray(cleaned)
-        pool.close() # not optimal but easy
-        pool.join()
-        return cleaned
-    return partial(easy_parallize, f)
-
-def source(x, n_cpu):
-    # f = combine_subbands(inarray, i.split(',')[-1] + '.ms', i, 8, 8)
-    source_thread.parallel = parallel_function(f, n_cpu)
-    parallel_result = source_thread.parallel(x)
-
 def loop3():
     '''
     description:
@@ -163,7 +140,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     lo.close()
     logging.info('evaluate_solutions(h5parm = {}, mtf = {}, threshold = {}) completed'.format(h5parm, mtf, threshold))
 
-def make_h5parm(mtf, ms, clobber = False, directions = []):
+def make_h5parm(args): # mtf, ms, clobber = False, directions = []):
     '''
     description:
     - get the direction from the measurement set or list provided
@@ -184,6 +161,7 @@ def make_h5parm(mtf, ms, clobber = False, directions = []):
     '''
 
     logging.info('executing make_h5parm(mtf = {}, ms = {}, clobber = {}, directions = {})'.format(mtf, ms, clobber, directions))
+    mtf, ms, clobber, directions = args # unpack arguments
 
     # get the direction from the measurement set if source position is not given
     if not directions:
@@ -455,12 +433,14 @@ def main():
     loop3() # run loop 3 to generate h5parm
     evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
 
-# TODO flux and distance threshold limit? even if solutions are nearest, could still be too far away
-# TODO multiprocessing
-# TODO plot h5parm solutions, run this and out outputted solutions -- should be the same
+    # TODO flux and distance threshold limit? even if solutions are nearest, could still be too far away
+    # TODO plot h5parm solutions, run this and out outputted solutions -- should be the same
 
-    pool = Pool(10) # 10 cores
-    results = pool.map(make_h5parm, [(mtf, ms, clobber, [3.7, 0.9]), (mtf, ms, clobber, [3.6, 0.8])])
+    # TODO multiprocessing
+
+    cores = 10
+    pool = Pool(cores)
+    new_h5parms = pool.map(make_h5parm, [(mtf, ms, clobber, [3.7, 0.9]), (mtf, ms, clobber, [3.6, 0.8])])
 
     # try:
     #     i = 1
