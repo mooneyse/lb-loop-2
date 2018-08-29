@@ -455,15 +455,22 @@ def main():
     loop3() # run loop 3 to generate h5parm
     evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
 
+# def f(x):
+#     return x*x
+#
+# if __name__ == '__main__':
+#     p = Pool(5)
+#     print(p.map(f, [1, 2, 3]))
+
     try:
         i = 1
         for ra, dec in zip(ra_list, dec_list):
-            logging.info('doing run {} with ra, dec = {}, {}'.format(i, ra, dec))
+            logging.info('doing run {} of {} with ra, dec = {}, {}'.format(i, len(ra_list), ra, dec))
             directions = [ra, dec]
             new_h5parm = make_h5parm(mtf, ms, clobber = clobber, directions = directions) # create a new h5parm of the best solutions
             i += 1
 
-    except UnboundLocalError:
+    except UnboundLocalError: # local variable 'ra_list' referenced before assignment
             new_h5parm = make_h5parm(mtf, ms, clobber = clobber, directions = directions)
 
     applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
