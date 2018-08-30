@@ -439,7 +439,7 @@ def main():
     parser = argparse.ArgumentParser(description = __doc__, formatter_class = argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-m', '--mtf', required = True,  type = str, help = 'master text file')
     parser.add_argument('-p', '--h5parm', required = True,  type = str, help = 'hdf5 file')
-    parser.add_argument('-f', '--ms', required = False,  type = str, help = 'measurement set')
+    parser.add_argument('-f', '--ms', required = True,  type = str, help = 'measurement set')
     parser.add_argument('-t', '--threshold', required = False, type = float, default = 0.25, help = 'threshold determining the xx-yy statistic goodness')
     parser.add_argument('-n', '--cores', required = False, type = int, default = 4, help = 'number of cores to use')
     parser.add_argument('-c', '--clobber', action = 'store_true', help = 'overwrite the new h5parm if it exists', )
