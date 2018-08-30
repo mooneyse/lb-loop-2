@@ -8,9 +8,11 @@ a collection of functions for modifying hdf5 files
 #      even if solutions are nearest, could still be too far away
 # TODO plot h5parm solutions, run this and compare input and output solutions
 # TODO sort out logging for mutliprocessing
-# TODO remove the requirement for the ms
 # TODO make sure temporary file names are not generic otherwise there will be multiprocessing issues
+# TODO make sure h5parm are read-only when used with mutliprocessing module
 # TODO write updatelist function
+# TODO make use of the losoto.h5parm.Soltab.addHistory
+# TODO h5parm dimensions are hardcoded to pol, dir, ant, freq, time
 
 from __future__ import print_function
 from functools import partial
@@ -152,6 +154,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
 def make_h5parm_multiprocessing(args):
     '''
     description:
+    - wrapper for make_h5parm
     - runs make_h5parm on multiple cores in parallel
 
     parameters:
@@ -396,6 +399,39 @@ def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False):
     '''
 
     logging.info('executing updatelist(new_h5parm = {}, loop3_h5parm = {}, mtf = {}, clobber = {})'.format(new_h5parm, loop3_h5parm, mtf, clobber))
+
+    # get solutions from new_h5parm and loop3_h5parm
+
+    # from new_h5parm
+    h = lh5.h5parm(new_h5parm)
+    phase = h.getSolset('sol000').getSoltab('phase000')
+    pol = phase.pol[:]
+    dir = phase.dir[:]
+    ant = phase.ant[:]
+    time = phase.time[:]
+    freq = phase.freq[:]
+
+    val_new_h5parm = phase.val[:]
+    weight_new_h5parm = phase.weight[:]
+    h.close()
+
+    # from loop3_h5parm
+    h = lh5.h5parm(loop3_h5parm)
+    phase = h.getSolset('sol000').getSoltab('phase000')
+    pol = phase.pol[:]
+    dir = phase.dir[:]
+    ant = phase.ant[:]
+    time = phase.time[:]
+    freq = phase.freq[:]
+
+    val_loop3_h5parm = phase.val[:]
+    weight_loop3_h5parm = phase.weight[:]
+    h.close()
+
+    # for comined_h5parm
+    vals = val_new_h5parm + val_loop3_h5parm
+    weights = weight_new_h5parm + weight_loop3_h5parm
+
     # create new h5parm
     logging.info('combining phase solutions from {} and {}'.format(new_h5parm, loop3_h5parm))
     combined_h5parm = '{}-{}'.format(os.path.splitext(new_h5parm)[0], os.path.basename(loop3_h5parm))
@@ -404,17 +440,22 @@ def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False):
     # combine two h5parms
     does_it_exist(combined_h5parm, clobber = clobber) # if h5parm already exists, then exit
 
-    # write these best phase solutions to the new h5parm
+    # write these best phase solutions to the combined_h5parm
     h = lh5.h5parm(combined_h5parm, readonly = False)
     try:
         h.makeSolset() # creates sol000
     except:
         h.makeSolset(addTables = False)
+        logging.info('could not make antenna and source tables')
         # on my machine the default 'addTables = True' gives
         # 'NotImplementedError: structured arrays with columns with type description ``<U16`` are not supported yet, sorry'
 
-    # $ H5parm_merge.py --help
     solset = h.getSolset('sol000')
+    c = solset.makeSoltab('phase',
+                          axesNames = ['pol', 'dir', 'ant', 'freq', 'time'],
+                          axesVals = [pol, dir, ant, freq, time],
+                          vals = vals,
+                          weights = weights) # creates phase000
     h.close()
 
     # evaluate the solutions and update the master file
@@ -424,12 +465,6 @@ def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False):
     # evaluate_solutions(h5parm, mtf, threshold)
     logging.info('finished updating {}'.format(mtf))
     logging.info('updatelist(new_h5parm = {}, loop3_h5parm = {}, mtf = {}, clobber = {}) completed'.format(new_h5parm, loop3_h5parm, mtf, clobber))
-
-    # One can then merge the two h5parms in a single file (this is needed if you want to interpolate/rescale/copy solutions in time/freq from the cal to the target):
-    # https://support.astron.nl/LOFARImagingCookbook/losoto.html
-    # H5parm_merge.py -v cal.h5:sol000 tgt.h5:cal000
-    # One can create a h5parm also from a single SB
-    # H5parm_importer.py -v LXXXXX_3c295.h5 LXXXXX_3c295.MS
 
     return combined_h5parm
 
@@ -495,6 +530,7 @@ def main():
         applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
 
     loop3_h5parm = loop3() # run loop 3, returning h5parm
+    loop3_h5parm = new_h5parm # for testing
     updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber) # combine h5parms and update mtf
     logging.info('main() completed')
 
