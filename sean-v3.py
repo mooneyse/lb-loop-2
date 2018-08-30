@@ -90,7 +90,12 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
 
     # get the direction from the h5parm
     h = h5py.File(h5parm, 'r') # TODO should probably use losoto for this
-    direction = h['/sol000/source'][0][1] # radians
+    try:
+        direction = h['/sol000/source'][0][1] # radians
+    # except ValueError:
+    #     logging.error('no source direction in the h5parm so exiting')
+    #     sys.exit()
+    direction = [3.7, 0.9]
     direction = np.degrees(np.array(direction))
     h.close()
 
