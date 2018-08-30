@@ -383,7 +383,7 @@ def applyh5parm(new_h5parm, ms, clobber = False, column_out = 'DATA'):
     logging.info('applyh5parm(new_h5parm = {}, ms = {}, clobber = {}) completed'.format(new_h5parm, ms, clobber))
     return ms
 
-def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False):
+def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False, threshold = 0.25):
     '''
     description:
     - combine the phase solutions from the initial h5parm and the final h5parm
@@ -460,7 +460,7 @@ def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False):
 
     # evaluate the solutions and update the master file
     logging.info('updating {} with the {} solutions'.format(mtf, combined_h5parm))
-    evaluate_solutions(combined_h5parm, mtf, threshold)
+    evaluate_solutions(combined_h5parm, mtf, threshold = threshold)
     logging.info('updatelist(new_h5parm = {}, loop3_h5parm = {}, mtf = {}, clobber = {}) completed'.format(new_h5parm, loop3_h5parm, mtf, clobber))
 
     return combined_h5parm
@@ -528,7 +528,7 @@ def main():
 
     loop3_h5parm = loop3() # run loop 3, returning h5parm
     loop3_h5parm = new_h5parm # for testing
-    updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber) # combine h5parms and update mtf
+    updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber, threshold = thresold) # combine h5parms and update mtf
     logging.info('main() completed')
 
 if __name__ == '__main__':
