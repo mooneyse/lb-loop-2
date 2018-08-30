@@ -202,13 +202,16 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
 
     # get the direction from the measurement set if source position is not given
     if not directions:
-        t  = pt.table(ms, readonly = True, ack = False)
-        field = pt.table(t.getkeyword('FIELD'), readonly = True, ack = False)
-        directions = field.getcell('PHASE_DIR', 0)[0] # radians
-        field.close()
-        t.close()
-
-        logging.info('no source positions given, using {} phase center'.format(ms))
+        if not ms:
+            logging.info('no directions or ms supplied so exiting')
+            sys.exit()
+        else:
+            t  = pt.table(ms, readonly = True, ack = False)
+            field = pt.table(t.getkeyword('FIELD'), readonly = True, ack = False)
+            directions = field.getcell('PHASE_DIR', 0)[0] # radians
+            field.close()
+            t.close()
+            logging.info('no source positions given, using {} phase center'.format(ms))
 
     elif len(directions) != 2:
         logging.error('ra, dec not passed correctly')
