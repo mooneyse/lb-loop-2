@@ -528,7 +528,7 @@ def main():
 
     loop3_h5parm = loop3() # run loop 3, returning h5parm
     loop3_h5parm = new_h5parm # for testing
-    updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber, threshold = thresold) # combine h5parms and update mtf
+    updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber, threshold = threshold) # combine h5parms and update mtf
     logging.info('main() completed')
 
 if __name__ == '__main__':
