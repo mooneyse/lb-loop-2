@@ -429,8 +429,8 @@ def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False):
     h.close()
 
     # for comined_h5parm
-    vals = val_new_h5parm + val_loop3_h5parm
-    weights = weight_new_h5parm + weight_loop3_h5parm
+    vals = val_new_h5parm - val_loop3_h5parm # NB minus sign for testing
+    weights = weight_new_h5parm - weight_loop3_h5parm # NB minus sign for testing
 
     # create new h5parm
     logging.info('combining phase solutions from {} and {}'.format(new_h5parm, loop3_h5parm))
