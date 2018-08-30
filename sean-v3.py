@@ -280,10 +280,11 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
     try:
         table = h.makeSolset() # creates sol000
         source_table = table.obj._f_get_child('source')
-        source_table.append('TODO in here, add source table information')
+        source_table.append(list(zip( * (['dir1', 'dir2', 'dir3'], [[1, 2], [3, 4], [5, 6]]))))
 
-        antenna_table = table.obj._f_get_child('source')
-        source_table.append('TODO in here, add antenna table information')
+        antenna_table = table.obj._f_get_child('antenna')
+        antenna_table.append(list(zip( * (['ant1', 'ant2', 'ant3'], [[1, 2, 3], [3, 4, 5], [5, 6, 7]]))))
+        print('DID SUMAT HERE! open {}'.format(new_h5parm))
     except:
         h.makeSolset(addTables = False)
         # we want the default 'addTables = True' but on my machine that gives
