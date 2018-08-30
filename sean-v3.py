@@ -455,48 +455,38 @@ def main():
 
     logging.info('executing main()')
 
-    if directions: # if a direction is given
-        if len(directions) % 2 != 0: # should be even
-        #     ra_list = directions[::2] # every second item, starting at the first element
-        #     dec_list = directions[1::2] # every second item, starting at the second element
-        # else:
-            logging.error('uneven number of ra, dec given for source positions')
-            sys.exit()
-
     loop3() # run loop 3 to generate h5parm
     evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
 
     # TODO flux and distance threshold limit?
     #      even if solutions are nearest, could still be too far away
     # TODO plot h5parm solutions, run this and out outputted solutions
-
-    mtf_list, ms_list, clobber_list = [], [], []
-    for i in range(int(len(directions) / 2)):
-        mtf_list.append(mtf)
-        ms_list.append(ms)
-        clobber_list.append(clobber)
-
-    directions_paired = list(zip(directions[::2], directions[1::2])) # every second item is ra, dec
-    multiprocessing = list(zip(mtf_list, ms_list, clobber_list, directions_paired))
-
     # TODO sort out logging for mutliprocessing
     # TODO remove the requirement for the ms
-    pool = Pool(cores)
-    new_h5parms = pool.map(make_h5parm_multiprocessing, multiprocessing)
 
-    # try:
-    #     i = 1
-    #     for ra, dec in zip(ra_list, dec_list):
-    #         logging.info('doing run {} of {} with ra, dec = {}, {}'.format(i, len(ra_list), ra, dec))
-    #         directions = [ra, dec]
-    #         new_h5parm = make_h5parm(mtf, ms, clobber = clobber, directions = directions) # create a new h5parm of the best solutions
-    #         i += 1
-    #
-    # except UnboundLocalError: # local variable 'ra_list' referenced before assignment
-    #         new_h5parm = make_h5parm(mtf, ms, clobber = clobber, directions = directions)
-    #
+    if directions: # if a direction is given
+        if len(directions) % 2 != 0: # should be even
+            logging.error('uneven number of ra, dec given for source positions')
+            sys.exit()
+
+        mtf_list, ms_list, clobber_list = [], [], []
+        for i in range(int(len(directions) / 2)):
+            mtf_list.append(mtf)
+            ms_list.append(ms)
+            clobber_list.append(clobber)
+
+        directions_paired = list(zip(directions[::2], directions[1::2])) # every second item is ra, dec
+        multiprocessing = list(zip(mtf_list, ms_list, clobber_list, directions_paired))
+
+        pool = Pool(cores)
+        new_h5parms = pool.map(make_h5parm_multiprocessing, multiprocessing)
+
+    else:
+        new_h5parm = make_h5parm(mtf, ms, clobber = clobber, directions = directions)
+
     for new_h5parm in new_h5parms:
         applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
+        
     # loop3_h5parm = loop3() # run loop 3, returning h5parm
     # updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber) # combine h5parms and update mtf
     # logging.info('main() completed')
