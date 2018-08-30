@@ -147,8 +147,8 @@ def make_h5parm_multiprocessing(args):
     - runs make_h5parm on multiple cores in parallel
 
     parameters:
-    - args (tuple): all arguments to be passed to the make_h5parm function with
-                    each tuple entry being a list of parameters for one run
+    - args (list): all arguments to be passed to the make_h5parm function with
+                   each list entry being a tuple of parameters for one run
 
     returns:
     - make_h5parm (function): runs the make_h5parm in parallel
@@ -483,8 +483,6 @@ def main():
                            [(mtf, ms, True, [3.7, 0.9]),
                             (mtf, ms, True, [3.6, 0.8])]) # change directions to a list, then put in here 0, 1, 2...
 
-    for new_h5parm in new_h5parms:
-        print('===================================================',new_h5parm)
     # try:
     #     i = 1
     #     for ra, dec in zip(ra_list, dec_list):
@@ -496,7 +494,8 @@ def main():
     # except UnboundLocalError: # local variable 'ra_list' referenced before assignment
     #         new_h5parm = make_h5parm(mtf, ms, clobber = clobber, directions = directions)
     #
-    # applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
+    for new_h5parm in new_h5parms:
+        applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
     # loop3_h5parm = loop3() # run loop 3, returning h5parm
     # updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber) # combine h5parms and update mtf
     # logging.info('main() completed')
