@@ -474,14 +474,11 @@ def main():
         ms_list.append(ms)
         clobber_list.append(clobber)
     multiprocessing = list(zip(mtf_list, ms_list, clobber_list, [directions[::2], directions[1::2]]))
-    print('+++++++++++++++++++++++++++++++++++++++++++++++++++',multiprocessing)
 
     # TODO sort out logging for mutliprocessing
     # TODO remove the requirement for the ms
     pool = Pool(cores)
-    new_h5parms = pool.map(make_h5parm_multiprocessing,
-                           [(mtf, ms, True, [3.7, 0.9]),
-                            (mtf, ms, True, [3.6, 0.8])]) # change directions to a list, then put in here 0, 1, 2...
+    new_h5parms = pool.map(make_h5parm_multiprocessing, multiprocessing)
 
     # try:
     #     i = 1
