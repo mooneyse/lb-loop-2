@@ -4,6 +4,14 @@
 a collection of functions for modifying hdf5 files
 '''
 
+# TODO flux and distance threshold limit?
+#      even if solutions are nearest, could still be too far away
+# TODO plot h5parm solutions, run this and compare input and output solutions
+# TODO sort out logging for mutliprocessing
+# TODO remove the requirement for the ms
+# TODO make sure temporary file names are not generic otherwise there will be multiprocessing issues
+# TODO write updatelist function
+
 from __future__ import print_function
 from functools import partial
 from multiprocessing import Pool
@@ -457,12 +465,6 @@ def main():
 
     loop3() # run loop 3 to generate h5parm
     evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
-
-    # TODO flux and distance threshold limit?
-    #      even if solutions are nearest, could still be too far away
-    # TODO plot h5parm solutions, run this and compare input and output solutions
-    # TODO sort out logging for mutliprocessing
-    # TODO remove the requirement for the ms
 
     if directions: # if a direction is given
         if len(directions) % 2 != 0: # should be even
