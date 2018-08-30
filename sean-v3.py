@@ -475,6 +475,7 @@ def main():
         mtf_list.append(mtf)
         ms_list.append(ms)
         clobber_list.append(clobber)
+    print('@@@@@@@@@@@@@@', ra_list, dec_list)
     multiprocessing = list(zip(mtf_list, ms_list, clobber_list, [directions[::2], directions[1::2]]))
 
     # TODO sort out logging for mutliprocessing
