@@ -279,12 +279,14 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
     h = lh5.h5parm(new_h5parm, readonly = False)
     try:
         table = h.makeSolset() # creates sol000
+        # NB here and this works, now just to get the information from the other h5parm for copying
+        # try use getAnt() and getSou() lh5.Solset(solset)
         source_table = table.obj._f_get_child('source')
         source_table.append(list(zip( * (['dir1', 'dir2', 'dir3'], [[1, 2], [3, 4], [5, 6]]))))
 
         antenna_table = table.obj._f_get_child('antenna')
         antenna_table.append(list(zip( * (['ant1', 'ant2', 'ant3'], [[1, 2, 3], [3, 4, 5], [5, 6, 7]]))))
-        print('DID SUMAT HERE! open {}'.format(new_h5parm))
+
     except:
         h.makeSolset(addTables = False)
         # we want the default 'addTables = True' but on my machine that gives
@@ -301,7 +303,7 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
         logging.info('copying {} data from {} to {}'.format(my_station, my_h5parm, new_h5parm))
 
         # use the station to get the relevant data to be copied from the h5parm
-        lo = lh5.h5parm(my_h5parm, readonly = False)
+        lo = lh5.h5parm(my_h5parm, readonly = False) # NB try change this to True as it should be True
         phase = lo.getSolset('sol000').getSoltab('phase000')
         logging.info('{} has {} dimensions, (pol, dir, ant, freq, time): {}'.format(my_h5parm, phase.val.ndim, phase.val.shape))
 
