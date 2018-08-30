@@ -442,7 +442,7 @@ def main():
     parser.add_argument('-f', '--ms', required = True,  type = str, help = 'measurement set')
     parser.add_argument('-t', '--threshold', required = False, type = float, default = 0.25, help = 'threshold determining the xx-yy statistic goodness')
     parser.add_argument('-n', '--cores', required = False, type = int, default = 4, help = 'number of cores to use')
-    parser.add_argument('-c', '--clobber', type = bool, action = 'store_true', help = 'overwrite the new h5parm if it exists', )
+    parser.add_argument('-c', '--clobber', action = 'store_true', help = 'overwrite the new h5parm if it exists', )
     parser.add_argument('-d', '--directions', type = float, default = 0, nargs = '+', help = 'ra, dec for source positions (ra1 dec1 ra2 dec2 etc)')
     args = parser.parse_args()
     mtf = args.mtf
