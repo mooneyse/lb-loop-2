@@ -429,8 +429,8 @@ def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False):
     h.close()
 
     # for comined_h5parm
-    vals = val_new_h5parm - val_loop3_h5parm # NB minus sign for testing
-    weights = weight_new_h5parm - weight_loop3_h5parm # NB minus sign for testing
+    vals = val_new_h5parm + val_loop3_h5parm
+    weights = weight_new_h5parm + weight_loop3_h5parm
 
     # create new h5parm
     logging.info('combining phase solutions from {} and {}'.format(new_h5parm, loop3_h5parm))
@@ -460,10 +460,7 @@ def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False):
 
     # evaluate the solutions and update the master file
     logging.info('updating {} with the {} solutions'.format(mtf, combined_h5parm))
-
-    logging.info('evaluating the {} solutions'.format(new_h5parm))
-    # evaluate_solutions(h5parm, mtf, threshold)
-    logging.info('finished updating {}'.format(mtf))
+    evaluate_solutions(combined_h5parm, mtf, threshold)
     logging.info('updatelist(new_h5parm = {}, loop3_h5parm = {}, mtf = {}, clobber = {}) completed'.format(new_h5parm, loop3_h5parm, mtf, clobber))
 
     return combined_h5parm
