@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 '''
-a collection of functions for modifying HDF5 files
+a collection of functions for modifying hdf5 files
 '''
 
 from __future__ import print_function
@@ -49,6 +49,7 @@ def loop3():
     - calls loop 3
 
     parameters:
+    - tbd
 
     returns:
     - loop3_h5parm (str): h5parm resulting from loop 3
@@ -141,7 +142,17 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     logging.info('evaluate_solutions(h5parm = {}, mtf = {}, threshold = {}) completed'.format(h5parm, mtf, threshold))
 
 def make_h5parm_multiprocessing(args):
-    # unpack arguments
+    '''
+    description:
+    - runs make_h5parm on multiple cores in parallel
+
+    parameters:
+    - args (tuple): all arguments to be passed to the make_h5parm function with
+                    each tuple entry being a list of parameters for one run
+
+    returns:
+    - make_h5parm (function): runs the make_h5parm in parallel
+    '''
     if len(args) == 4:
         mtf, ms, clobber, directions = args
 
@@ -455,6 +466,14 @@ def main():
 
     # TODO flux and distance threshold limit? even if solutions are nearest, could still be too far away
     # TODO plot h5parm solutions, run this and out outputted solutions -- should be the same
+
+# mtf_list, ms_list, clobber_list = [], [], []
+# for i in range(int(len(directions) / 2)):
+    # mtf_list.append(mtf)
+    # ms_list.append(ms)
+    # clobber_list.append(clobber)
+# multiprocessing = list(zip(mtf_list, ms_list, clobber_list, [directions[::2], directions[1::2]]))
+# print(multiprocessing)
 
     # TODO multiprocessing
     # put in the directions here and remove the requirement for the ms
