@@ -13,6 +13,7 @@ a collection of functions for modifying hdf5 files
 # TODO write updatelist function
 # TODO make use of the losoto.h5parm.Soltab.addHistory
 # TODO h5parm dimensions are hardcoded to pol, dir, ant, freq, time
+#      they could be in a different order
 
 from __future__ import print_function
 from functools import partial
@@ -94,8 +95,9 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
         direction = h['/sol000/source'][0][1] # radians
     except ValueError:
         logging.error('no source direction in the h5parm so exiting')
-    #     sys.exit()
-    direction = [3.7, 0.9] # NB here
+        direction = [3.7, 0.9] # NB put this here until source and antenna tables are copied across with losoto
+    #    sys.exit()
+
     direction = np.degrees(np.array(direction))
     h.close()
 
@@ -276,8 +278,12 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
 
     h = lh5.h5parm(new_h5parm, readonly = False)
     try:
-        h.makeSolset() # creates sol000
-        # TODO antenna and source tables are empty and so need to be populated
+        table = h.makeSolset() # creates sol000
+        source_table = table.obj._f_get_child('source')
+        source_table.append('TODO in here, add source table information')
+
+        antenna_table = table.obj._f_get_child('source')
+        source_table.append('TODO in here, add antenna table information')
     except:
         h.makeSolset(addTables = False)
         # we want the default 'addTables = True' but on my machine that gives
@@ -328,6 +334,7 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
                           axesVals = [pol, dir, ant, freq, time],
                           vals = vals,
                           weights = weights) # creates phase000
+
     h.close()
 
     # the end, tidying up
