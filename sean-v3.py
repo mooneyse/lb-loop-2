@@ -464,24 +464,27 @@ def main():
     loop3() # run loop 3 to generate h5parm
     evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
 
-    # TODO flux and distance threshold limit? even if solutions are nearest, could still be too far away
-    # TODO plot h5parm solutions, run this and out outputted solutions -- should be the same
+    # TODO flux and distance threshold limit?
+    #      even if solutions are nearest, could still be too far away
+    # TODO plot h5parm solutions, run this and out outputted solutions
 
-# mtf_list, ms_list, clobber_list = [], [], []
-# for i in range(int(len(directions) / 2)):
-    # mtf_list.append(mtf)
-    # ms_list.append(ms)
-    # clobber_list.append(clobber)
-# multiprocessing = list(zip(mtf_list, ms_list, clobber_list, [directions[::2], directions[1::2]]))
-# print(multiprocessing)
+    mtf_list, ms_list, clobber_list = [], [], []
+    for i in range(int(len(directions) / 2)):
+        mtf_list.append(mtf)
+        ms_list.append(ms)
+        clobber_list.append(clobber)
+    multiprocessing = list(zip(mtf_list, ms_list, clobber_list, [directions[::2], directions[1::2]]))
+    print('+++++++++++++++++++++++++++++++++++++++++++++++++++',multiprocessing)
 
-    # TODO multiprocessing
-    # put in the directions here and remove the requirement for the ms
+    # TODO sort out logging for mutliprocessing
+    # TODO remove the requirement for the ms
     pool = Pool(cores)
     new_h5parms = pool.map(make_h5parm_multiprocessing,
                            [(mtf, ms, True, [3.7, 0.9]),
                             (mtf, ms, True, [3.6, 0.8])]) # change directions to a list, then put in here 0, 1, 2...
 
+    for new_h5parm in new_h5parms:
+        print('===================================================',new_h5parm)
     # try:
     #     i = 1
     #     for ra, dec in zip(ra_list, dec_list):
