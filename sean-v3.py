@@ -204,7 +204,9 @@ def make_h5parm(mtf, ms, clobber = False, directions = []):
 
     elif len(directions) != 2:
         logging.error('ra, dec not passed correctly')
-        sys.exit()
+        os._exit() # https://stackoverflow.com/a/23937527/6386612
+        # not ideal as buffers are not flushed on exit
+        # sys.exit()
 
     directions = SkyCoord(directions[0], directions[1], unit = 'rad')
 
