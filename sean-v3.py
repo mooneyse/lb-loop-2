@@ -168,9 +168,9 @@ def make_h5parm_multiprocessing(args):
         mtf, ms = args
         clobber, directions = False, []
 
-    return make_h5parm(mtf, ms, clobber, directions)
+    return make_h5parm(mtf, ms = ms, clobber = clobber, directions = directions)
 
-def make_h5parm(mtf, ms, clobber = False, directions = []):
+def make_h5parm(mtf, ms = '', clobber = False, directions = []):
     '''
     description:
     - get the direction from the measurement set or list provided
@@ -437,13 +437,13 @@ def main():
     logging.basicConfig(format = '\033[1m%(asctime)s \033[31m%(levelname)s \033[00m%(message)s', datefmt = '%Y/%m/%d %H:%M:%S', level = logging.INFO)
 
     parser = argparse.ArgumentParser(description = __doc__, formatter_class = argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('-m', '--mtf', required = True, help = 'master text file')
-    parser.add_argument('-p', '--h5parm', required = True, help = 'hdf5 file')
-    parser.add_argument('-f', '--ms', required = True, help = 'measurement set')
-    parser.add_argument('-t', '--threshold', type = float, default = 0.25, help = 'threshold determining the xx-yy statistic goodness')
-    parser.add_argument('-n', '--cores', type = int, default = 5, help = 'number of cores to use')
-    parser.add_argument('-c', '--clobber', help = 'overwrite the new h5parm if it exists', action = 'store_true')
-    parser.add_argument('-d', '--directions', type = float, default = 0, help = 'ra, dec for source positions (ra1 dec1 ra2 dec2...)', nargs = '+')
+    parser.add_argument('-m', '--mtf', required = True,  type = str, help = 'master text file')
+    parser.add_argument('-p', '--h5parm', required = True,  type = str, help = 'hdf5 file')
+    parser.add_argument('-f', '--ms', required = True,  type = str, help = 'measurement set')
+    parser.add_argument('-t', '--threshold', required = False, type = float, default = 0.25, help = 'threshold determining the xx-yy statistic goodness')
+    parser.add_argument('-n', '--cores', required = False, type = int, default = 4, help = 'number of cores to use')
+    parser.add_argument('-c', '--clobber', type = bool, action = 'store_true', help = 'overwrite the new h5parm if it exists', )
+    parser.add_argument('-d', '--directions', type = float, default = 0, nargs = '+', help = 'ra, dec for source positions (ra1 dec1 ra2 dec2 etc)')
     args = parser.parse_args()
     mtf = args.mtf
     h5parm = args.h5parm
@@ -460,7 +460,7 @@ def main():
 
     # TODO flux and distance threshold limit?
     #      even if solutions are nearest, could still be too far away
-    # TODO plot h5parm solutions, run this and out outputted solutions
+    # TODO plot h5parm solutions, run this and compare input and output solutions
     # TODO sort out logging for mutliprocessing
     # TODO remove the requirement for the ms
 
@@ -469,6 +469,8 @@ def main():
             logging.error('uneven number of ra, dec given for source positions')
             sys.exit()
 
+        # if multiple ra, dec are given then do multiprocessing
+        # first, some book-keeping to get things in the right place
         mtf_list, ms_list, clobber_list = [], [], []
         for i in range(int(len(directions) / 2)):
             mtf_list.append(mtf)
@@ -478,18 +480,18 @@ def main():
         directions_paired = list(zip(directions[::2], directions[1::2])) # every second item is ra, dec
         multiprocessing = list(zip(mtf_list, ms_list, clobber_list, directions_paired))
 
-        pool = Pool(cores)
+        pool = Pool(cores) # specify cores
         new_h5parms = pool.map(make_h5parm_multiprocessing, multiprocessing)
 
-    else:
-        new_h5parm = make_h5parm(mtf, ms, clobber = clobber, directions = directions)
+    else: # if directions are not given, use the ms phase centre
+        new_h5parm = make_h5parm(mtf, ms = ms, clobber = clobber, directions = directions)
 
     for new_h5parm in new_h5parms:
         applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
-        
-    # loop3_h5parm = loop3() # run loop 3, returning h5parm
-    # updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber) # combine h5parms and update mtf
-    # logging.info('main() completed')
+
+    loop3_h5parm = loop3() # run loop 3, returning h5parm
+    updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber) # combine h5parms and update mtf
+    logging.info('main() completed')
 
 if __name__ == '__main__':
     main()
