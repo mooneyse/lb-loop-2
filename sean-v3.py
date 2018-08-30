@@ -456,10 +456,10 @@ def main():
     logging.info('executing main()')
 
     if directions: # if a direction is given
-        if len(directions) % 2 == 0: # should be even
-            ra_list = directions[::2] # every second item, starting at the first element
-            dec_list = directions[1::2] # every second item, starting at the second element
-        else:
+        if len(directions) % 2 != 0: # should be even
+        #     ra_list = directions[::2] # every second item, starting at the first element
+        #     dec_list = directions[1::2] # every second item, starting at the second element
+        # else:
             logging.error('uneven number of ra, dec given for source positions')
             sys.exit()
 
@@ -475,8 +475,9 @@ def main():
         mtf_list.append(mtf)
         ms_list.append(ms)
         clobber_list.append(clobber)
-    print('@@@@@@@@@@@@@@', ra_list, dec_list)
-    multiprocessing = list(zip(mtf_list, ms_list, clobber_list, [directions[::2], directions[1::2]]))
+
+    directions_paired = list(zip(directions[::2], directions[1::2])) # every second item is ra, dec
+    multiprocessing = list(zip(mtf_list, ms_list, clobber_list, directions_paired))
 
     # TODO sort out logging for mutliprocessing
     # TODO remove the requirement for the ms
