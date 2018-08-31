@@ -470,7 +470,7 @@ def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False, threshold = 0.25)
     # write these best phase solutions to the combined_h5parm
     h = lh5.h5parm(combined_h5parm, readonly = False)
     try:
-        h.makeSolset() # creates sol000
+        table = h.makeSolset() # creates sol000
     except:
         h.makeSolset(addTables = False)
         logging.info('could not make antenna and source tables')
