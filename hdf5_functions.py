@@ -27,7 +27,7 @@ import astropy.units as u
 import pyrap.tables as pt
 import losoto.h5parm as lh5
 import numpy as np
-import argparse, csv, datetime, h5py, logging, multiprocessing, os, subprocess, sys, threading
+import argparse, csv, datetime, logging, multiprocessing, os, subprocess, sys, threading
 
 def does_it_exist(the_file, clobber = False, append = False):
     '''
