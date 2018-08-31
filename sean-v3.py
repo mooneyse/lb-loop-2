@@ -281,8 +281,8 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
         table = h.makeSolset() # creates sol000
         # NB here and this works, now just to get the information from the other h5parm for copying
         # try use getAnt() and getSou() lh5.Solset(solset)
-        source_table = table.obj._f_get_child('source')
-        source_table.append(list(zip( * (['dir1', 'dir2', 'dir3'], [[1, 2], [3, 4], [5, 6]]))))
+        # source_table = table.obj._f_get_child('source')
+        # source_table.append(list(zip( * (['dir1', 'dir2', 'dir3'], [[1, 2], [3, 4], [5, 6]]))))
 
         antenna_table = table.obj._f_get_child('antenna')
         antenna_table.append(list(zip( * (['ant1', 'ant2', 'ant3'], [[1, 2, 3], [3, 4, 5], [5, 6, 7]]))))
@@ -320,6 +320,9 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
         # WARNING pol, dir, ant, time, freq should be the same in all h5parms so
         # using the last one in the loop for that information (could be a source of error in future)
         if my_line == len(working_data) - 1:
+            soltab = lh5.getSolset('sol000')
+            antenna_soltab = soltab.getAnt()
+            source_soltab = soltab.getSou()
             pol = phase.pol[:]
             dir = phase.dir[:]
             ant = phase.ant[:]
@@ -337,6 +340,10 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
                           axesVals = [pol, dir, ant, freq, time],
                           vals = vals,
                           weights = weights) # creates phase000
+
+    source_table = table.obj._f_get_child('source')
+    # source_table.append(list(zip( * (['dir1', 'dir2', 'dir3'], [[1, 2], [3, 4], [5, 6]]))))
+    source_table.append(source_soltab)
 
     h.close()
 
