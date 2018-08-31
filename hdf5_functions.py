@@ -92,23 +92,16 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
 
     logging.info('executing evaluate_solutions(h5parm = {}, mtf = {}, threshold = {})'.format(h5parm, mtf, threshold))
 
-    # get the direction from the h5parm
-    h = lh5.h5parm(h5parm)
-    direction = h.getSolset('sol000').getSou()['pointing']
-    print('DIIIIIIIIIIIIIIIIIIIIIIRECTION',direction)
-
-    h.close()
-
-    h = h5py.File(h5parm, 'r') # TODO should probably use losoto for this
+    # get the direction from the h5parm source table
     try:
-        direction = h['/sol000/source'][0][1] # radians
-        print('DIIIIIIIIIIIIIIIIIIIIIIRECTION',direction)
+        h = lh5.h5parm(h5parm)
+        direction = h.getSolset('sol000').getSou()['pointing']
     except ValueError:
         logging.error('no source direction in the h5parm so exiting')
         sys.exit()
 
-    direction = np.degrees(np.array(direction))
     h.close()
+    direction = np.degrees(np.array(direction))
 
     # get the phase solutions for each station from the h5parm
     logging.info('opening {}'.format(h5parm))
