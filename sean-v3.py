@@ -96,8 +96,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
         direction = h['/sol000/source'][0][1] # radians
     except ValueError:
         logging.error('no source direction in the h5parm so exiting')
-        direction = [3.7, 0.9] # NB put this here until source and antenna tables are copied across with losoto
-    #    sys.exit()
+        sys.exit()
 
     direction = np.degrees(np.array(direction))
     h.close()
