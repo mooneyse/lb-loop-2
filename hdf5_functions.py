@@ -95,31 +95,33 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     # get the direction from the h5parm source table
     h = lh5.h5parm(h5parm)
     solsetnames = h.getSolsetNames()
-    solsetname = solsetnames[0] # usually sol000
 
-    if len(solsetnames) > 1:
+    if len(solsetnames) > 1: # ignoring others
         logging.warn('multiple solution sets found in {}: {}'.format(h5parm, solsetnames))
-        logging.warn('using solution set {} only'.format(solsetname)) # ignoring others
+        logging.warn('using solution set {} only'.format(solsetnames[0])) # usually sol000
 
     try:
-        getsou = h.getSolset(solsetname).getSou() # dictionary
+        getsou = h.getSolset(solsetnames[0]).getSou() # dictionary
     except ValueError:
         logging.error('no source direction in the h5parm so exiting')
         sys.exit()
 
     if len(getsou.keys()) > 1: # should be only one key called 'pointing' but using the first key if there are multiple
-        logging.warn('multiple dictionary keys in the {} source table: {}'.format(h5parm, getsou.keys()))
+        logging.warn('multiple dictionary keys in the source table in {}: {}'.format(h5parm, getsou.keys()))
         logging.warn('using key {}'.format(getsou.keys()[0]))
 
     direction = getsou[getsou.keys()[0]] # list in radians
     direction = np.degrees(np.array(direction)) # array in degrees
-    # h.close()
 
     # get the phase solutions for each station from the h5parm
     # NOTE the convenience function openSoltab does not close the h5parm so it is not used here
-    # lo = lh5.h5parm(h5parm), readonly = False)
-    phase = h.getSolset('sol000').getSoltab('phase000')
-    logging.info('got the phase solution tab (phase000) from {}'.format(h5parm))
+    soltabnames = h.getSolset('sol000').getSoltabNames()
+    if len(soltabnames) > 1: # should be only one called 'phase000' but using the first if there are multiple
+        logging.warn('multiple solution tables in {}: {}'.format(h5parm, soltabnames))
+        logging.warn('using solution table {}'.format(soltabnames[0]))
+
+    phase = h.getSolset(solsetnames[0]).getSoltab(soltabnames[0])
+    logging.info('got the solution tab {} from {}'.format(soltabnames[0], h5parm))
     stations = phase.ant[:]
     logging.info('got the stations (i.e. antennas) from {}'.format(h5parm))
     evaluations = {} # dictionary to hold the statistics for each station
@@ -153,8 +155,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
 
     with open(mtf, 'a') as f:
         f.write('{}, {}, {}'.format(h5parm, direction[0], direction[1]))
-        for mtf_station in mtf_stations:
-            # look up the statistic for a station and determine if it is good
+        for mtf_station in mtf_stations: # look up the statistic for a station and determine if it is good
             try:
                 value = evaluations[mtf_station[1:]]
             except KeyError:
