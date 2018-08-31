@@ -319,8 +319,9 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
 
         # WARNING pol, dir, ant, time, freq should be the same in all h5parms so
         # using the last one in the loop for that information (could be a source of error in future)
+        # also getting the antenna and source table from this last h5parm
         if my_line == len(working_data) - 1:
-            soltab = lh5.getSolset('sol000')
+            soltab = lo.getSolset('sol000')
             antenna_soltab = soltab.getAnt()
             source_soltab = soltab.getSou()
             pol = phase.pol[:]
