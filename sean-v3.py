@@ -336,19 +336,11 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
                           vals = vals,
                           weights = weights) # creates phase000
 
+    # copy source and antenna tables into the new h5parm
     source_table = table.obj._f_get_child('source')
-    # source_table.append(list(zip( * (['dir1', 'dir2', 'dir3'], [[1, 2], [3, 4], [5, 6]]))))
-    print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-    source_table.append(source_soltab.items())
+    source_table.append(source_soltab.items()) # from dictionary to list
     antenna_table = table.obj._f_get_child('antenna')
-    antenna_table.append(antenna_soltab.items())
-    # NB here and this works, now just to get the information from the other h5parm for copying
-    # try use getAnt() and getSou() lh5.Solset(solset)
-    # source_table = table.obj._f_get_child('source')
-    # source_table.append(list(zip( * (['dir1', 'dir2', 'dir3'], [[1, 2], [3, 4], [5, 6]]))))
-
-    # antenna_table = table.obj._f_get_child('antenna')
-    # antenna_table.append(list(zip( * (['ant1', 'ant2', 'ant3'], [[1, 2, 3], [3, 4, 5], [5, 6, 7]]))))
+    antenna_table.append(antenna_soltab.items()) # from dictionary to list
 
     h.close()
 
