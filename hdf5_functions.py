@@ -92,23 +92,30 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
 
     logging.info('executing evaluate_solutions(h5parm = {}, mtf = {}, threshold = {})'.format(h5parm, mtf, threshold))
 
+    # get the direction from the h5parm source table
     h = lh5.h5parm(h5parm)
     solsetnames = h.getSolsetNames()
-    sol = solsetnames[0] # usually sol000
-    logging.info('solution sets found in {}: {}'.format(h5parm, solsetnames))
-    logging.info('using solution set {} only'.format(sol)) # ignoring others
+    solsetname = solsetnames[0] # usually sol000
 
-    try: # try get the direction from the h5parm source table
-        direction = h.getSolset(sol).getSou()['pointing']
+    if len(solsetnames) > 1:
+        logging.warn('multiple solution sets found in {}: {}'.format(h5parm, solsetnames))
+        logging.warn('using solution set {} only'.format(solsetname)) # ignoring others
+
+    try:
+        getsou = h.getSolset(solsetname).getSou() # dictionary
     except ValueError:
         logging.error('no source direction in the h5parm so exiting')
         sys.exit()
 
-    direction = np.degrees(np.array(direction))
+    if len(getsou_keys) > 1: # should be only one key called 'pointing' but using the first key if there are multiple
+        logging.warn('multiple dictionary keys in the {} source table: {}'.format(h5parm, getsou.keys()))
+        logging.warn('using key {}'.format(getsou.keys()[0]))
+
+    direction = getsou[getsou.keys()[0]] # list in radians
+    direction = np.degrees(np.array(direction)) # array in degrees
     h.close()
 
     # get the phase solutions for each station from the h5parm
-    logging.info('opening {}'.format(h5parm))
     # NOTE the convenience function openSoltab does not close the h5parm so it is not used here
     lo = lh5.h5parm(h5parm, readonly = False)
     phase = lo.getSolset('sol000').getSoltab('phase000')
