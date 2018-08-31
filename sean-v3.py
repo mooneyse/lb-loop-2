@@ -277,20 +277,14 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
     does_it_exist(new_h5parm, clobber = clobber) # check if the h5parm exists
 
     h = lh5.h5parm(new_h5parm, readonly = False)
+
     try:
         table = h.makeSolset() # creates sol000
-        # NB here and this works, now just to get the information from the other h5parm for copying
-        # try use getAnt() and getSou() lh5.Solset(solset)
-        # source_table = table.obj._f_get_child('source')
-        # source_table.append(list(zip( * (['dir1', 'dir2', 'dir3'], [[1, 2], [3, 4], [5, 6]]))))
-
-        antenna_table = table.obj._f_get_child('antenna')
-        antenna_table.append(list(zip( * (['ant1', 'ant2', 'ant3'], [[1, 2, 3], [3, 4, 5], [5, 6, 7]]))))
-
     except:
         h.makeSolset(addTables = False)
         # we want the default 'addTables = True' but on my machine that gives
         # 'NotImplementedError: structured arrays with columns with type description ``<U16`` are not supported yet, sorry'
+
     solset = h.getSolset('sol000')
 
     working_data = np.genfromtxt(working_file, delimiter = '\t', dtype = str)
@@ -346,6 +340,15 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
     # source_table.append(list(zip( * (['dir1', 'dir2', 'dir3'], [[1, 2], [3, 4], [5, 6]]))))
     print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
     source_table.append(source_soltab.items())
+    antenna_table = table.obj._f_get_child('antenna')
+    antenna_table.append(antenna_soltab.items())
+    # NB here and this works, now just to get the information from the other h5parm for copying
+    # try use getAnt() and getSou() lh5.Solset(solset)
+    # source_table = table.obj._f_get_child('source')
+    # source_table.append(list(zip( * (['dir1', 'dir2', 'dir3'], [[1, 2], [3, 4], [5, 6]]))))
+
+    # antenna_table = table.obj._f_get_child('antenna')
+    # antenna_table.append(list(zip( * (['ant1', 'ant2', 'ant3'], [[1, 2, 3], [3, 4, 5], [5, 6, 7]]))))
 
     h.close()
 
