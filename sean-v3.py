@@ -345,7 +345,7 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
     source_table = table.obj._f_get_child('source')
     # source_table.append(list(zip( * (['dir1', 'dir2', 'dir3'], [[1, 2], [3, 4], [5, 6]]))))
     print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-    source_table.append(source_soltab)
+    source_table.append(source_soltab.items())
 
     h.close()
 
