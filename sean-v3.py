@@ -10,10 +10,11 @@ a collection of functions for modifying hdf5 files
 # TODO sort out logging for mutliprocessing
 # TODO make sure temporary file names are not generic otherwise there will be multiprocessing issues
 # TODO make sure h5parm are read-only when used with mutliprocessing module
-# TODO write updatelist function
+# TODO if one of the multiprocessing threads fails then exit
 # TODO make use of the losoto.h5parm.Soltab.addHistory
 # TODO h5parm dimensions are hardcoded to pol, dir, ant, freq, time
 #      they could be in a different order
+#      also then need to change the np.concatenate around line 331
 
 from __future__ import print_function
 from functools import partial
@@ -171,6 +172,9 @@ def make_h5parm_multiprocessing(args):
     returns:
     - make_h5parm (function): runs the make_h5parm in parallel
     '''
+
+    # probably over-complicated and not very pythonic way of handling the
+    # the different arguments passed
     if len(args) == 4:
         mtf, ms, clobber, directions = args
 
@@ -265,6 +269,7 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
             value = data[mtf_station][row] # boolean value for h5parm and station
             if value == 1 and mtf_station not in successful_stations:
                 working_information = '{}\t{}\t{}\t{}\t{}'.format(mtf_station.ljust(8), round(key.deg, 6), int(value), row, h5parm)
+                # print this information and write it to a working file
                 logging.info('\t{}'.format(working_information))
                 f.write('{}\n'.format(working_information))
                 successful_stations.append(mtf_station)
@@ -275,7 +280,6 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
     new_h5parm = '{}_{}_{}.h5'.format(ms, directions.ra.deg, directions.dec.deg)
     logging.info('creating {}'.format(new_h5parm))
     does_it_exist(new_h5parm, clobber = clobber) # check if the h5parm exists
-
     h = lh5.h5parm(new_h5parm, readonly = False)
 
     try:
@@ -285,8 +289,9 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
         # we want the default 'addTables = True' but on my machine that gives
         # 'NotImplementedError: structured arrays with columns with type description ``<U16`` are not supported yet, sorry'
 
-    solset = h.getSolset('sol000')
+    solset = h.getSolset('sol000') # on the new h5parm
 
+    # get data to be copied from the working file to which the information was written
     working_data = np.genfromtxt(working_file, delimiter = '\t', dtype = str)
     working_data = sorted(working_data.tolist()) # stations in h5parm are alphabetised
     val, weight = [], []
@@ -316,8 +321,8 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
         # also getting the antenna and source table from this last h5parm
         if my_line == len(working_data) - 1:
             soltab = lo.getSolset('sol000')
-            antenna_soltab = soltab.getAnt()
-            source_soltab = soltab.getSou()
+            antenna_soltab = soltab.getAnt() # dictionary
+            source_soltab = soltab.getSou() # dictionary
             pol = phase.pol[:]
             dir = phase.dir[:]
             ant = phase.ant[:]
@@ -342,7 +347,7 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
     antenna_table = table.obj._f_get_child('antenna')
     antenna_table.append(antenna_soltab.items()) # from dictionary to list
 
-    h.close()
+    h.close() # close the new h5parm
 
     # the end, tidying up
     logging.info('finished making the h5parm {}'.format(new_h5parm))
