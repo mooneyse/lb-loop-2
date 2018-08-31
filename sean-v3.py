@@ -440,7 +440,11 @@ def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False, threshold = 0.25)
 
     # from loop3_h5parm
     h = lh5.h5parm(loop3_h5parm)
-    phase = h.getSolset('sol000').getSoltab('phase000')
+    soltab = h.getSolset('sol000') # NB remove hard-coded names
+    phase = soltab.getSoltab('phase000')
+    antenna_soltab = soltab.getAnt().items() # dictionary to list
+    source_soltab = soltab.getSou().items() # dictionary to list
+
     pol = phase.pol[:]
     dir = phase.dir[:]
     ant = phase.ant[:]
@@ -479,6 +483,13 @@ def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False, threshold = 0.25)
                           axesVals = [pol, dir, ant, freq, time],
                           vals = vals,
                           weights = weights) # creates phase000
+
+    # copy source and antenna tables into the new h5parm
+    source_table = table.obj._f_get_child('source')
+    source_table.append(source_soltab)
+    antenna_table = table.obj._f_get_child('antenna')
+    antenna_table.append(antenna_soltab) # from dictionary to list
+
     h.close()
 
     # evaluate the solutions and update the master file
