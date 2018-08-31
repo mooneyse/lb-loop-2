@@ -92,16 +92,20 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
 
     logging.info('executing evaluate_solutions(h5parm = {}, mtf = {}, threshold = {})'.format(h5parm, mtf, threshold))
 
-    # get the direction from the h5parm source table
-    try:
-        h = lh5.h5parm(h5parm)
-        direction = h.getSolset('sol000').getSou()['pointing']
+    h = lh5.h5parm(h5parm)
+    solsetnames = h.getSolsetNames()
+    sol = solsetnames[0] # usually sol000
+    logging.info('solution sets found in {}: {}'.format(h5parm, solsetnames))
+    logging.info('using solution set {} only'.format(sol)) # ignoring others
+
+    try: # try get the direction from the h5parm source table
+        direction = h.getSolset(sol).getSou()['pointing']
     except ValueError:
         logging.error('no source direction in the h5parm so exiting')
         sys.exit()
 
-    h.close()
     direction = np.degrees(np.array(direction))
+    h.close()
 
     # get the phase solutions for each station from the h5parm
     logging.info('opening {}'.format(h5parm))
