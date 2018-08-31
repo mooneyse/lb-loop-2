@@ -107,7 +107,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
         logging.error('no source direction in the h5parm so exiting')
         sys.exit()
 
-    if len(getsou_keys) > 1: # should be only one key called 'pointing' but using the first key if there are multiple
+    if len(getsou.keys()) > 1: # should be only one key called 'pointing' but using the first key if there are multiple
         logging.warn('multiple dictionary keys in the {} source table: {}'.format(h5parm, getsou.keys()))
         logging.warn('using key {}'.format(getsou.keys()[0]))
 
