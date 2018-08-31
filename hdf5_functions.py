@@ -15,6 +15,8 @@ a collection of functions for modifying hdf5 files
 # TODO h5parm dimensions are hardcoded to pol, dir, ant, freq, time
 #      they could be in a different order
 #      also then need to change the np.concatenate around line 331
+# TODO break lots of bits into smaller functions
+#      some snippets of code are written twice!
 
 from __future__ import print_function
 from functools import partial
@@ -284,7 +286,8 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
     try:
         table = h.makeSolset() # creates sol000
     except:
-        h.makeSolset(addTables = False)
+        logging.error('could not make antenna and source tables')
+        sys.exit()
         # we want the default 'addTables = True' but on my machine that gives
         # 'NotImplementedError: structured arrays with columns with type description ``<U16`` are not supported yet, sorry'
 
@@ -471,9 +474,9 @@ def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False, threshold = 0.25)
     h = lh5.h5parm(combined_h5parm, readonly = False)
     try:
         table = h.makeSolset() # creates sol000
-    except:
-        h.makeSolset(addTables = False)
-        logging.info('could not make antenna and source tables')
+    except NotImplementedError:
+        logging.error('could not make antenna and source tables')
+        sys.exit()
         # on my machine the default 'addTables = True' gives
         # 'NotImplementedError: structured arrays with columns with type description ``<U16`` are not supported yet, sorry'
 
