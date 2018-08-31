@@ -113,12 +113,12 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
 
     direction = getsou[getsou.keys()[0]] # list in radians
     direction = np.degrees(np.array(direction)) # array in degrees
-    h.close()
+    # h.close()
 
     # get the phase solutions for each station from the h5parm
     # NOTE the convenience function openSoltab does not close the h5parm so it is not used here
-    lo = lh5.h5parm(h5parm, readonly = False)
-    phase = lo.getSolset('sol000').getSoltab('phase000')
+    # lo = lh5.h5parm(h5parm), readonly = False)
+    phase = h.getSolset('sol000').getSoltab('phase000')
     logging.info('got the phase solution tab (phase000) from {}'.format(h5parm))
     stations = phase.ant[:]
     logging.info('got the stations (i.e. antennas) from {}'.format(h5parm))
@@ -144,9 +144,10 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
 
     # append to master file if it exists, else write
     if not does_it_exist(mtf, append = True):
-        lo.close()
+        h.close()
         sys.exit()
     logging.info('writing the results to the master text file {}'.format(mtf))
+
     with open(mtf) as f:
         mtf_stations = list(csv.reader(f))[0][3:] # get stations from the mtf
 
@@ -168,7 +169,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
 
         f.write('\n')
 
-    lo.close()
+    h.close()
     logging.info('evaluate_solutions(h5parm = {}, mtf = {}, threshold = {}) completed'.format(h5parm, mtf, threshold))
 
 def make_h5parm_multiprocessing(args):
