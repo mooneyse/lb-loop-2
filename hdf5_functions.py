@@ -82,9 +82,9 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     - append the right ascension, declination, and validity to the master text file
 
     parameters:
-    - h5parm   (str)            : lofar hdf5 parameter file
-    - mtf      (str)            : master text file
-    - thresold (float, optional): threshold to determine the goodness of the xx-yy statistic
+    - h5parm   (str)             : lofar hdf5 parameter file
+    - mtf      (str)             : master text file
+    - threshold (float, optional): threshold to determine the goodness of the xx-yy statistic
 
     returns:
     - none
