@@ -530,7 +530,12 @@ def main():
     - none
     '''
 
-    logging.basicConfig(format = '\033[1m%(asctime)s \033[31m%(levelname)s \033[00m%(message)s', datefmt = '%Y/%m/%d %H:%M:%S', level = logging.INFO)
+    format = '\033[1m%(asctime)s \033[31m%(levelname)s \033[00m%(message)s'
+    logging.basicConfig(format=format,
+                        datefmt='%Y/%m/%d %H:%M:%S',
+                        level=logging.INFO,
+                        filename='hdf5_functions.log',
+                        filemode='w')
 
     parser = argparse.ArgumentParser(description = __doc__, formatter_class = argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-m', '--mtf', required = True,  type = str, help = 'master text file')
