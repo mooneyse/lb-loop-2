@@ -24,12 +24,6 @@ import sys
 import threading
 import loop3A
 
-# def coherence_metric(phasesol_xx,phasesol_yy):
-#     diff = phasesol_xx - phasesol_yy
-#     diff = np.unwrap(diff)
-#     coh_met = np.nanmean(np.gradient(abs(diff))**2)
-#     return(coh_met)
-
 def does_it_exist(the_file, clobber = False, append = False):
     '''
     description:
@@ -71,6 +65,7 @@ def loop3():
     '''
 
     logging.info('executing loop3()')
+    # loop3A from Neal Jackson
     logging.info('loop3() completed')
     return '/data/scratch/sean/h5parms/loop3_h5parm.h5'
 
@@ -139,10 +134,16 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
         for value in phase.val[1, 0, station, 0, :]:
             yy.append(value)
 
+
+        diff = np.array(xx) - np.array(yy)
+        diff = np.unwrap(diff)
+        coh_met = np.nanmean(np.gradient(abs(diff)) ** 2)
+
         xx = np.array(xx)
         yy = np.array(yy)
         xx_yy = xx - yy
         mean_xx_yy = np.nanmean(np.abs(xx_yy)) * (1 / (2 * np.pi))
+        print(mean_xx_yy, coh_met)
         evaluations[stations[station]] = mean_xx_yy # 0 = best, 1 = worst
 
     # append to master file if it exists, else write
@@ -273,7 +274,7 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
     logging.info('creating working file {}'.format(working_file))
     f = open(working_file, 'w')
 
-    logging.info('for this direction in the ms, make a new h5parm consisting of the following:')
+    logging.info('for the ({}, {}) direction, make a new h5parm consisting of the following:'.format(directions.ra.deg, directions.dec.deg))
     logging.info('\tstation \tseparation\tboolean\trow\t5parm')
     successful_stations = []
 
@@ -533,18 +534,58 @@ def main():
     format = '\033[1m%(asctime)s \033[31m%(levelname)s \033[00m%(message)s'
     logging.basicConfig(format=format,
                         datefmt='%Y/%m/%d %H:%M:%S',
-                        level=logging.INFO,
-                        filename='hdf5_functions.log',
-                        filemode='w')
+                        level=logging.INFO)
+                        # filename='hdf5_functions.log',
+                        # filemode='w')
 
-    parser = argparse.ArgumentParser(description = __doc__, formatter_class = argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('-m', '--mtf', required = True,  type = str, help = 'master text file')
-    parser.add_argument('-p', '--h5parm', required = True,  type = str, help = 'hdf5 file')
-    parser.add_argument('-f', '--ms', required = True,  type = str, help = 'measurement set')
-    parser.add_argument('-t', '--threshold', required = False, type = float, default = 0.25, help = 'threshold determining the xx-yy statistic goodness')
-    parser.add_argument('-n', '--cores', required = False, type = int, default = 4, help = 'number of cores to use')
-    parser.add_argument('-c', '--clobber', action = 'store_true', help = 'overwrite the new h5parm if it exists', )
-    parser.add_argument('-d', '--directions', type = float, default = 0, nargs = '+', help = 'ra, dec for source positions (ra1 dec1 ra2 dec2 etc)')
+    formatter_class = argparse.RawDescriptionHelpFormatter
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=formatter_class)
+
+    parser.add_argument('-m',
+                        '--mtf',
+                        required=True,
+                        type=str,
+                        help='master text file')
+
+    parser.add_argument('-p',
+                        '--h5parm',
+                        required=True,
+                        type=str,
+                        help='hdf5 file')
+
+    parser.add_argument('-f',
+                        '--ms',
+                        required=True,
+                        type=str,
+                        help='measurement set')
+
+    parser.add_argument('-t',
+                        '--threshold',
+                        required=False,
+                        type=float,
+                        default=0.25,
+                        help='threshold for the xx-yy statistic goodness')
+
+    parser.add_argument('-n',
+                        '--cores',
+                        required=False,
+                        type=int,
+                        default=4,
+                        help='number of cores to use')
+
+    parser.add_argument('-c',
+                        '--clobber',
+                        action='store_true',
+                        help='overwrite the new h5parm if it exists')
+
+    parser.add_argument('-d',
+                        '--directions',
+                        type=float,
+                        default=0,
+                        nargs='+',
+                        help='source positions (radians; ra1 dec1 ra2 dec2...)')
+
     args = parser.parse_args()
     mtf = args.mtf
     h5parm = args.h5parm
@@ -555,39 +596,38 @@ def main():
     directions = args.directions
 
     logging.info('executing main()')
-
     loop3() # run loop 3 to generate h5parm
     evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
 
-    if directions: # if a direction is given
-        if len(directions) % 2 != 0: # should be even
-            logging.error('uneven number of ra, dec given for source positions')
-            sys.exit()
-
-        # if multiple ra, dec are given then do multiprocessing
-        # first, some book-keeping to get things in the right place
-        mtf_list, ms_list, clobber_list = [], [], []
-        for i in range(int(len(directions) / 2)):
-            mtf_list.append(mtf)
-            ms_list.append(ms)
-            clobber_list.append(clobber)
-
-        directions_paired = list(zip(directions[::2], directions[1::2])) # every second item is ra, dec
-        multiprocessing = list(zip(mtf_list, ms_list, clobber_list, directions_paired))
-
-        pool = Pool(cores) # specify cores
-        new_h5parms = pool.map(make_h5parm_multiprocessing, multiprocessing)
-
-    else: # if directions are not given, use the ms phase centre
-        new_h5parm = make_h5parm(mtf, ms = ms, clobber = clobber, directions = directions)
-
-    for new_h5parm in new_h5parms:
-        applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
-
-    loop3_h5parm = loop3() # run loop 3, returning h5parm
-    loop3_h5parm = new_h5parm # for testing
-    updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber, threshold = threshold) # combine h5parms and update mtf
-    logging.info('main() completed')
+    # if directions: # if a direction is given
+    #     if len(directions) % 2 != 0: # should be even
+    #         logging.error('uneven number of ra, dec given for source positions')
+    #         sys.exit()
+    #
+    #     # if multiple ra, dec are given then do multiprocessing
+    #     # first, some book-keeping to get things in the right place
+    #     mtf_list, ms_list, clobber_list = [], [], []
+    #     for i in range(int(len(directions) / 2)):
+    #         mtf_list.append(mtf)
+    #         ms_list.append(ms)
+    #         clobber_list.append(clobber)
+    #
+    #     directions_paired = list(zip(directions[::2], directions[1::2])) # every second item is ra, dec
+    #     multiprocessing = list(zip(mtf_list, ms_list, clobber_list, directions_paired))
+    #
+    #     pool = Pool(cores) # specify cores
+    #     new_h5parms = pool.map(make_h5parm_multiprocessing, multiprocessing)
+    #
+    # else: # if directions are not given, use the ms phase centre
+    #     new_h5parm = make_h5parm(mtf, ms = ms, clobber = clobber, directions = directions)
+    #
+    # for new_h5parm in new_h5parms:
+    #     applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
+    #
+    # loop3_h5parm = loop3() # run loop 3, returning h5parm
+    # loop3_h5parm = new_h5parm # for testing
+    # updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber, threshold = threshold) # combine h5parms and update mtf
+    # logging.info('main() completed')
 
 if __name__ == '__main__':
     main()
