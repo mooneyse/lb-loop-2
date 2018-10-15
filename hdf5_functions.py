@@ -134,6 +134,8 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
         for value in phase.val[1, 0, station, 0, :]:
             yy.append(value)
 
+        xx = np.array(xx)
+        yy = np.array(yy)
 
         diff = np.array(xx) - np.array(yy)
         diff = np.unwrap(diff)
@@ -147,8 +149,8 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
         mymax = np.unwrap(mymax)
         mymax = np.nanmean(np.gradient(abs(mymax)) ** 2)
 
-        xx = np.array(xx)
-        yy = np.array(yy)
+        # xx = np.array(xx)
+        # yy = np.array(yy)
         xx_yy = xx - yy
         mean_xx_yy = np.nanmean(np.abs(xx_yy)) * (1 / (2 * np.pi))
         print(mean_xx_yy, coh_met,mymin,mymax)
