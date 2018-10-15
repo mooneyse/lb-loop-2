@@ -139,11 +139,19 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
         diff = np.unwrap(diff)
         coh_met = np.nanmean(np.gradient(abs(diff)) ** 2)
 
+        mymin=np.array(xx) - np.array(xx)
+        mymin = np.unwrap(mymin)
+        mymin = np.nanmean(np.gradient(abs(mymin)) ** 2)
+
+        mymax=np.array(xx) - np.array(-xx)
+        mymax = np.unwrap(mymax)
+        mymax = np.nanmean(np.gradient(abs(mymax)) ** 2)
+
         xx = np.array(xx)
         yy = np.array(yy)
         xx_yy = xx - yy
         mean_xx_yy = np.nanmean(np.abs(xx_yy)) * (1 / (2 * np.pi))
-        print(mean_xx_yy, coh_met)
+        print(mean_xx_yy, coh_met,mymin,mymax)
         evaluations[stations[station]] = mean_xx_yy # 0 = best, 1 = worst
 
     # append to master file if it exists, else write
