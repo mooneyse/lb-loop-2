@@ -136,25 +136,11 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
 
         xx = np.array(xx)
         yy = np.array(yy)
-
-        diff = np.array(xx) - np.array(yy)
-        diff = np.unwrap(diff)
-        coh_met = np.nanmean(np.gradient(abs(diff)) ** 2)
-
-        mymin=np.array(xx) - np.array(xx)
-        mymin = np.unwrap(mymin)
-        mymin = np.nanmean(np.gradient(abs(mymin)) ** 2)
-
-        mymax=np.array(xx) - np.array(-xx)
-        mymax = np.unwrap(mymax)
-        mymax = np.nanmax(np.gradient(abs(mymax)) ** 2)
-
-        # xx = np.array(xx)
-        # yy = np.array(yy)
-        xx_yy = xx - yy
-        mean_xx_yy = np.nanmean(np.abs(xx_yy)) * (1 / (2 * np.pi))
-        print(mean_xx_yy, coh_met,mymin,mymax)
-        evaluations[stations[station]] = mean_xx_yy # 0 = best, 1 = worst
+        xx_yy_difference = xx - yy
+        xx_yy_unwrap = np.unwrap(xx_yy_difference)
+        coherence_metric = np.nanmean(np.gradient(abs(xx_yy_unwrap)) ** 2) # np.nanmean(np.abs(xx_yy)) * (1 / (2 * np.pi))
+        print(coherence_metric)#, coh_met,mymin,mymax)
+        evaluations[stations[station]] = coherence_metric  # 0 = best
 
     # append to master file if it exists, else write
     if not does_it_exist(mtf, append = True):
