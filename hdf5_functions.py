@@ -147,7 +147,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
 
         mymax=np.array(xx) - np.array(-xx)
         mymax = np.unwrap(mymax)
-        mymax = np.nanmean(np.gradient(abs(mymax)) ** 2)
+        mymax = np.nanmax(np.gradient(abs(mymax)) ** 2)
 
         # xx = np.array(xx)
         # yy = np.array(yy)
