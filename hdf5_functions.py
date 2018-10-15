@@ -4,25 +4,10 @@
 a collection of functions for modifying hdf5 files
 '''
 
-# TODO flux and distance threshold limit?
-#      even if solutions are nearest, could still be too far away
-# TODO plot h5parm solutions, run this and compare input and output solutions
-# TODO sort out logging for mutliprocessing
-# TODO make sure temporary file names are not generic otherwise there will be
-#      multiprocessing issues
-# TODO make sure h5parm are read-only when used with mutliprocessing module
-# TODO if one of the multiprocessing threads fails then exit
-# TODO make use of the losoto.h5parm.Soltab.addHistory
-# TODO h5parm dimensions are hardcoded to pol, dir, ant, freq, time
-#      they could be in a different order
-#      also then need to change the np.concatenate around line 331
-# TODO break lots of bits into smaller functions
-#      some snippets of code are written twice!
-
 from __future__ import print_function
 from functools import partial
 from multiprocessing import Pool
-from pathlib import Path
+from pathlib import Path # pip install --user pathlib on CEP3
 from astropy.coordinates import SkyCoord
 import astropy.units as u
 import pyrap.tables as pt
@@ -567,36 +552,36 @@ def main():
     logging.info('executing main()')
 
     loop3() # run loop 3 to generate h5parm
-    # evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
-    #
-    # if directions: # if a direction is given
-    #     if len(directions) % 2 != 0: # should be even
-    #         logging.error('uneven number of ra, dec given for source positions')
-    #         sys.exit()
-    #
-    #     # if multiple ra, dec are given then do multiprocessing
-    #     # first, some book-keeping to get things in the right place
-    #     mtf_list, ms_list, clobber_list = [], [], []
-    #     for i in range(int(len(directions) / 2)):
-    #         mtf_list.append(mtf)
-    #         ms_list.append(ms)
-    #         clobber_list.append(clobber)
-    #
-    #     directions_paired = list(zip(directions[::2], directions[1::2])) # every second item is ra, dec
-    #     multiprocessing = list(zip(mtf_list, ms_list, clobber_list, directions_paired))
-    #
-    #     pool = Pool(cores) # specify cores
-    #     new_h5parms = pool.map(make_h5parm_multiprocessing, multiprocessing)
-    #
-    # else: # if directions are not given, use the ms phase centre
-    #     new_h5parm = make_h5parm(mtf, ms = ms, clobber = clobber, directions = directions)
-    #
-    # for new_h5parm in new_h5parms:
-    #     applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
-    #
-    # loop3_h5parm = loop3() # run loop 3, returning h5parm
-    # loop3_h5parm = new_h5parm # for testing
-    # updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber, threshold = threshold) # combine h5parms and update mtf
+    evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
+
+    if directions: # if a direction is given
+        if len(directions) % 2 != 0: # should be even
+            logging.error('uneven number of ra, dec given for source positions')
+            sys.exit()
+
+        # if multiple ra, dec are given then do multiprocessing
+        # first, some book-keeping to get things in the right place
+        mtf_list, ms_list, clobber_list = [], [], []
+        for i in range(int(len(directions) / 2)):
+            mtf_list.append(mtf)
+            ms_list.append(ms)
+            clobber_list.append(clobber)
+
+        directions_paired = list(zip(directions[::2], directions[1::2])) # every second item is ra, dec
+        multiprocessing = list(zip(mtf_list, ms_list, clobber_list, directions_paired))
+
+        pool = Pool(cores) # specify cores
+        new_h5parms = pool.map(make_h5parm_multiprocessing, multiprocessing)
+
+    else: # if directions are not given, use the ms phase centre
+        new_h5parm = make_h5parm(mtf, ms = ms, clobber = clobber, directions = directions)
+
+    for new_h5parm in new_h5parms:
+        applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
+
+    loop3_h5parm = loop3() # run loop 3, returning h5parm
+    loop3_h5parm = new_h5parm # for testing
+    updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber, threshold = threshold) # combine h5parms and update mtf
     logging.info('main() completed')
 
 if __name__ == '__main__':
