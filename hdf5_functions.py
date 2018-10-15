@@ -11,7 +11,7 @@ from pathlib import Path # pip install --user pathlib on CEP3
 from astropy.coordinates import SkyCoord
 import astropy.units as u
 import pyrap.tables as pt
-import losoto.h5parm as lh5
+import losoto.h5parm as lh5 # module load losoto/2.0 on CEP3
 import numpy as np
 import argparse
 import csv
