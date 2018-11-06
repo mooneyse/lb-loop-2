@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 
 '''
 a collection of functions for modifying hdf5 files
@@ -22,7 +22,7 @@ import os
 import subprocess
 import sys
 import threading
-import loop3A
+# import loop3A
 
 def does_it_exist(the_file, clobber = False, append = False):
     '''
@@ -52,7 +52,7 @@ def does_it_exist(the_file, clobber = False, append = False):
         logging.info('{} does not exist'.format(the_file))
         return False
 
-def loop3():
+def loop3(ms):
     '''
     description:
     - calls loop 3
@@ -65,9 +65,14 @@ def loop3():
     '''
 
     logging.info('executing loop3()')
-    # loop3A from Neal Jackson
+    # loop3A.py and loop3_service.py from Neal Jackson
+    loop3_hdf5 = loop3A.selfcal(vis=ms)  # crashes because h5parm is not
+    # imported correctly and, after fixing that, because
+    # IOError: [Errno 2] No such file or directory: 'v.pkl'
+    # also had to module load lofar losoto/2.0
+    # loop 3 files need main() and argparse
     logging.info('loop3() completed')
-    return '/data/scratch/sean/h5parms/loop3_h5parm.h5'
+    return loop3_hdf5
 
 def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     '''
@@ -149,21 +154,22 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     logging.info('writing the results to the master text file {}'.format(mtf))
 
     with open(mtf) as f:
-        mtf_stations = list(csv.reader(f))[0][3:] # get stations from the mtf
+        mtf_stations = list(csv.reader(f))[0][3:]  # get stations from the mtf
 
     with open(mtf, 'a') as f:
         f.write('{}, {}, {}'.format(h5parm, direction[0], direction[1]))
-        for mtf_station in mtf_stations: # look up the statistic for a station and determine if it is good
+        for mtf_station in mtf_stations:
+            # look up the statistic for a station and determine if it is good
             try:
                 value = evaluations[mtf_station[1:]]
             except KeyError:
                 value = float('nan')
 
-            if value < threshold: # success
+            if value < threshold:  # success
                 f.write(', {}'.format(int(True)))
             elif np.isnan(value):
                 f.write(', {}'.format('nan'))
-            else: # fail
+            else:  # fail
                 f.write(', {}'.format(int(False)))
 
         f.write('\n')
@@ -592,7 +598,7 @@ def main():
     directions = args.directions
 
     logging.info('executing main()')
-    loop3() # run loop 3 to generate h5parm
+    loop3(ms) # run loop 3 to generate h5parm
     evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
 
     # if directions: # if a direction is given
