@@ -98,22 +98,14 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     h = lh5.h5parm(h5parm)
     solsetnames = h.getSolsetNames()
 
-    if len(solsetnames) > 1:  # ignoring others
-        prints = {'h5': h5parm, 'solsets': solsetnames, 'last': solsetnames[-1]}
-        print('multiple solution sets found in {h5} (i.e. {solsets}) but using '
-              '{last} only'.format(**prints))
+    # only using the last solution set
+    p = {'h5': h5parm, 'solsets': solsetnames, 'last': solsetnames[-1]}
+    print('solsets in {h5} are {solsets} but using {last} only'.format(**p))
 
-    getsou = h.getSolset(solsetnames[-1]).getSou() # dictionary
+    getsou = h.getSolset(solsetnames[-1]).getSou()  # dictionary
+    direction = np.degrees(np.array(getsou['POINTING']))  # array in degrees
 
-    print(getsou, 'GET SOOOOOOOOOOOOOOOOO')
-
-    if len(getsou.keys()) > 1: # should be only one key called 'pointing' but using the first key if there are multiple
-        logging.warn('multiple dictionary keys in the source table in {}: {}'.format(h5parm, getsou.keys()))
-        logging.warn('using key {}'.format(getsou.keys()[0]))
-
-    direction = getsou[getsou.keys()[0]] # list in radians
-    direction = np.degrees(np.array(direction)) # array in degrees
-
+    print('asdfasdfasdfasdfasdfasdfsadf',direction)
     # get the phase solutions for each station from the h5parm
     # NOTE the convenience function openSoltab does not close the h5parm so it is not used here
     soltabnames = h.getSolset('sol000').getSoltabNames()
