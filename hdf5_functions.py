@@ -22,7 +22,7 @@ import os
 import subprocess
 import sys
 import threading
-# import loop3A 
+import loop3A 
 
 def does_it_exist(the_file, clobber = False, append = False):
     '''
