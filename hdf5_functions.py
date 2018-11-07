@@ -22,7 +22,7 @@ import os
 import subprocess
 import sys
 import threading
-import loop3A 
+import loop3A
 
 def does_it_exist(the_file, clobber = False, append = False):
     '''
@@ -66,7 +66,7 @@ def loop3(ms):
 
     logging.info('executing loop3()')
     # loop3A.py and loop3_service.py from Neal Jackson
-    loop3_hdf5 = loop3A.selfcal(vis=ms)  # crashes because h5parm is not
+    # loop3_hdf5 = loop3A.selfcal(vis=ms)  # crashes because h5parm is not
     # imported correctly and, after fixing that, because
     # IOError: [Errno 2] No such file or directory: 'v.pkl'
     # also had to module load lofar losoto/2.0
