@@ -78,34 +78,35 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     '''
     description:
     - get the direction from the h5parm
-    - evaluate the phase solutions in the h5parm for each station using the xx-yy statistic
+    - evaluate the phase solutions in the h5parm for each station using the
+      xx-yy statistic
     - determine the validity of each xx-yy statistic that was calculated
-    - append the right ascension, declination, and validity to the master text file
+    - append the right ascension, declination, and validity to the master text
+      file
 
     parameters:
-    - h5parm   (str)             : lofar hdf5 parameter file
-    - mtf      (str)             : master text file
-    - threshold (float, optional): threshold to determine the goodness of the xx-yy statistic
+    - h5parm    (str)            : lofar hdf5 parameter file
+    - mtf       (str)            : master text file
+    - threshold (float, optional): threshold to determine the goodness of the
+                                   xx-yy statistic
 
     returns:
     - none
     '''
 
-    logging.info('executing evaluate_solutions(h5parm = {}, mtf = {}, threshold = {})'.format(h5parm, mtf, threshold))
-
     # get the direction from the h5parm source table
     h = lh5.h5parm(h5parm)
     solsetnames = h.getSolsetNames()
 
-    if len(solsetnames) > 1: # ignoring others
-        logging.warn('multiple solution sets found in {}: {}'.format(h5parm, solsetnames))
-        logging.warn('using solution set {} only'.format(solsetnames[0])) # usually sol000
+    if len(solsetnames) > 1:  # ignoring others
+        prints = {'h5': h5parm, 'solsets': solsetnames, 'last': solsetnames[-1]}
+        print('multiple solution sets found in {h5} (i.e. {solsets}) but using '
+              '{last} only'.format(**prints))
 
     try:
-        getsou = h.getSolset(solsetnames[0]).getSou() # dictionary
-    except ValueError:
-        logging.error('no source direction in the h5parm so exiting')
-        sys.exit()
+        getsou = h.getSolset(solsetnames[-1]).getSou() # dictionary
+
+    print(getsou, 'GET SOOOOOOOOOOOOOOOOO')
 
     if len(getsou.keys()) > 1: # should be only one key called 'pointing' but using the first key if there are multiple
         logging.warn('multiple dictionary keys in the source table in {}: {}'.format(h5parm, getsou.keys()))
@@ -533,13 +534,6 @@ def main():
     - none
     '''
 
-    format = '\033[1m%(asctime)s \033[31m%(levelname)s \033[00m%(message)s'
-    logging.basicConfig(format=format,
-                        datefmt='%Y/%m/%d %H:%M:%S',
-                        level=logging.INFO)
-                        # filename='hdf5_functions.log',
-                        # filemode='w')
-
     formatter_class = argparse.RawDescriptionHelpFormatter
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=formatter_class)
@@ -597,9 +591,7 @@ def main():
     clobber = args.clobber
     directions = args.directions
 
-    logging.info('executing main()')
-    loop3(ms) # run loop 3 to generate h5parm
-    evaluate_solutions(h5parm, mtf, threshold) # evaluate phase solutions in a h5parm, append to mtf
+    evaluate_solutions(h5parm=h5parm, mtf=mtf, threshold=threshold)
 
     # if directions: # if a direction is given
     #     if len(directions) % 2 != 0: # should be even
