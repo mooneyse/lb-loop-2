@@ -74,12 +74,20 @@ def loop3(ms):
     logging.info('loop3() completed')
     return loop3_hdf5
 
+
+def coherence_metric(xx, yy):
+    ''' calculates the coherence metric by comparing the xx and yy phases '''
+    xx = np.array(xx)
+    yy = np.array(yy)
+    return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
+
+
 def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     '''
     description:
     - get the direction from the h5parm
     - evaluate the phase solutions in the h5parm for each station using the
-      xx-yy statistic
+      coherence metric
     - determine the validity of each xx-yy statistic that was calculated
     - append the right ascension, declination, and validity to the master text
       file
@@ -88,7 +96,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     - h5parm    (str)            : lofar hdf5 parameter file
     - mtf       (str)            : master text file
     - threshold (float, optional): threshold to determine the goodness of the
-                                   xx-yy statistic
+                                   coherence metric
 
     returns:
     - none
@@ -96,34 +104,23 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
 
     # get the direction from the h5parm source table
     h = lh5.h5parm(h5parm)
-    solsetnames = h.getSolsetNames()  # e.g. ['sol000', 'sol001']
-    sol = solsetnames[-1]  # e.g. 'sol001'
-    soltabnames = h.getSolset(sol).getSoltabNames()
-    print(soltabnames)
-    phase = h.getSolset(solsetnames[0]).getSoltab(soltabnames[0])
-    print('HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHERE')
-    # only using the last solution set
-    p = {'h5': h5parm, 'solsetnames': solsetnames, 'sol': sol}
-    print('solsets in {h5} are {solsetnames} but using {sol} only'.format(**p))
+    solname = h.getSolsetNames()[-1]  # only using the last solution set
+    solset = h.getSolset(solname)
+    soltabnames = solset.getSoltabNames()
 
-    source = h.getSolset(sol).getSou()  # dictionary
+    phase = solset.getSoltab('phase000')
+    stations = phase.ant[:]
+
+    source = solset.getSou()  # dictionary
     direction = np.degrees(np.array(source['POINTING']))  # array in degrees
 
-    # get the phase solutions for each station from the h5parm
+    evaluations = {}  # dictionary to hold the statistics for each station
+    # calculate coherence metric
+    print(phase.getAxesNames())
+    # phase.getAxisValues('')
 
-    if len(soltabnames) > 1: # should be only one called 'phase000' but using the first if there are multiple
-        logging.warn('multiple solution tables in {}: {}'.format(h5parm, soltabnames))
-        logging.warn('using solution table {}'.format(soltabnames[0]))
+    print('HHHHHHHHHHHHHHHHHHHHHHHEEEEEEEEEEEEEEEEEEEEEEERRRRRRRRRRRRRRRRRREEE')
 
-    phase = h.getSolset(solsetnames[0]).getSoltab(soltabnames[0])
-    logging.info('got the solution tab {} from {}'.format(soltabnames[0], h5parm))
-    stations = phase.ant[:]
-    logging.info('got the stations (i.e. antennas) from {}'.format(h5parm))
-    evaluations = {} # dictionary to hold the statistics for each station
-
-    # calculate xx-yy statistic
-    logging.info('evaluating the xx-yy statistic for {}'.format(h5parm))
-    logging.info('a value < {} is good (1), otherwise the value is bad (0)'.format(threshold))
     for station in range(len(stations)):
         xx, yy = [], []
         # structure: phase.val[polarisation (xx = 0, yy  = 1), direction, station, frequency, time]
@@ -133,13 +130,8 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
         for value in phase.val[1, 0, station, 0, :]:
             yy.append(value)
 
-        xx = np.array(xx)
-        yy = np.array(yy)
-        xx_yy_difference = xx - yy
-        xx_yy_unwrap = np.unwrap(xx_yy_difference)
-        # coherence_metric = np.nanmean(np.abs(xx_yy)) * (1 / (2 * np.pi))
-        coherence_metric = np.nanmean(np.gradient(abs(xx_yy_unwrap)) ** 2)
-        evaluations[stations[station]] = coherence_metric  # 0 = best
+        evaluations[stations[station]] = coherence_metric(xx, yy)  # 0 = best
+
 
     # append to master file if it exists, else write
     if not does_it_exist(mtf, append = True):
