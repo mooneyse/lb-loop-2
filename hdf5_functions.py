@@ -119,7 +119,8 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     values = phase.getValues()
 
     print(len(values))#'ant'])
-
+    print('asdfasdf', values[0])
+    print('ppppppp',values[1])
     print(phase.val.shape)
     print('HHHHHHHHHHHHHHHHHHHHHHHEEEEEEEEEEEEEEEEEEEEEEERRRRRRRRRRRRRRRRRREEE')
 
