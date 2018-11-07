@@ -66,7 +66,7 @@ def loop3(ms):
 
     logging.info('executing loop3()')
     # loop3A.py and loop3_service.py from Neal Jackson
-    # loop3_hdf5 = loop3A.selfcal(vis=ms)  # crashes because h5parm is not
+    loop3_hdf5 = 'hdf5'  # loop3A.selfcal(vis=ms)  # crashes because h5parm is not
     # imported correctly and, after fixing that, because
     # IOError: [Errno 2] No such file or directory: 'v.pkl'
     # also had to module load lofar losoto/2.0
