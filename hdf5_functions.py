@@ -103,8 +103,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
         print('multiple solution sets found in {h5} (i.e. {solsets}) but using '
               '{last} only'.format(**prints))
 
-    try:
-        getsou = h.getSolset(solsetnames[-1]).getSou() # dictionary
+    getsou = h.getSolset(solsetnames[-1]).getSou() # dictionary
 
     print(getsou, 'GET SOOOOOOOOOOOOOOOOO')
 
