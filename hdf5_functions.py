@@ -118,7 +118,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     # calculate coherence metric
     values = phase.getValues()
 
-    print(values['ant'])
+    print(len(values))#'ant'])
 
     print(phase.val.shape)
     print('HHHHHHHHHHHHHHHHHHHHHHHEEEEEEEEEEEEEEEEEEEEEEERRRRRRRRRRRRRRRRRREEE')
