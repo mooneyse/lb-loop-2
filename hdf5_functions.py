@@ -109,7 +109,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     soltabnames = solset.getSoltabNames()
 
     phase = solset.getSoltab('phase000')
-    stations = phase.ant[:]
+    stations = phase.ant
 
     source = solset.getSou()  # dictionary
     direction = np.degrees(np.array(source['POINTING']))  # array in degrees
@@ -117,8 +117,8 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     evaluations = {}  # dictionary to hold the statistics for each station
     # calculate coherence metric
     print(phase.getAxesNames())
-    # phase.getAxisValues('')
-
+    print('abba',phase.getAxisValues('ant'))
+    print('baab',stations)
     print('HHHHHHHHHHHHHHHHHHHHHHHEEEEEEEEEEEEEEEEEEEEEEERRRRRRRRRRRRRRRRRREEE')
 
     for station in range(len(stations)):
