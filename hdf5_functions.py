@@ -117,8 +117,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     evaluations = {}  # dictionary to hold the statistics for each station
     # calculate coherence metric
     print(phase.getAxesNames())
-    print('abba',phase.getAxisValues('ant'))
-    print('baab',stations)
+    print(phase.getValuesIter('ant'))
     print('HHHHHHHHHHHHHHHHHHHHHHHEEEEEEEEEEEEEEEEEEEEEEERRRRRRRRRRRRRRRRRREEE')
 
     for station in range(len(stations)):
