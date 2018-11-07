@@ -1,9 +1,9 @@
 # loop3_service   Neal Jackson 1.10.2018
-# Service routines for loop3. 
-# Response to complaints that this looks too much like AIPS will involve adding 
+# Service routines for loop3.
+# Response to complaints that this looks too much like AIPS will involve adding
 #    APARM arrays as arguments.
 
-import numpy as np,os,sys,glob,time,h5parm,scipy,pickle
+import numpy as np,os,sys,glob,time,losoto.h5parm,scipy,pickle
 from scipy import interpolate
 import pyrap.tables as pt
 import matplotlib; from matplotlib import pyplot as plt
@@ -102,7 +102,7 @@ def coherence_metric (htab='1327_test.ms_cal.h5',solset='sol000',soltab='phase00
             diff = np.unwrap(diff[~np.isnan(diff)])
             coh = np.append(coh,np.nanmean(np.gradient(abs(diff))**2))
     return coh
-    
+
 
 def snplt (htab='1327_test.ms_cal.h5',solset='sol000',soltab='phase000',antenna=None,nplot=6,
            outpng=None):
