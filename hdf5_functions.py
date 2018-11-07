@@ -120,7 +120,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     print(phase.val.shape)
     print('HHHHHHHHHHHHHHHHHHHHHHHEEEEEEEEEEEEEEEEEEEEEEERRRRRRRRRRRRRRRRRREEE')
 
-    print(phase.setSelection(pol='XX', ant=['DE603HBA'])
+    print(phase.setSelection(pol='XX', ant=['DE603HBA']))
 
     for station in range(len(stations)):
         xx, yy = [], []
