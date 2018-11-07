@@ -99,6 +99,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     solsetnames = h.getSolsetNames()  # e.g. ['sol000', 'sol001']
     sol = solsetnames[-1]  # e.g. 'sol001'
     soltabnames = h.getSolset(sol).getSoltabNames()
+    print(soltabnames)
     phase = h.getSolset(solsetnames[0]).getSoltab(soltabnames[0])
     print('HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHERE')
     # only using the last solution set
