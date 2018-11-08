@@ -77,8 +77,6 @@ def loop3(ms):
 
 def coherence_metric(xx, yy):
     ''' calculates the coherence metric by comparing the xx and yy phases '''
-    xx = np.array(xx)
-    yy = np.array(yy)
     return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
 
 
@@ -107,52 +105,29 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     solname = h.getSolsetNames()[-1]  # only using the last solution set
     solset = h.getSolset(solname)
     soltabnames = solset.getSoltabNames()
-
     phase = solset.getSoltab('phase000')
     stations = phase.ant
-
     source = solset.getSou()  # dictionary
-    direction = np.degrees(np.array(source['POINTING']))  # array in degrees
+    direction = np.degrees(np.array(source[list(source.keys())[0]]))  # degrees
+    generator = phase.getValuesIter(returnAxes=['freq', 'time'])
+    evaluations, temporary = {}, {}  # evaluations holds the coherence metrics
 
-    evaluations = {}  # dictionary to hold the statistics for each station
-    # calculate coherence metric
-    values = phase.getValues()
-    # value, dictionary = values[0], values[1]
-    asdf = phase.getValuesIter(returnAxes=['freq', 'pol', 'time'])
-    print(asdf)
-    # print(values1['ant'])
-    # print('PPPPPPPPPPPPPPPPPP', values1.keys())
-    # print(len(values))#'ant'])
-    # print('asdfasdf', values[0])
-    # print('ppppppp',values[1])
-    # print(phase.val.shape)
-    print('HHHHHHHHHHHHHHHHHHHHHHHEEEEEEEEEEEEEEEEEEEEEEERRRRRRRRRRRRRRRRRREEE')
+    for g in generator:
+        temporary[g[1]['pol'] + '_' + g[1]['ant']] = np.squeeze(g[0])
 
-    print(phase.setSelection(pol='XX', ant=['DE603HBA']))
+    for station in stations:
+        xx = temporary['XX_' + station]
+        yy = temporary['YY_' + station]
 
-    for station in range(len(stations)):
-        xx, yy = [], []
-        # structure: phase.val[polarisation (xx = 0, yy  = 1), direction, station, frequency, time]
-        for value in phase.val[0, 0, station, 0, :]:
-            xx.append(value)
-
-        for value in phase.val[1, 0, station, 0, :]:
-            yy.append(value)
-
-        evaluations[stations[station]] = coherence_metric(xx, yy)  # 0 = best
-
+        evaluations[station] = coherence_metric(xx, yy)  # 0 = best
 
     # append to master file if it exists, else write
-    if not does_it_exist(mtf, append = True):
-        h.close()
-        sys.exit()
-    logging.info('writing the results to the master text file {}'.format(mtf))
-
     with open(mtf) as f:
         mtf_stations = list(csv.reader(f))[0][3:]  # get stations from the mtf
 
     with open(mtf, 'a') as f:
         f.write('{}, {}, {}'.format(h5parm, direction[0], direction[1]))
+
         for mtf_station in mtf_stations:
             # look up the statistic for a station and determine if it is good
             try:
@@ -170,7 +145,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
         f.write('\n')
 
     h.close()
-    logging.info('evaluate_solutions(h5parm = {}, mtf = {}, threshold = {}) completed'.format(h5parm, mtf, threshold))
+    print('HERE HERE HERE.')
 
 def make_h5parm_multiprocessing(args):
     '''
