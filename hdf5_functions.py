@@ -79,7 +79,7 @@ def coherence_metric(xx, yy):
     '''Calculates the coherence metric by comparing the XX and YY phases. '''
     return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
 
-
+np.seterr(all='raise')
 def evaluate_solutions(h5parm, mtf, threshold=0.25):
     '''Get the direction from the h5parm. Evaluate the phase solutions in the
     h5parm for each station using the coherence metric. Determine the validity
@@ -129,7 +129,6 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
                 value = float('nan')
 
             if np.isnan(value):
-                print(value, 'VALUE')
                 f.write(', {}'.format('nan'))
             elif value < threshold:  # success
                 f.write(', {}'.format(int(True)))
