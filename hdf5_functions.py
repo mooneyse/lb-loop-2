@@ -75,11 +75,20 @@ def loop3(ms):
     return loop3_hdf5
 
 
+def interpolate_nan(X):
+    '''Interpolate NaN values using this answer from Stack Overflow:
+    https://stackoverflow.com/a/6520696/6386612.'''
+    nans, x = np.isnan(X), lambda z: z.nonzero()[0]
+    X[nans] = np.interp(x(nans), x(~nans), X[~nans])
+    return X
+
+
 def coherence_metric(xx, yy):
-    '''Calculates the coherence metric by comparing the XX and YY phases. '''
+    '''Calculates the coherence metric by comparing the XX and YY phases.'''
+    xx, yy = interpolate_nan(xx), interpolate_nan(yy)
     return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
 
-np.seterr(all='raise')
+
 def evaluate_solutions(h5parm, mtf, threshold=0.25):
     '''Get the direction from the h5parm. Evaluate the phase solutions in the
     h5parm for each station using the coherence metric. Determine the validity
@@ -93,8 +102,7 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
         coherence metric.
 
     Returns:
-    None.
-    '''
+    None.'''
 
     h = lh5.h5parm(h5parm)
     solname = h.getSolsetNames()[-1]  # only using the last solution set
