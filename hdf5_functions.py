@@ -76,31 +76,26 @@ def loop3(ms):
 
 
 def coherence_metric(xx, yy):
-    ''' calculates the coherence metric by comparing the xx and yy phases '''
+    '''Calculates the coherence metric by comparing the XX and YY phases. '''
     return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
 
 
-def evaluate_solutions(h5parm, mtf, threshold = 0.25):
-    '''
-    description:
-    - get the direction from the h5parm
-    - evaluate the phase solutions in the h5parm for each station using the
-      coherence metric
-    - determine the validity of each xx-yy statistic that was calculated
-    - append the right ascension, declination, and validity to the master text
-      file
+def evaluate_solutions(h5parm, mtf, threshold=0.25):
+    '''Get the direction from the h5parm. Evaluate the phase solutions in the
+    h5parm for each station using the coherence metric. Determine the validity
+    of each xx-yy statistic that was calculated. Append the right ascension,
+    declination, and validity to the master text file.
 
-    parameters:
-    - h5parm    (str)            : lofar hdf5 parameter file
-    - mtf       (str)            : master text file
-    - threshold (float, optional): threshold to determine the goodness of the
-                                   coherence metric
+    Args:
+    h5parm (str): LOFAR HDF5 parameter file.
+    mtf (str): Master text file.
+    threshold (float, optional): threshold to determine the goodness of the
+        coherence metric.
 
-    returns:
-    - none
+    Returns:
+    None.
     '''
 
-    # get the direction from the h5parm source table
     h = lh5.h5parm(h5parm)
     solname = h.getSolsetNames()[-1]  # only using the last solution set
     solset = h.getSolset(solname)
@@ -118,10 +113,8 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
     for station in stations:
         xx = temporary['XX_' + station]
         yy = temporary['YY_' + station]
-
         evaluations[station] = coherence_metric(xx, yy)  # 0 = best
 
-    # append to master file if it exists, else write
     with open(mtf) as f:
         mtf_stations = list(csv.reader(f))[0][3:]  # get stations from the mtf
 
@@ -143,7 +136,6 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
                 f.write(', {}'.format(int(False)))
 
         f.write('\n')
-
     h.close()
 
 def make_h5parm_multiprocessing(args):
