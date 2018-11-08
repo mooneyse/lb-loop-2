@@ -135,18 +135,16 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
             except KeyError:
                 value = float('nan')
 
-            if value < threshold:  # success
-                f.write(', {}'.format(int(True)))
-            elif np.isnan(value):
+            if np.isnan(value):
                 f.write(', {}'.format('nan'))
+            elif value < threshold:  # success
+                f.write(', {}'.format(int(True)))
             else:  # fail
                 f.write(', {}'.format(int(False)))
 
         f.write('\n')
 
     h.close()
-    print(evaluations)
-    print('HERE HERE HERE.')
 
 def make_h5parm_multiprocessing(args):
     '''
@@ -539,11 +537,6 @@ def main():
                         type=int,
                         default=4,
                         help='number of cores to use')
-
-    parser.add_argument('-c',
-                        '--clobber',
-                        action='store_true',
-                        help='overwrite the new h5parm if it exists')
 
     parser.add_argument('-d',
                         '--directions',
