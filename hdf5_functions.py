@@ -102,7 +102,7 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
         coherence metric.
 
     Returns:
-    None.'''
+    (Dictionary) The coherence metric for each station.'''
 
     h = lh5.h5parm(h5parm)
     solname = h.getSolsetNames()[-1]  # only using the last solution set
@@ -145,7 +145,7 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
 
         f.write('\n')
     h.close()
-    print(evaluations)
+    return evaluations
 
 def make_h5parm_multiprocessing(args):
     '''
