@@ -127,7 +127,7 @@ def make_h5parm(mtf, ms='', directions=[]):
     h5parms = np.genfromtxt(mtf, delimiter=',', unpack=True, dtype=str,
                             usecols=0)
 
-    '123123123123herererere'
+    print('123123123123herererere')
     print(data.dtype.names)
     # calculate the distance betweeen the ms direction and the h5parm directions
     # there is one entry in mtf_directions for each unique line in the mtf
@@ -420,7 +420,6 @@ def main():
     directions_paired = list(zip(directions[::2], directions[1::2]))
     multiprocessing = list(zip(mtf_list, ms_list, directions_paired))
     pool = Pool(cores)  # specify cores
-    print('HERHEHREHHREHR')
     new_h5parms = pool.map(make_h5parm_multiprocessing, multiprocessing)
     print('fffffffffffffffffffffffff')
 
