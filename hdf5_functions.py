@@ -160,7 +160,7 @@ def make_h5parm(mtf, ms='', directions=[]):
 
             if value == 1 and mtf_station not in successful_stations:
                 w = '{}\t{}\t{}\t{}\t{}'.format(mtf_station.ljust(8),
-                                                round(key.deg, 6), int(value)
+                                                round(key.deg, 6), int(value),
                                                 row, h5parm)
                 f.write('{}\n'.format(w))
                 successful_stations.append(mtf_station)
