@@ -309,7 +309,7 @@ def apply_h5parm(h5parm, ms, column_out='DATA'):
     # parset is saved in same directory as the h5parm
     parset = os.path.dirname(h5parm) + '/applyh5parm.parset'
     column_in = 'DATA'
-    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     with open(parset, 'w') as f:  # create the parset
         f.write('# applyh5parm function created this parset at {}\n'.format(now)
