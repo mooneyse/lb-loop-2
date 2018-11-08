@@ -145,6 +145,7 @@ def evaluate_solutions(h5parm, mtf, threshold = 0.25):
         f.write('\n')
 
     h.close()
+    print(evaluations)
     print('HERE HERE HERE.')
 
 def make_h5parm_multiprocessing(args):
