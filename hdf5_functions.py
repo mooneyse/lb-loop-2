@@ -312,7 +312,7 @@ def apply_h5parm(h5parm, ms, column_out='DATA'):
     now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     with open(parset, 'w') as f:  # create the parset
-        f.write('# applyh5parm function created this parset at {}\n'.format(now)
+        f.write('# created by applyh5parm at {}\n'.format(now))
         f.write('msin                = {}\n'.format(ms))
         f.write('msin.datacolumn     = {}\n'.format(column_in))
         f.write('msout               = {}\n'.format(ms))
