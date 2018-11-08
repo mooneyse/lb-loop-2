@@ -98,7 +98,7 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
 
 def make_h5parm_multiprocessing(args):
     '''Wrapper to parallelize make_h5parm.'''
-    print('fffffffffffffffffffffffff')
+    print('fffffffffffffffffffffffff', args)
     mtf, ms, directions = args
     return make_h5parm(mtf=mtf, ms=ms, directions=directions)
 
@@ -228,6 +228,7 @@ def make_h5parm(mtf, ms='', directions=[]):
     h.close()  # close the new h5parm
     return new_h5parm
 
+
 def apply_h5parm(h5parm, ms, column_out='DATA'):
     '''Creates an NDPPP parset. Applies the output of make_h5parm to the
     measurement set.
@@ -258,6 +259,7 @@ def apply_h5parm(h5parm, ms, column_out='DATA'):
     f.close()
 
     ndppp_output = subprocess.check_output(['NDPPP', '--help']) # NOTE update
+
 
 def update_list(new_h5parm, loop3_h5parm, mtf, clobber = False, threshold = 0.25):
     '''
@@ -351,6 +353,7 @@ def update_list(new_h5parm, loop3_h5parm, mtf, clobber = False, threshold = 0.25
     logging.info('updatelist(new_h5parm = {}, loop3_h5parm = {}, mtf = {}, clobber = {}) completed'.format(new_h5parm, loop3_h5parm, mtf, clobber))
 
     return combined_h5parm
+
 
 def main():
     '''Evaluates the h5parm phase solutions, makes a new h5parm of the best
