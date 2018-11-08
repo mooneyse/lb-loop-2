@@ -303,8 +303,7 @@ def apply_h5parm(h5parm, ms, column_out='DATA'):
     column_out (str, default = 'DATA'): The column for NDPPP to write to.
 
     Returns:
-    The path to the measurement set for self-calibration with corrected data.
-    (str)'''
+    None.'''
 
     # parset is saved in same directory as the h5parm
     parset = os.path.dirname(h5parm) + '/applyh5parm.parset'
@@ -324,7 +323,6 @@ def apply_h5parm(h5parm, ms, column_out='DATA'):
     f.close()
 
     ndppp_output = subprocess.check_output(['NDPPP', '--help']) # NOTE update
-    return ms
 
 def update_list(new_h5parm, loop3_h5parm, mtf, clobber = False, threshold = 0.25):
     '''
