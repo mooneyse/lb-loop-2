@@ -97,135 +97,96 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
 
 
 def make_h5parm_multiprocessing(args):
-    '''This is a wrapper for make_h5parm. It runs make_h5parm on multiple cores
-    in parallel.
-
-    Args:
-    args (list): All arguments to be passed to the make_h5parm function with
-        each list entry being a tuple of parameters for one run.
-
-    Returns:
-    Runs make_h5parm in parallel (function).'''
+    '''Wrapper to parallelize make_h5parm.'''
 
     mtf, ms, directions = args
-    return make_h5parm(mtf, ms=ms, directions=directions)
+    return make_h5parm(mtf=mtf, ms=ms, directions=directions)
 
-def make_h5parm(mtf, ms = '', clobber = False, directions = []):
-    '''
-    description:
-    - get the direction from the measurement set or list provided
-    - get the directions of the h5parms from the master text file
-    - calculate the separation between the measurement set direction and the h5parm directions
-    - for each station, find the h5parm of smallest separation which has valid phase solutions
-    - create a new h5parm
-    - write these phase solutions to this new h5parm
 
-    parameters:
-    - mtf        (str) : master text file with list of h5parms
-    - ms         (str) : measurement set to be self-calibrated
-    - clobber    (bool): (default = false) overwrite new_h5parm if it exists
-    - directions (list): (default = []) ra, dec of source (radians)
+def make_h5parm(mtf, ms='', directions=[]):
+    '''Get the direction from the measurement set or list provided. Get the
+    directions of the h5parms from the master text file. Calculate the
+    separation between the measurement set direction and the h5parm directions.
+    For each station, find the h5parm of smallest separation which has valid
+    phase solutions. Create a new h5parm. Write these phase solutions to this
+    new h5parm.
 
-    returns:
-    - new_h5parm (str): the new h5parm to be applied to the measurement set
-    '''
+    Args:
+    mtf (str): Master text file with list of h5parms.
+    ms (str): Measurement set to be self-calibrated.
+    directions (list, default = []): RA, Dec of source (radians).
 
-    logging.info('executing make_h5parm(mtf = {}, ms = {}, clobber = {}, directions = {})'.format(mtf, ms, clobber, directions))
-
-    # get the direction from the measurement set if source position is not given
-    if not directions:
-        if not ms:
-            logging.info('no directions or ms supplied so exiting')
-            sys.exit()
-        else:
-            t  = pt.table(ms, readonly = True, ack = False)
-            field = pt.table(t.getkeyword('FIELD'), readonly = True, ack = False)
-            directions = field.getcell('PHASE_DIR', 0)[0] # radians
-            field.close()
-            t.close()
-            logging.info('no source positions given, using {} phase center'.format(ms))
-
-    elif len(directions) != 2:
-        logging.error('ra, dec not passed correctly')
-        os._exit() # https://stackoverflow.com/a/23937527/6386612
-        # not ideal as buffers are not flushed on exit
-        # sys.exit()
-
-    directions = SkyCoord(directions[0], directions[1], unit = 'rad')
+    Returns:
+    The new h5parm to be applied to the measurement set. (str)'''
 
     # get the direction from the master text file
-    # HACK genfromtxt gives empty string for h5parms when names = True is used; importing them separately as a work around
-    data = np.genfromtxt(mtf, delimiter = ',', unpack = True, dtype = float, names = True)
-    h5parms = np.genfromtxt(mtf, delimiter = ',', unpack = True, dtype = str, usecols = 0)
-    mtf_directions = {}
+    # HACK genfromtxt gives empty string for h5parms when names = True is used
+    # importing them separately as a work around
+    data = np.genfromtxt(mtf, delimiter=',', unpack=True, dtype=float,
+                         names=True)
+    h5parms = np.genfromtxt(mtf, delimiter=',', unpack=True, dtype=str,
+                            usecols=0)
 
+    '123123123123herererere'
+    print(data.dtype.names)
     # calculate the distance betweeen the ms direction and the h5parm directions
     # there is one entry in mtf_directions for each unique line in the mtf
+    directions = SkyCoord(directions[0], directions[1], unit = 'rad')
+    mtf_directions = {}
+
     for h5parm, ra, dec in zip(h5parms, data['ra'], data['dec']):
-        mtf_direction = SkyCoord(float(ra), float(dec), unit = 'deg')
+        mtf_direction = SkyCoord(float(ra), float(dec), unit='deg')
         separation = directions.separation(mtf_direction)
-        mtf_directions[separation] = h5parm # distances from ms to each h5parm
+        mtf_directions[separation] = h5parm  # distances from ms to each h5parm
 
     # read in the stations from the master text file
     with open(mtf) as f:
-        mtf_stations = list(csv.reader(f))[0][3:] # skipping h5parm, ra, and dec
-        mtf_stations = [x.lstrip() for x in mtf_stations] # remove leading space
+        mtf_stations = list(csv.reader(f))[0][3:]  # skip h5parm, ra, and dec
+        mtf_stations = [x.lstrip() for x in mtf_stations]  # remove first space
 
     # find the closest h5parm which has an acceptable solution for each station
-    working_file = '{}/make_h5parm_{}_{}.txt'.format(os.path.dirname(os.path.dirname(ms)), directions.ra.deg, directions.dec.deg)
-    logging.info('creating working file {}'.format(working_file))
-    f = open(working_file, 'w')
+    parts = {'prefix': os.path.dirname(os.path.dirname(ms)),
+             'ra': directions.ra.deg, 'dec': directions.dec.deg}
 
-    logging.info('for the ({}, {}) direction, make a new h5parm consisting of the following:'.format(directions.ra.deg, directions.dec.deg))
-    logging.info('\tstation \tseparation\tboolean\trow\t5parm')
+    working_file = '{}/make_h5parm_{}_{}.txt'.format(**parts)
+    f = open(working_file, 'w')
     successful_stations = []
 
-    for mtf_station in mtf_stations: # for each station
-        for key in sorted(mtf_directions.keys()): # starting with shortest separations
+    for mtf_station in mtf_stations:  # for each station
+        for key in sorted(mtf_directions.keys()):  # shortest separation first
             h5parm = mtf_directions[key]
-            row = list(h5parms).index(h5parm) # row in mtf
-            value = data[mtf_station][row] # boolean value for h5parm and station
+            row = list(h5parms).index(h5parm)  # row in mtf
+            value = data[mtf_station][row]  # boolean for h5parm and station
+
             if value == 1 and mtf_station not in successful_stations:
-                working_information = '{}\t{}\t{}\t{}\t{}'.format(mtf_station.ljust(8), round(key.deg, 6), int(value), row, h5parm)
-                # print this information and write it to a working file
-                logging.info('\t{}'.format(working_information))
-                f.write('{}\n'.format(working_information))
+                w = '{}\t{}\t{}\t{}\t{}'.format(mtf_station.ljust(8),
+                                                round(key.deg, 6), int(value)
+                                                row, h5parm)
+                f.write('{}\n'.format(w))
                 successful_stations.append(mtf_station)
     f.close()
 
     # create a new h5parm
     ms = os.path.splitext(os.path.normpath(ms))[0]
     new_h5parm = '{}_{}_{}.h5'.format(ms, directions.ra.deg, directions.dec.deg)
-    logging.info('creating {}'.format(new_h5parm))
-    does_it_exist(new_h5parm, clobber = clobber) # check if the h5parm exists
-    h = lh5.h5parm(new_h5parm, readonly = False)
+    h = lh5.h5parm(new_h5parm, readonly=False)
+    table = h.makeSolset()  # creates sol000
+    solset = h.getSolset('sol000')  # on the new h5parm
 
-    try:
-        table = h.makeSolset() # creates sol000
-    except:
-        logging.error('could not make antenna and source tables')
-        sys.exit()
-        # we want the default 'addTables = True' but on my machine that gives
-        # 'NotImplementedError: structured arrays with columns with type description ``<U16`` are not supported yet, sorry'
-
-    solset = h.getSolset('sol000') # on the new h5parm
-
-    # get data to be copied from the working file to which the information was written
-    working_data = np.genfromtxt(working_file, delimiter = '\t', dtype = str)
-    working_data = sorted(working_data.tolist()) # stations in h5parm are alphabetised
+    # get data to be copied from the working file
+    working_data = np.genfromtxt(working_file, delimiter='\t', dtype=str)
+    working_data = sorted(working_data.tolist())  # stations are alphabetised
     val, weight = [], []
 
-    for my_line in range(len(working_data)): # one line per station
+    for my_line in range(len(working_data)):  # one line per station
         my_station = working_data[my_line][0]
         my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
-        logging.info('copying {} data from {} to {}'.format(my_station, my_h5parm, new_h5parm))
 
         # use the station to get the relevant data to be copied from the h5parm
-        lo = lh5.h5parm(my_h5parm, readonly = False) # NB try change this to True as it should be True
+        lo = lh5.h5parm(my_h5parm, readonly=False)  # NB try change this to True
         phase = lo.getSolset('sol000').getSoltab('phase000')
-        logging.info('{} has {} dimensions, (pol, dir, ant, freq, time): {}'.format(my_h5parm, phase.val.ndim, phase.val.shape))
 
-        for s in range(len(phase.ant[:])): # stations
+        for s in range(len(phase.ant[:])):  # stations
             if phase.ant[s] == my_station.strip():
                 # copy values and weights
                 v = phase.val[:, :, s, :, :]
@@ -236,12 +197,13 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
                 weight.append(w_expanded)
 
         # WARNING pol, dir, ant, time, freq should be the same in all h5parms so
-        # using the last one in the loop for that information (could be a source of error in future)
+        # using the last one in the loop for that information (could be a source
+        # of error in future)
         # also getting the antenna and source table from this last h5parm
         if my_line == len(working_data) - 1:
             soltab = lo.getSolset('sol000')
-            antenna_soltab = soltab.getAnt() # dictionary
-            source_soltab = soltab.getSou() # dictionary
+            antenna_soltab = soltab.getAnt()  # dictionary
+            source_soltab = soltab.getSou()  # dictionary
             pol = phase.pol[:]
             dir = phase.dir[:]
             ant = phase.ant[:]
@@ -255,24 +217,17 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
 
     # write these best phase solutions to the new h5parm
     c = solset.makeSoltab('phase',
-                          axesNames = ['pol', 'dir', 'ant', 'freq', 'time'],
-                          axesVals = [pol, dir, ant, freq, time],
-                          vals = vals,
-                          weights = weights) # creates phase000
+                          axesNames=['pol', 'dir', 'ant', 'freq', 'time'],
+                          axesVals=[pol, dir, ant, freq, time],
+                          vals=vals,
+                          weights=weights)  # creates phase000
 
     # copy source and antenna tables into the new h5parm
     source_table = table.obj._f_get_child('source')
-    source_table.append(source_soltab.items()) # from dictionary to list
+    source_table.append(source_soltab.items())  # from dictionary to list
     antenna_table = table.obj._f_get_child('antenna')
-    antenna_table.append(antenna_soltab.items()) # from dictionary to list
-
-    h.close() # close the new h5parm
-
-    # the end, tidying up
-    logging.info('finished making the h5parm {}'.format(new_h5parm))
-    logging.info('removing {}'.format(working_file))
-    os.remove(working_file)
-    logging.info('make_h5parm(mtf = {}, ms = {}, clobber = {}) completed'.format(mtf, ms, clobber))
+    antenna_table.append(antenna_soltab.items())  # from dictionary to list
+    h.close()  # close the new h5parm
     return new_h5parm
 
 def apply_h5parm(h5parm, ms, column_out='DATA'):
