@@ -543,7 +543,6 @@ def main():
     ms = args.ms
     threshold = args.threshold
     cores = args.cores
-    clobber = args.clobber
     directions = args.directions
 
     evaluate_solutions(h5parm=h5parm, mtf=mtf, threshold=threshold)
