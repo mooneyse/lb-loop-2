@@ -129,6 +129,7 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
                 value = float('nan')
 
             if np.isnan(value):
+                print(value, 'VALUE')
                 f.write(', {}'.format('nan'))
             elif value < threshold:  # success
                 f.write(', {}'.format(int(True)))
