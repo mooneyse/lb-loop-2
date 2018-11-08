@@ -95,38 +95,20 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
     h.close()
     return evaluations
 
+
 def make_h5parm_multiprocessing(args):
-    '''
-    description:
-    - wrapper for make_h5parm
-    - runs make_h5parm on multiple cores in parallel
+    '''This is a wrapper for make_h5parm. It runs make_h5parm on multiple cores
+    in parallel.
 
-    parameters:
-    - args (list): all arguments to be passed to the make_h5parm function with
-                   each list entry being a tuple of parameters for one run
+    Args:
+    args (list): All arguments to be passed to the make_h5parm function with
+        each list entry being a tuple of parameters for one run.
 
-    returns:
-    - make_h5parm (function): runs the make_h5parm in parallel
-    '''
+    Returns:
+    Runs make_h5parm in parallel (function).'''
 
-    # probably over-complicated and not very pythonic way of handling the
-    # the different arguments passed
-    if len(args) == 4:
-        mtf, ms, clobber, directions = args
-
-    elif len(args) == 3 and type(args[2]) == list:
-        mtf, ms, directions = args
-        clobber = False
-
-    elif len(args) == 3 and type(args[2]) == bool:
-        mtf, ms, clobber = args
-        directions = []
-
-    elif len(args) == 2:
-        mtf, ms = args
-        clobber, directions = False, []
-
-    return make_h5parm(mtf, ms = ms, clobber = clobber, directions = directions)
+    mtf, ms, directions = args
+    return make_h5parm(mtf, ms=ms, directions=directions)
 
 def make_h5parm(mtf, ms = '', clobber = False, directions = []):
     '''
@@ -475,35 +457,24 @@ def main():
 
     evaluate_solutions(h5parm=h5parm, mtf=mtf, threshold=threshold)
 
-    # if directions: # if a direction is given
-    #     if len(directions) % 2 != 0: # should be even
-    #         logging.error('uneven number of ra, dec given for source positions')
-    #         sys.exit()
-    #
-    #     # if multiple ra, dec are given then do multiprocessing
-    #     # first, some book-keeping to get things in the right place
-    #     mtf_list, ms_list, clobber_list = [], [], []
-    #     for i in range(int(len(directions) / 2)):
-    #         mtf_list.append(mtf)
-    #         ms_list.append(ms)
-    #         clobber_list.append(clobber)
-    #
-    #     directions_paired = list(zip(directions[::2], directions[1::2])) # every second item is ra, dec
-    #     multiprocessing = list(zip(mtf_list, ms_list, clobber_list, directions_paired))
-    #
-    #     pool = Pool(cores) # specify cores
-    #     new_h5parms = pool.map(make_h5parm_multiprocessing, multiprocessing)
-    #
-    # else: # if directions are not given, use the ms phase centre
-    #     new_h5parm = make_h5parm(mtf, ms = ms, clobber = clobber, directions = directions)
-    #
-    # for new_h5parm in new_h5parms:
-    #     applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
-    #
-    apply_h5parm(h5parm=h5parm, ms=ms)  # h5parm should be new_h5parm
-    # loop3_h5parm = new_h5parm # for testing
-    # updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber, threshold = threshold) # combine h5parms and update mtf
-    # logging.info('main() completed')
+    mtf_list, ms_list = [], []  # book-keeping to get things in the right place
+    for i in range(int(len(directions) / 2)):
+        mtf_list.append(mtf)
+        ms_list.append(ms)
+
+    directions_paired = list(zip(directions[::2], directions[1::2]))
+    multiprocessing = list(zip(mtf_list, ms_list, directions_paired))
+    pool = Pool(cores)  # specify cores
+    print('HERHEHREHHREHR')
+    new_h5parms = pool.map(make_h5parm_multiprocessing, multiprocessing)
+    print('fffffffffffffffffffffffff')
+
+    for h5parm in new_h5parms:
+        apply_h5parm(h5parm=h5parm, ms=ms)
+    print('gggggggggggggggggggg')
+
+    loop3_h5parm = new_h5parm  # for testing
+    updatelist(new_h5parm, loop3_h5parm, mtf, threshold=threshold)
 
 if __name__ == '__main__':
     main()
