@@ -98,7 +98,7 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
 
 def make_h5parm_multiprocessing(args):
     '''Wrapper to parallelize make_h5parm.'''
-
+    print('fffffffffffffffffffffffff')
     mtf, ms, directions = args
     return make_h5parm(mtf=mtf, ms=ms, directions=directions)
 
@@ -127,8 +127,6 @@ def make_h5parm(mtf, ms='', directions=[]):
     h5parms = np.genfromtxt(mtf, delimiter=',', unpack=True, dtype=str,
                             usecols=0)
 
-    print('123123123123herererere')
-    print(data.dtype.names)
     # calculate the distance betweeen the ms direction and the h5parm directions
     # there is one entry in mtf_directions for each unique line in the mtf
     directions = SkyCoord(directions[0], directions[1], unit = 'rad')
@@ -420,6 +418,7 @@ def main():
     directions_paired = list(zip(directions[::2], directions[1::2]))
     multiprocessing = list(zip(mtf_list, ms_list, directions_paired))
     pool = Pool(cores)  # specify cores
+    print(multiprocessing)
     new_h5parms = pool.map(make_h5parm_multiprocessing, multiprocessing)
     print('fffffffffffffffffffffffff')
 
