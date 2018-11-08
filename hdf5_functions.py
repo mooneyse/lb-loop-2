@@ -1,17 +1,15 @@
 #!/usr/bin/env python2.7
 
-'''
-a collection of functions for modifying hdf5 files
-'''
+'''A collection of functions for modifying HDF5 files.'''
 
 from __future__ import print_function
 from functools import partial
 from multiprocessing import Pool
-from pathlib import Path # pip install --user pathlib on CEP3
+from pathlib import Path  # pip install --user pathlib on CEP3
 from astropy.coordinates import SkyCoord
 import astropy.units as u
 import pyrap.tables as pt
-import losoto.h5parm as lh5 # module load losoto/2.0 on CEP3
+import losoto.h5parm as lh5  # module load losoto/2.0 on CEP3
 import numpy as np
 import argparse
 import csv
@@ -23,56 +21,6 @@ import subprocess
 import sys
 import threading
 import loop3A
-
-def does_it_exist(the_file, clobber = False, append = False):
-    '''
-    description:
-    - convenience function to check if a file already exists
-
-    parameters:
-    - the_file (str): check if this file exists
-    - clobber (bool): (default = False) overwrite if True
-    - append  (bool): (default = False) append to file if it exists
-
-    returns:
-    - bool: file already exists (True), file does not exist (False)
-    '''
-
-    if Path(the_file).is_file():
-        if append:
-            logging.warn('{} already exists and it will be appended to (append = {})'.format(the_file, append))
-        elif clobber:
-            logging.warn('{} already exists but it will be overwritten (clobber = {})'.format(the_file, clobber))
-            os.remove(the_file)
-        else:
-            logging.error('{} already exists and it will not be overwritten (clobber = {})'.format(the_file, clobber))
-            sys.exit()
-        return True
-    else:
-        logging.info('{} does not exist'.format(the_file))
-        return False
-
-def loop3(ms):
-    '''
-    description:
-    - calls loop 3
-
-    parameters:
-    - tbd
-
-    returns:
-    - loop3_h5parm (str): h5parm resulting from loop 3
-    '''
-
-    logging.info('executing loop3()')
-    # loop3A.py and loop3_service.py from Neal Jackson
-    loop3_hdf5 = 'hdf5'  # loop3A.selfcal(vis=ms)  # crashes because h5parm is not
-    # imported correctly and, after fixing that, because
-    # IOError: [Errno 2] No such file or directory: 'v.pkl'
-    # also had to module load lofar losoto/2.0
-    # loop 3 files need main() and argparse
-    logging.info('loop3() completed')
-    return loop3_hdf5
 
 
 def interpolate_nan(X):
@@ -102,7 +50,7 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
         coherence metric.
 
     Returns:
-    (Dictionary) The coherence metric for each station.'''
+    The coherence metric for each station. (dict)'''
 
     h = lh5.h5parm(h5parm)
     solname = h.getSolsetNames()[-1]  # only using the last solution set
@@ -345,60 +293,40 @@ def make_h5parm(mtf, ms = '', clobber = False, directions = []):
     logging.info('make_h5parm(mtf = {}, ms = {}, clobber = {}) completed'.format(mtf, ms, clobber))
     return new_h5parm
 
-def applyh5parm(new_h5parm, ms, clobber = False, column_out = 'DATA'):
-    '''
-    description:
-    - create ndppp parset
-    - apply the output of make_h5parm to the measurement set
+def apply_h5parm(h5parm, ms, column_out='DATA'):
+    '''Creates an NDPPP parset. Applies the output of make_h5parm to the
+    measurement set.
 
-    parameters:
-    - new_h5parm (str) : the output of make_h5parm
-    - ms         (str) : the measurement set for self-calibration
-    - clobber    (bool): (default = false) overwrites the parset if it exists
-    - column_out (str) : (default = 'DATA') which column for NDPPP to write to
+    Args:
+    new_h5parm (str): The output of make_h5parm.
+    ms (str): The measurement set for self-calibration.
+    column_out (str, default = 'DATA'): The column for NDPPP to write to.
 
-    returns:
-    - ms (str): measurement set for self-calibration with corrected data
-    '''
+    Returns:
+    The path to the measurement set for self-calibration with corrected data.
+    (str)'''
 
-    logging.info('executing applyh5parm(new_h5parm = {}, ms = {}, clobber = {})'.format(new_h5parm, ms, clobber))
     # parset is saved in same directory as the h5parm
-    parset = os.path.dirname(new_h5parm) + '/applyh5parm.parset'
+    parset = os.path.dirname(h5parm) + '/applyh5parm.parset'
     column_in = 'DATA'
+    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
-    does_it_exist(parset, clobber = clobber) # if parset already exists, warn user
-
-    # create the parset
-    with open(parset, 'w') as f:
-        f.write('# applyh5parm function created this parset at {}\n'.format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+    with open(parset, 'w') as f:  # create the parset
+        f.write('# applyh5parm function created this parset at {}\n'.format(now)
         f.write('msin                = {}\n'.format(ms))
         f.write('msin.datacolumn     = {}\n'.format(column_in))
-        f.write('msout               = .\n')
-        f.write('msout.datacolumn    = %s\n' % column_out)
+        f.write('msout               = {}\n'.format(ms))
+        f.write('msout.datacolumn    = {}\n'.format(column_out)
         f.write('steps               = [applycal]\n')
         f.write('applycal.type       = applycal\n')
-        f.write('applycal.parmdb     = %s\n' % new_h5parm)
+        f.write('applycal.parmdb     = {}\n'.format(h5parm))
         f.write('applycal.correction = phase000\n')
     f.close()
 
-    # apply the h5parm
-    logging.info('apply {} to {} with NDPPP'.format(new_h5parm, ms))
-    ndppp_output = subprocess.check_output(['NDPPP', '--help']) # NOTE set to parset
-
-    # format and log the output
-    # NOTE might not be the best way of handling this given the text output could be large
-    ndppp_output = ndppp_output.decode('utf-8')
-    ndppp_output = ndppp_output.split('\n')
-    for line in ndppp_output:
-        if line: # do not print blank line
-            logging.info(line)
-
-    logging.info('finished applying {} to {}, removing {}'.format(new_h5parm, ms, parset))
-    os.remove(parset)
-    logging.info('applyh5parm(new_h5parm = {}, ms = {}, clobber = {}) completed'.format(new_h5parm, ms, clobber))
+    ndppp_output = subprocess.check_output(['NDPPP', '--help']) # NOTE update
     return ms
 
-def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False, threshold = 0.25):
+def update_list(new_h5parm, loop3_h5parm, mtf, clobber = False, threshold = 0.25):
     '''
     description:
     - combine the phase solutions from the initial h5parm and the final h5parm
@@ -492,16 +420,9 @@ def updatelist(new_h5parm, loop3_h5parm, mtf, clobber = False, threshold = 0.25)
     return combined_h5parm
 
 def main():
-    '''
-    description:
-    - runs loop3, evalate_solutions, make_h5parm, applyh5parm, and updatelist
-
-    parameters:
-    - none
-
-    returns:
-    - none
-    '''
+    '''Evaluates the h5parm phase solutions, makes a new h5parm of the best
+    solutions, applies them to the measurement set, and updates the master text
+    file with the best solutions after loop 3 is called.'''
 
     formatter_class = argparse.RawDescriptionHelpFormatter
     parser = argparse.ArgumentParser(description=__doc__,
@@ -581,7 +502,7 @@ def main():
     # for new_h5parm in new_h5parms:
     #     applyh5parm(new_h5parm, ms, clobber = clobber) # apply h5parm to ms
     #
-    # loop3_h5parm = loop3() # run loop 3, returning h5parm
+    apply_h5parm(h5parm=h5parm, ms=ms)  # h5parm should be new_h5parm
     # loop3_h5parm = new_h5parm # for testing
     # updatelist(new_h5parm, loop3_h5parm, mtf, clobber = clobber, threshold = threshold) # combine h5parms and update mtf
     # logging.info('main() completed')
