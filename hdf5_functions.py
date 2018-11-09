@@ -53,7 +53,7 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
     The coherence metric for each station. (dict)'''
 
     h = lh5.h5parm(h5parm)
-    solname = h.getSolsetNames()[-1]  # only using the last solution set
+    solname = h.getSolsetNames()[0]  # set to -1 to use only the last solset
     solset = h.getSolset(solname)
     soltabnames = solset.getSoltabNames()
     phase = solset.getSoltab('phase000')
