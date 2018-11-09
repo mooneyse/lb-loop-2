@@ -126,9 +126,9 @@ def make_h5parm(mtf, ms='', directions=[]):
     h5parms = np.genfromtxt(mtf, delimiter=',', unpack=True, dtype=str,
                             usecols=0)
 
-    # calculate the distance betweeen the ms direction and the h5parm directions
+    # calculate the distance betweeen the ms and the h5parm directions
     # there is one entry in mtf_directions for each unique line in the mtf
-    directions = SkyCoord(directions[0], directions[1], unit = 'rad')
+    directions = SkyCoord(directions[0], directions[1], unit='rad')
     mtf_directions = {}
 
     for h5parm, ra, dec in zip(h5parms, data['ra'], data['dec']):
@@ -165,7 +165,8 @@ def make_h5parm(mtf, ms='', directions=[]):
 
     # create a new h5parm
     ms = os.path.splitext(os.path.normpath(ms))[0]
-    new_h5parm = '{}_{}_{}.h5'.format(ms, directions.ra.deg, directions.dec.deg)
+    new_h5parm = '{}_{}_{}.h5'.format(ms, directions.ra.deg,
+                                      directions.dec.deg)
     h = lh5.h5parm(new_h5parm, readonly=False)
     table = h.makeSolset()  # creates sol000
     solset = h.getSolset('sol000')  # on the new h5parm
@@ -180,7 +181,7 @@ def make_h5parm(mtf, ms='', directions=[]):
         my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
 
         # use the station to get the relevant data to be copied from the h5parm
-        lo = lh5.h5parm(my_h5parm, readonly=False)  # NB try change this to True
+        lo = lh5.h5parm(my_h5parm, readonly=False)  # NB change this to True
         phase = lo.getSolset('sol000').getSoltab('phase000')
 
         for s in range(len(phase.ant[:])):  # stations
@@ -188,14 +189,14 @@ def make_h5parm(mtf, ms='', directions=[]):
                 # copy values and weights
                 v = phase.val[:, :, s, :, :]
                 w = phase.weight[:, :, s, :, :]
-                v_expanded = np.expand_dims(v, axis = 2)
-                w_expanded = np.expand_dims(w, axis = 2)
+                v_expanded = np.expand_dims(v, axis=2)
+                w_expanded = np.expand_dims(w, axis=2)
                 val.append(v_expanded)
                 weight.append(w_expanded)
 
-        # WARNING pol, dir, ant, time, freq should be the same in all h5parms so
-        # using the last one in the loop for that information (could be a source
-        # of error in future)
+        # WARNING pol, dir, ant, time, freq should be the same in all h5parms
+        # so using the last one in the loop for that information (could be a
+        # source of error in future)
         # also getting the antenna and source table from this last h5parm
         if my_line == len(working_data) - 1:
             soltab = lo.getSolset('sol000')
@@ -209,8 +210,8 @@ def make_h5parm(mtf, ms='', directions=[]):
 
         lo.close()
 
-    vals = np.concatenate(val, axis = 2)
-    weights = np.concatenate(weight, axis = 2)
+    vals = np.concatenate(val, axis=2)
+    weights = np.concatenate(weight, axis=2)
 
     # write these best phase solutions to the new h5parm
     c = solset.makeSoltab('phase',
@@ -257,12 +258,13 @@ def apply_h5parm(h5parm, ms, column_out='DATA'):
         f.write('applycal.correction = phase000\n')
     f.close()
 
-    ndppp_output = subprocess.check_output(['NDPPP', '--help']) # NOTE update
+    ndppp_output = subprocess.check_output(['NDPPP', '--help'])  # NOTE update
 
 
 def update_list(new_h5parm, loop3_h5parm, mtf, threshold=0.25):
-    '''Combine the phase solutions from the initial h5parm and the final h5parm.
-    Calls evaluate_solutions to update the master file with a new line appended.
+    '''Combine the phase solutions from the initial h5parm and the final
+    h5parm. Calls evaluate_solutions to update the master file with a new line
+    appended.
 
     Args:
     new_h5parm (str): The initial h5parm (i.e. from make_h5parm).
@@ -308,16 +310,16 @@ def update_list(new_h5parm, loop3_h5parm, mtf, threshold=0.25):
                        os.path.basename(loop3_h5parm))
 
     # write these best phase solutions to the combined_h5parm
-    h = lh5.h5parm(combined_h5parm, readonly = False)
+    h = lh5.h5parm(combined_h5parm, readonly=False)
 
     table = h.makeSolset()  # creates sol000
 
     solset = h.getSolset('sol000')
     c = solset.makeSoltab('phase',
-                          axesNames = ['pol', 'dir', 'ant', 'freq', 'time'],
-                          axesVals = [pol, dir, ant, freq, time],
-                          vals = vals,
-                          weights = weights)  # creates phase000
+                          axesNames=['pol', 'dir', 'ant', 'freq', 'time'],
+                          axesVals=[pol, dir, ant, freq, time],
+                          vals=vals,
+                          weights=weights)  # creates phase000
 
     # copy source and antenna tables into the new h5parm
     source_table = table.obj._f_get_child('source')
@@ -377,7 +379,7 @@ def main():
                         type=float,
                         default=0,
                         nargs='+',
-                        help='source positions (radians; ra1 dec1 ra2 dec2...)')
+                        help='source positions (radians; RA DEC RA DEC...)')
 
     args = parser.parse_args()
     mtf = args.mtf
