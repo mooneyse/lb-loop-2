@@ -98,7 +98,6 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
 
 def make_h5parm_multiprocessing(args):
     '''Wrapper to parallelize make_h5parm.'''
-    print('fffffffffffffffffffffffff', args)
     mtf, ms, directions = args
     return make_h5parm(mtf=mtf, ms=ms, directions=directions)
 
@@ -132,101 +131,102 @@ def make_h5parm(mtf, ms='', directions=[]):
     directions = SkyCoord(directions[0], directions[1], unit = 'rad')
     mtf_directions = {}
 
-    # for h5parm, ra, dec in zip(h5parms, data['ra'], data['dec']):
-    #     mtf_direction = SkyCoord(float(ra), float(dec), unit='deg')
-    #     separation = directions.separation(mtf_direction)
-    #     mtf_directions[separation] = h5parm  # distances from ms to each h5parm
-    #
-    # # read in the stations from the master text file
-    # with open(mtf) as f:
-    #     mtf_stations = list(csv.reader(f))[0][3:]  # skip h5parm, ra, and dec
-    #     mtf_stations = [x.lstrip() for x in mtf_stations]  # remove first space
-    #
-    # # find the closest h5parm which has an acceptable solution for each station
-    # parts = {'prefix': os.path.dirname(os.path.dirname(ms)),
-    #          'ra': directions.ra.deg, 'dec': directions.dec.deg}
-    #
-    # working_file = '{}/make_h5parm_{}_{}.txt'.format(**parts)
-    # f = open(working_file, 'w')
-    # successful_stations = []
-    #
-    # for mtf_station in mtf_stations:  # for each station
-    #     for key in sorted(mtf_directions.keys()):  # shortest separation first
-    #         h5parm = mtf_directions[key]
-    #         row = list(h5parms).index(h5parm)  # row in mtf
-    #         value = data[mtf_station][row]  # boolean for h5parm and station
-    #
-    #         if value == 1 and mtf_station not in successful_stations:
-    #             w = '{}\t{}\t{}\t{}\t{}'.format(mtf_station.ljust(8),
-    #                                             round(key.deg, 6), int(value),
-    #                                             row, h5parm)
-    #             f.write('{}\n'.format(w))
-    #             successful_stations.append(mtf_station)
-    # f.close()
-    #
-    # # create a new h5parm
-    # ms = os.path.splitext(os.path.normpath(ms))[0]
-    # new_h5parm = '{}_{}_{}.h5'.format(ms, directions.ra.deg, directions.dec.deg)
-    # h = lh5.h5parm(new_h5parm, readonly=False)
-    # table = h.makeSolset()  # creates sol000
-    # solset = h.getSolset('sol000')  # on the new h5parm
-    #
-    # # get data to be copied from the working file
-    # working_data = np.genfromtxt(working_file, delimiter='\t', dtype=str)
-    # working_data = sorted(working_data.tolist())  # stations are alphabetised
-    # val, weight = [], []
-    #
-    # for my_line in range(len(working_data)):  # one line per station
-    #     my_station = working_data[my_line][0]
-    #     my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
-    #
-    #     # use the station to get the relevant data to be copied from the h5parm
-    #     lo = lh5.h5parm(my_h5parm, readonly=False)  # NB try change this to True
-    #     phase = lo.getSolset('sol000').getSoltab('phase000')
-    #
-    #     for s in range(len(phase.ant[:])):  # stations
-    #         if phase.ant[s] == my_station.strip():
-    #             # copy values and weights
-    #             v = phase.val[:, :, s, :, :]
-    #             w = phase.weight[:, :, s, :, :]
-    #             v_expanded = np.expand_dims(v, axis = 2)
-    #             w_expanded = np.expand_dims(w, axis = 2)
-    #             val.append(v_expanded)
-    #             weight.append(w_expanded)
-    #
-    #     # WARNING pol, dir, ant, time, freq should be the same in all h5parms so
-    #     # using the last one in the loop for that information (could be a source
-    #     # of error in future)
-    #     # also getting the antenna and source table from this last h5parm
-    #     if my_line == len(working_data) - 1:
-    #         soltab = lo.getSolset('sol000')
-    #         antenna_soltab = soltab.getAnt()  # dictionary
-    #         source_soltab = soltab.getSou()  # dictionary
-    #         pol = phase.pol[:]
-    #         dir = phase.dir[:]
-    #         ant = phase.ant[:]
-    #         time = phase.time[:]
-    #         freq = phase.freq[:]
-    #
-    #     lo.close()
-    #
-    # vals = np.concatenate(val, axis = 2)
-    # weights = np.concatenate(weight, axis = 2)
-    #
-    # # write these best phase solutions to the new h5parm
-    # c = solset.makeSoltab('phase',
-    #                       axesNames=['pol', 'dir', 'ant', 'freq', 'time'],
-    #                       axesVals=[pol, dir, ant, freq, time],
-    #                       vals=vals,
-    #                       weights=weights)  # creates phase000
-    #
-    # # copy source and antenna tables into the new h5parm
-    # source_table = table.obj._f_get_child('source')
-    # source_table.append(source_soltab.items())  # from dictionary to list
-    # antenna_table = table.obj._f_get_child('antenna')
-    # antenna_table.append(antenna_soltab.items())  # from dictionary to list
-    # h.close()  # close the new h5parm
-    # return new_h5parm
+    for h5parm, ra, dec in zip(h5parms, data['ra'], data['dec']):
+        mtf_direction = SkyCoord(float(ra), float(dec), unit='deg')
+        separation = directions.separation(mtf_direction)
+        mtf_directions[separation] = h5parm  # distances from ms to each h5parm
+
+    # read in the stations from the master text file
+    with open(mtf) as f:
+        mtf_stations = list(csv.reader(f))[0][3:]  # skip h5parm, ra, and dec
+        mtf_stations = [x.lstrip() for x in mtf_stations]  # remove first space
+
+    # find the closest h5parm which has an acceptable solution for each station
+    parts = {'prefix': os.path.dirname(os.path.dirname(ms)),
+             'ra': directions.ra.deg, 'dec': directions.dec.deg}
+
+    working_file = '{}/make_h5parm_{}_{}.txt'.format(**parts)
+    f = open(working_file, 'w')
+    successful_stations = []
+
+    for mtf_station in mtf_stations:  # for each station
+        for key in sorted(mtf_directions.keys()):  # shortest separation first
+            h5parm = mtf_directions[key]
+            row = list(h5parms).index(h5parm)  # row in mtf
+            value = data[mtf_station][row]  # boolean for h5parm and station
+
+            if value == 1 and mtf_station not in successful_stations:
+                w = '{}\t{}\t{}\t{}\t{}'.format(mtf_station.ljust(8),
+                                                round(key.deg, 6), int(value),
+                                                row, h5parm)
+                f.write('{}\n'.format(w))
+                successful_stations.append(mtf_station)
+    f.close()
+
+    # create a new h5parm
+    ms = os.path.splitext(os.path.normpath(ms))[0]
+    new_h5parm = '{}_{}_{}.h5'.format(ms, directions.ra.deg, directions.dec.deg)
+    h = lh5.h5parm(new_h5parm, readonly=False)
+    table = h.makeSolset()  # creates sol000
+    solset = h.getSolset('sol000')  # on the new h5parm
+
+    # get data to be copied from the working file
+    working_data = np.genfromtxt(working_file, delimiter='\t', dtype=str)
+    working_data = sorted(working_data.tolist())  # stations are alphabetised
+    val, weight = [], []
+
+    for my_line in range(len(working_data)):  # one line per station
+        my_station = working_data[my_line][0]
+        my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
+
+        # use the station to get the relevant data to be copied from the h5parm
+        lo = lh5.h5parm(my_h5parm, readonly=False)  # NB try change this to True
+        phase = lo.getSolset('sol000').getSoltab('phase000')
+
+        for s in range(len(phase.ant[:])):  # stations
+            if phase.ant[s] == my_station.strip():
+                # copy values and weights
+                v = phase.val[:, :, s, :, :]
+                w = phase.weight[:, :, s, :, :]
+                v_expanded = np.expand_dims(v, axis = 2)
+                w_expanded = np.expand_dims(w, axis = 2)
+                val.append(v_expanded)
+                weight.append(w_expanded)
+
+        # WARNING pol, dir, ant, time, freq should be the same in all h5parms so
+        # using the last one in the loop for that information (could be a source
+        # of error in future)
+        # also getting the antenna and source table from this last h5parm
+        if my_line == len(working_data) - 1:
+            soltab = lo.getSolset('sol000')
+            antenna_soltab = soltab.getAnt()  # dictionary
+            source_soltab = soltab.getSou()  # dictionary
+            pol = phase.pol[:]
+            dir = phase.dir[:]
+            ant = phase.ant[:]
+            time = phase.time[:]
+            freq = phase.freq[:]
+
+        lo.close()
+
+    vals = np.concatenate(val, axis = 2)
+    weights = np.concatenate(weight, axis = 2)
+
+    # write these best phase solutions to the new h5parm
+    c = solset.makeSoltab('phase',
+                          axesNames=['pol', 'dir', 'ant', 'freq', 'time'],
+                          axesVals=[pol, dir, ant, freq, time],
+                          vals=vals,
+                          weights=weights)  # creates phase000
+
+    # copy source and antenna tables into the new h5parm
+    source_table = table.obj._f_get_child('source')
+    source_table.append(source_soltab.items())  # from dictionary to list
+    antenna_table = table.obj._f_get_child('antenna')
+    antenna_table.append(antenna_soltab.items())  # from dictionary to list
+    h.close()  # close the new h5parm
+    print('make h5parm done?')
+    return new_h5parm
 
 
 def apply_h5parm(h5parm, ms, column_out='DATA'):
@@ -421,12 +421,11 @@ def main():
     directions_paired = list(zip(directions[::2], directions[1::2]))
     multiprocessing = list(zip(mtf_list, ms_list, directions_paired))
     pool = Pool(cores)  # specify cores
-    print(multiprocessing)
     new_h5parms = pool.map(make_h5parm_multiprocessing, multiprocessing)
-    print('fffffffffffffffffffffffff')
 
     for h5parm in new_h5parms:
         apply_h5parm(h5parm=h5parm, ms=ms)
+
     print('gggggggggggggggggggg')
 
     loop3_h5parm = new_h5parm  # for testing
