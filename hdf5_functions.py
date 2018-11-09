@@ -16,13 +16,12 @@ import numpy as np
 import argparse
 import csv
 import datetime
-import logging
-import multiprocessing
+# import logging
+# import multiprocessing
 import os
 import subprocess
-import sys
-import threading
-import loop3A
+# import sys
+# import threading
 
 __author__ = 'Sean Mooney'
 __date__ = '01 November 2018'
