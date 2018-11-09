@@ -1,6 +1,8 @@
 #!/usr/bin/env python2.7
 
-'''A collection of functions for modifying HDF5 files.'''
+'''A collection of functions for modifying HDF5 files. These functions form
+   loop 2 of the LOFAR long-baseline pipeline, which can be found at
+   https://github.com/lmorabit/long_baseline_pipeline.'''
 
 from __future__ import print_function
 from functools import partial
@@ -21,6 +23,9 @@ import subprocess
 import sys
 import threading
 import loop3A
+
+__author__ = 'Sean Mooney'
+__date__ = '01 November 2018'
 
 
 def interpolate_nan(X):
@@ -103,12 +108,11 @@ def make_h5parm_multiprocessing(args):
 
 
 def make_h5parm(mtf, ms='', directions=[]):
-    '''Get the direction from the measurement set or list provided. Get the
-    directions of the h5parms from the master text file. Calculate the
-    separation between the measurement set direction and the h5parm directions.
-    For each station, find the h5parm of smallest separation which has valid
-    phase solutions. Create a new h5parm. Write these phase solutions to this
-    new h5parm.
+    '''Get the directions of the h5parms from the master text file. Calculate
+    the separation between the measurement set direction and the h5parm
+    directions. For each station, find the h5parm of smallest separation which
+    has valid phase solutions. Create a new h5parm. Write these phase solutions
+    to this new h5parm.
 
     Args:
     mtf (str): Master text file with list of h5parms.
