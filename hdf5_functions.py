@@ -135,7 +135,7 @@ def make_h5parm(mtf, ms='', directions=[]):
         mtf_direction = SkyCoord(float(ra), float(dec), unit='deg')
         separation = directions.separation(mtf_direction)
         mtf_directions[separation] = h5parm  # distances from ms to each h5parm
-    print('make h5parm done?', mtf_directions)
+
     # read in the stations from the master text file
     with open(mtf) as f:
         mtf_stations = list(csv.reader(f))[0][3:]  # skip h5parm, ra, and dec
@@ -147,6 +147,7 @@ def make_h5parm(mtf, ms='', directions=[]):
 
     working_file = '{}/make_h5parm_{}_{}.txt'.format(**parts)
     f = open(working_file, 'w')
+    print('make h5parm done?')    
     successful_stations = []
 
     for mtf_station in mtf_stations:  # for each station
