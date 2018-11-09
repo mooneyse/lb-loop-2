@@ -130,12 +130,12 @@ def make_h5parm(mtf, ms='', directions=[]):
     # there is one entry in mtf_directions for each unique line in the mtf
     directions = SkyCoord(directions[0], directions[1], unit = 'rad')
     mtf_directions = {}
-    print('make h5parm done?', directions)
+
     for h5parm, ra, dec in zip(h5parms, data['ra'], data['dec']):
         mtf_direction = SkyCoord(float(ra), float(dec), unit='deg')
         separation = directions.separation(mtf_direction)
         mtf_directions[separation] = h5parm  # distances from ms to each h5parm
-
+    print('make h5parm done?', mtf_directions)
     # read in the stations from the master text file
     with open(mtf) as f:
         mtf_stations = list(csv.reader(f))[0][3:]  # skip h5parm, ra, and dec
