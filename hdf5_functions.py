@@ -145,9 +145,9 @@ def make_h5parm(mtf, ms='', directions=[]):
     parts = {'prefix': os.path.dirname(os.path.dirname(ms)),
              'ra': directions.ra.deg, 'dec': directions.dec.deg}
 
-    working_file = '{}/make_h5parm_{}_{}.txt'.format(**parts)
+    working_file = '{prefix}/make_h5parm_{ra}_{dec}.txt'.format(**parts)
     f = open(working_file, 'w')
-    print('make h5parm done?')    
+    print('make h5parm done?')
     successful_stations = []
 
     for mtf_station in mtf_stations:  # for each station
