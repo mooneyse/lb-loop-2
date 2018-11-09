@@ -125,12 +125,12 @@ def make_h5parm(mtf, ms='', directions=[]):
                          names=True)
     h5parms = np.genfromtxt(mtf, delimiter=',', unpack=True, dtype=str,
                             usecols=0)
-    print('make h5parm done?')
+
     # calculate the distance betweeen the ms direction and the h5parm directions
     # there is one entry in mtf_directions for each unique line in the mtf
     directions = SkyCoord(directions[0], directions[1], unit = 'rad')
     mtf_directions = {}
-
+    print('make h5parm done?', directions)
     for h5parm, ra, dec in zip(h5parms, data['ra'], data['dec']):
         mtf_direction = SkyCoord(float(ra), float(dec), unit='deg')
         separation = directions.separation(mtf_direction)
