@@ -101,13 +101,28 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
     return evaluations
 
 
-def make_h5parm_multiprocessing(args):
+def dir2phasesol_wrapper(mtf, ms, directions=[], cores=4):
+    '''Book-keeping to get the multiprocessing set up and running.'''
+
+    mtf_list, ms_list = [], []
+    for i in range(int(len(directions) / 2)):
+        mtf_list.append(mtf)
+        ms_list.append(ms)
+
+    directions_paired = list(zip(directions[::2], directions[1::2]))
+    multiprocessing = list(zip(mtf_list, ms_list, directions_paired))
+    pool = Pool(cores)  # specify cores
+    new_h5parms = pool.map(dir2phasesol_multiprocessing, multiprocessing)
+    return new_h5parms
+
+
+def dir2phasesol_multiprocessing(args):
     '''Wrapper to parallelize make_h5parm.'''
     mtf, ms, directions = args
-    return make_h5parm(mtf=mtf, ms=ms, directions=directions)
+    return dir2phasesol(mtf=mtf, ms=ms, directions=directions)
 
 
-def make_h5parm(mtf, ms='', directions=[]):
+def dir2phasesol(mtf, ms='', directions=[]):
     '''Get the directions of the h5parms from the master text file. Calculate
     the separation between the measurement set direction and the h5parm
     directions. For each station, find the h5parm of smallest separation which
@@ -395,22 +410,13 @@ def main():
 
     evaluate_solutions(h5parm=h5parm, mtf=mtf, threshold=threshold)
 
-    mtf_list, ms_list = [], []  # book-keeping to get things in the right place
-    for i in range(int(len(directions) / 2)):
-        mtf_list.append(mtf)
-        ms_list.append(ms)
+    new_h5parms = dir2phasesol_wrapper(mtf=mtf, ms=ms, directions=directions,
+                                       cores=cores)
 
-    directions_paired = list(zip(directions[::2], directions[1::2]))
-    multiprocessing = list(zip(mtf_list, ms_list, directions_paired))
-    pool = Pool(cores)  # specify cores
-    new_h5parms = pool.map(make_h5parm_multiprocessing, multiprocessing)
+    apply_h5parm(h5parm=new_h5parms[0], ms=ms)  # new_h5parms[0] used as a test
 
-    for h5parm in new_h5parms:
-        apply_h5parm(h5parm=h5parm, ms=ms)
-
-    new_h5parm, loop3_h5parm = new_h5parms[0], new_h5parms[1]  # for testing
-    update_list(new_h5parm=new_h5parm, loop3_h5parm=loop3_h5parm, mtf=mtf,
-                threshold=threshold)
+    update_list(new_h5parm=new_h5parms[0], loop3_h5parm=new_h5parms[1],
+                mtf=mtf, threshold=threshold)  # new_h5parms used as a test
 
 if __name__ == '__main__':
     main()
