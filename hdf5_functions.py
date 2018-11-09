@@ -148,7 +148,7 @@ def make_h5parm(mtf, ms='', directions=[]):
     working_file = '{}/make_h5parm_{}_{}.txt'.format(**parts)
     f = open(working_file, 'w')
     successful_stations = []
-
+    print('make h5parm done?')
     for mtf_station in mtf_stations:  # for each station
         for key in sorted(mtf_directions.keys()):  # shortest separation first
             h5parm = mtf_directions[key]
@@ -225,7 +225,6 @@ def make_h5parm(mtf, ms='', directions=[]):
     antenna_table = table.obj._f_get_child('antenna')
     antenna_table.append(antenna_soltab.items())  # from dictionary to list
     h.close()  # close the new h5parm
-    print('make h5parm done?')
     return new_h5parm
 
 
