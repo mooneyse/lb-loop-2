@@ -168,7 +168,6 @@ def make_h5parm(mtf, ms='', directions=[]):
     new_h5parm = '{}_{}_{}.h5'.format(ms, directions.ra.deg, directions.dec.deg)
     h = lh5.h5parm(new_h5parm, readonly=False)
     table = h.makeSolset()  # creates sol000
-    print('table:', table)
     solset = h.getSolset('sol000')  # on the new h5parm
 
     # get data to be copied from the working file
@@ -426,9 +425,7 @@ def main():
     for h5parm in new_h5parms:
         apply_h5parm(h5parm=h5parm, ms=ms)
 
-    print('gggggggggggggggggggg')
-
-    loop3_h5parm = new_h5parm  # for testing
+    loop3_h5parm = new_h5parms[0]  # for testing
     updatelist(new_h5parm, loop3_h5parm, mtf, threshold=threshold)
 
 if __name__ == '__main__':
