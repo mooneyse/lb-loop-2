@@ -260,27 +260,20 @@ def apply_h5parm(h5parm, ms, column_out='DATA'):
     ndppp_output = subprocess.check_output(['NDPPP', '--help']) # NOTE update
 
 
-def update_list(new_h5parm, loop3_h5parm, mtf, clobber = False, threshold = 0.25):
-    '''
-    description:
-    - combine the phase solutions from the initial h5parm and the final h5parm
-    - calls evaluate_solutions to update the master file with a new line appended
+def update_list(new_h5parm, loop3_h5parm, mtf, threshold=0.25):
+    '''Combine the phase solutions from the initial h5parm and the final h5parm.
+    Calls evaluate_solutions to update the master file with a new line appended.
 
-    parameters:
-    - new_h5parm   (str): the initial h5parm (i.e. from make_h5parm)
-    - loop3_h5parm (str): the final h5parm from loop 3
-    - mtf          (str): master text file
+    Args:
+    new_h5parm (str): The initial h5parm (i.e. from make_h5parm).
+    loop3_h5parm (str): The final h5parm from loop 3.
+    mtf (str): Master text file.
 
-    returns:
-    - combined_h5parm (str): a new h5parm that is a combination of new_h5parm and loop3_h5parm
-    '''
-
-    logging.info('executing updatelist(new_h5parm = {}, loop3_h5parm = {}, mtf = {}, clobber = {})'.format(new_h5parm, loop3_h5parm, mtf, clobber))
+    Returns:
+    A new h5parm that is a combination of new_h5parm and loop3_h5parm (str).'''
 
     # get solutions from new_h5parm and loop3_h5parm
-
-    # from new_h5parm
-    h = lh5.h5parm(new_h5parm)
+    h = lh5.h5parm(new_h5parm)  # from new_h5parm
     phase = h.getSolset('sol000').getSoltab('phase000')
     pol = phase.pol[:]
     dir = phase.dir[:]
@@ -292,12 +285,11 @@ def update_list(new_h5parm, loop3_h5parm, mtf, clobber = False, threshold = 0.25
     weight_new_h5parm = phase.weight[:]
     h.close()
 
-    # from loop3_h5parm
-    h = lh5.h5parm(loop3_h5parm)
-    soltab = h.getSolset('sol000') # NB remove hard-coded names
+    h = lh5.h5parm(loop3_h5parm)  # from loop3_h5parm
+    soltab = h.getSolset('sol000')  # NB change to take highest solset
     phase = soltab.getSoltab('phase000')
-    antenna_soltab = soltab.getAnt().items() # dictionary to list
-    source_soltab = soltab.getSou().items() # dictionary to list
+    antenna_soltab = soltab.getAnt().items()  # dictionary to list
+    source_soltab = soltab.getSou().items()  # dictionary to list
 
     pol = phase.pol[:]
     dir = phase.dir[:]
@@ -312,45 +304,30 @@ def update_list(new_h5parm, loop3_h5parm, mtf, clobber = False, threshold = 0.25
     # for comined_h5parm
     vals = val_new_h5parm + val_loop3_h5parm
     weights = weight_new_h5parm + weight_loop3_h5parm
-
-    # create new h5parm
-    logging.info('combining phase solutions from {} and {}'.format(new_h5parm, loop3_h5parm))
-    combined_h5parm = '{}-{}'.format(os.path.splitext(new_h5parm)[0], os.path.basename(loop3_h5parm))
-    logging.info('new combined h5parm is called {}'.format(combined_h5parm))
-
-    # combine two h5parms
-    does_it_exist(combined_h5parm, clobber = clobber) # if h5parm already exists, then exit
+    combined_h5parm = (os.path.splitext(new_h5parm)[0] + '-' +
+                       os.path.basename(loop3_h5parm))
 
     # write these best phase solutions to the combined_h5parm
     h = lh5.h5parm(combined_h5parm, readonly = False)
-    try:
-        table = h.makeSolset() # creates sol000
-    except NotImplementedError:
-        logging.error('could not make antenna and source tables')
-        sys.exit()
-        # on my machine the default 'addTables = True' gives
-        # 'NotImplementedError: structured arrays with columns with type description ``<U16`` are not supported yet, sorry'
+
+    table = h.makeSolset()  # creates sol000
 
     solset = h.getSolset('sol000')
     c = solset.makeSoltab('phase',
                           axesNames = ['pol', 'dir', 'ant', 'freq', 'time'],
                           axesVals = [pol, dir, ant, freq, time],
                           vals = vals,
-                          weights = weights) # creates phase000
+                          weights = weights)  # creates phase000
 
     # copy source and antenna tables into the new h5parm
     source_table = table.obj._f_get_child('source')
     source_table.append(source_soltab)
     antenna_table = table.obj._f_get_child('antenna')
-    antenna_table.append(antenna_soltab) # from dictionary to list
-
+    antenna_table.append(antenna_soltab)  # from dictionary to list
     h.close()
 
     # evaluate the solutions and update the master file
-    logging.info('updating {} with the {} solutions'.format(mtf, combined_h5parm))
-    evaluate_solutions(combined_h5parm, mtf, threshold = threshold)
-    logging.info('updatelist(new_h5parm = {}, loop3_h5parm = {}, mtf = {}, clobber = {}) completed'.format(new_h5parm, loop3_h5parm, mtf, clobber))
-
+    evaluate_solutions(h5parm=combined_h5parm, mtf=mtf, threshold=threshold)
     return combined_h5parm
 
 
@@ -426,7 +403,7 @@ def main():
         apply_h5parm(h5parm=h5parm, ms=ms)
 
     loop3_h5parm = new_h5parms[0]  # for testing
-    updatelist(new_h5parm, loop3_h5parm, mtf, threshold=threshold)
+    update_list(new_h5parm, loop3_h5parm, mtf, threshold=threshold)
 
 if __name__ == '__main__':
     main()
