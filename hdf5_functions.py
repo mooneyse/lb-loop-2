@@ -147,7 +147,6 @@ def make_h5parm(mtf, ms='', directions=[]):
 
     working_file = '{prefix}/make_h5parm_{ra}_{dec}.txt'.format(**parts)
     f = open(working_file, 'w')
-    print('make h5parm done?')
     successful_stations = []
 
     for mtf_station in mtf_stations:  # for each station
@@ -169,6 +168,7 @@ def make_h5parm(mtf, ms='', directions=[]):
     new_h5parm = '{}_{}_{}.h5'.format(ms, directions.ra.deg, directions.dec.deg)
     h = lh5.h5parm(new_h5parm, readonly=False)
     table = h.makeSolset()  # creates sol000
+    print('table:', table)
     solset = h.getSolset('sol000')  # on the new h5parm
 
     # get data to be copied from the working file
