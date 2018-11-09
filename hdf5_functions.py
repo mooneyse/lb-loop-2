@@ -402,8 +402,9 @@ def main():
     for h5parm in new_h5parms:
         apply_h5parm(h5parm=h5parm, ms=ms)
 
-    loop3_h5parm = new_h5parms[0]  # for testing
-    update_list(new_h5parm, loop3_h5parm, mtf, threshold=threshold)
+    new_h5parm, loop3_h5parm = new_h5parms[0], new_h5parms[1]  # for testing
+    update_list(new_h5parm=new_h5parm, loop3_h5parm=loop3_h5parm, mtf,
+                threshold=threshold)
 
 if __name__ == '__main__':
     main()
