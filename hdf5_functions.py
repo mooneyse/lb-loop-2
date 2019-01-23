@@ -7,11 +7,11 @@
 from __future__ import print_function
 from functools import partial
 from multiprocessing import Pool
-from pathlib import Path  # pip install --user pathlib on CEP3
+from pathlib import Path  # on CEP3, "pip install --user pathlib"
 from astropy.coordinates import SkyCoord
 import astropy.units as u
 import pyrap.tables as pt
-import losoto.h5parm as lh5  # module load losoto/2.0 on CEP3
+import losoto.h5parm as lh5  # on CEP3, "module load losoto/2.0 on CEP3"
 import numpy as np
 import argparse
 import csv
