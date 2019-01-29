@@ -23,12 +23,12 @@ __author__ = 'Sean Mooney'
 __date__ = '01 November 2018'
 
 
-def interpolate_nan(X):
+def interpolate_nan(x_):
     '''Interpolate NaN values using this answer from Stack Overflow:
     https://stackoverflow.com/a/6520696/6386612.'''
-    nans, x = np.isnan(X), lambda z: z.nonzero()[0]
-    X[nans] = np.interp(x(nans), x(~nans), X[~nans])
-    return X
+    nans, x = np.isnan(x_), lambda z: z.nonzero()[0]
+    x_[nans] = np.interp(x(nans), x(~nans), x_[~nans])
+    return x_
 
 
 def coherence_metric(xx, yy):
@@ -40,7 +40,7 @@ def coherence_metric(xx, yy):
 def evaluate_solutions(h5parm, mtf, threshold=0.25):
     '''Get the direction from the h5parm. Evaluate the phase solutions in the
     h5parm for each station using the coherence metric. Determine the validity
-    of each xx-yy statistic that was calculated. Append the right ascension,
+    of each coherence metric that was calculated. Append the right ascension,
     declination, and validity to the master text file.
 
     Args:
@@ -133,7 +133,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     The new h5parm to be applied to the measurement set. (str)'''
 
     # get the direction from the master text file
-    # HACK genfromtxt gives empty string for h5parms when names = True is used
+    # HACK genfromtxt gives empty string for h5parms when names=True is used
     # importing them separately as a work around
     data = np.genfromtxt(mtf, delimiter=',', unpack=True, dtype=float,
                          names=True)
@@ -250,7 +250,7 @@ def apply_h5parm(h5parm, ms, column_out='DATA'):
     Args:
     new_h5parm (str): The output of make_h5parm.
     ms (str): The measurement set for self-calibration.
-    column_out (str, default = 'DATA'): The column for NDPPP to write to.
+    column_out (str, default='DATA'): The column for NDPPP to write to.
 
     Returns:
     None.'''
@@ -348,9 +348,11 @@ def update_list(new_h5parm, loop3_h5parm, mtf, threshold=0.25):
 
 
 def main():
-    '''Evaluates the h5parm phase solutions, makes a new h5parm of the best
-    solutions, applies them to the measurement set, and updates the master text
-    file with the best solutions after loop 3 is called.'''
+    '''First, evaluate the h5parm phase solutions. Then for a given direction,
+    make a new h5parm of acceptable solutions from the nearest direction for
+    each station. Apply the solutions to the measurement set. Run loop 3 to
+    image the measurement set in the given direction. Updates the master text
+    file with the new best solutions after loop 3 is called.'''
 
     formatter_class = argparse.RawDescriptionHelpFormatter
     parser = argparse.ArgumentParser(description=__doc__,
