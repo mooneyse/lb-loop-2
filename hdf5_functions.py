@@ -406,8 +406,8 @@ def main():
 
     evaluate_solutions(h5parm='/data020/scratch/sean/letsgetloopy/M1344+5503.ms_02_c0.h5', mtf='/data020/scratch/sean/letsgetloopy/mtf.txt', threshold=threshold)
 
-    new_h5parms = dir2phasesol_wrapper(mtf=mtf, ms=ms, directions=directions,
-                                       cores=cores)
+    # new_h5parms = dir2phasesol_wrapper(mtf=mtf, ms=ms, directions=directions,
+    #                                    cores=cores)
 
     # apply_h5parm(h5parm=new_h5parms[0], ms=ms)  # new_h5parms[0] used as a test
 
