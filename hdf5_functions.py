@@ -162,7 +162,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     # read in the stations from the master text file
     with open(mtf) as f:
-        mtf_stations = list(csv.reader(f))[0][3:]  # skip h5parm, ra, and dec
+        mtf_stations = list(csv.reader(f))[0][4:]  # skip h5parm, ra, and dec
         mtf_stations = [x.lstrip() for x in mtf_stations]  # remove first space
 
     # find the closest h5parm which has an acceptable solution for each station
