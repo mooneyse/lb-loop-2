@@ -55,6 +55,7 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
     solname = h.getSolsetNames()[0]  # set to -1 to use only the last solset
     print(solname, '---------------------')
     solset = h.getSolset(solname)
+    print(solset, '---------------------')
     soltabnames = solset.getSoltabNames()
     phase = solset.getSoltab('phase000')
     stations = phase.ant
