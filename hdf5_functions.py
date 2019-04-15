@@ -406,15 +406,15 @@ def main():
 
     evaluate_solutions(h5parm=h5parm, mtf=mtf, threshold=threshold)
 
-    new_h5parms = dir2phasesol_wrapper(mtf=mtf, ms=ms, directions=directions,
-                                       cores=cores)
+    # new_h5parms = dir2phasesol_wrapper(mtf=mtf, ms=ms, directions=directions,
+    #                                    cores=cores)
 
-    apply_h5parm(h5parm=new_h5parms[0], ms=ms)  # new_h5parms[0] used as a test
+    # apply_h5parm(h5parm=new_h5parms[0], ms=ms)  # new_h5parms[0] used as a test
 
     # loop 3 goes here
 
-    update_list(new_h5parm=new_h5parms[0], loop3_h5parm=new_h5parms[1],
-                mtf=mtf, threshold=threshold)  # new_h5parms used as a test
+    # update_list(new_h5parm=new_h5parms[0], loop3_h5parm=new_h5parms[1],
+    #             mtf=mtf, threshold=threshold)  # new_h5parms used as a test
 
 if __name__ == '__main__':
     main()
