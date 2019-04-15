@@ -33,6 +33,7 @@ def interpolate_nan(x_):
 def coherence_metric(xx, yy):
     '''Calculates the coherence metric by comparing the XX and YY phases.'''
     xx, yy = interpolate_nan(xx), interpolate_nan(yy)
+    print('asean',xx)
     return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
 
 
@@ -53,9 +54,7 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
 
     h = lh5.h5parm(h5parm)
     solname = h.getSolsetNames()[0]  # set to -1 to use only the last solset
-    print(solname, '---------------------')
     solset = h.getSolset(solname)
-    print(solset, '---------------------')
     soltabnames = solset.getSoltabNames()
     phase = solset.getSoltab('phase000')
     stations = phase.ant
