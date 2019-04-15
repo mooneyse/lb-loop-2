@@ -69,7 +69,7 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
         xx = temporary['XX_' + station]
         yy = temporary['YY_' + station]
         print('ALPHA GOOOOO')
-        print(coherence_metric(xx, yy))
+        print(h5parm, coherence_metric(xx, yy))
         evaluations[station] = coherence_metric(xx, yy)  # 0 = best
 
     with open(mtf) as f:
