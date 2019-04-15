@@ -33,7 +33,7 @@ def interpolate_nan(x_):
 def coherence_metric(xx, yy):
     '''Calculates the coherence metric by comparing the XX and YY phases.'''
     xx, yy = interpolate_nan(xx), interpolate_nan(yy)
-    print('asean',xx)
+    print('asean',yy)
     return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
 
 
