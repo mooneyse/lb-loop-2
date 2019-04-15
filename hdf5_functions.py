@@ -36,7 +36,18 @@ def coherence_metric(xx, yy):
     return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
 
 
-def evaluate_solutions(h5parm, mtf, solution_table='phase', threshold=0.25):
+def evaluate_solutions_wrapper(h5parm, mtf, solution_tables, threshold):
+    '''Executes the evaluate_solutions function for each solution table. If a
+    list of solution tables are given, a corresponding list of thresholds must
+    also be given.'''
+    if type(solution_tables) is str:
+        evaluate_solutions(h5parm, mtf, solution_tables, threshold=threshold)
+    elif type(solution_tables) is list:
+        for solution_table, threshold in zip(solutions_tables, threshold):
+            evaluate_solutions(h5parm, mtf, solution_table, threshold=threshold)
+
+
+def evaluate_solutions(h5parm, mtf, solution_table, threshold=0.25):
     '''Get the direction from the h5parm. Evaluate the phase solutions in the
     h5parm for each station using the coherence metric. Determine the validity
     of each coherence metric that was calculated. Append the right ascension,
@@ -71,10 +82,10 @@ def evaluate_solutions(h5parm, mtf, solution_table='phase', threshold=0.25):
         evaluations[station] = coherence_metric(xx, yy)  # 0 = best
 
     with open(mtf) as f:
-        mtf_stations = list(csv.reader(f))[0][3:]  # get stations from the mtf
+        mtf_stations = list(csv.reader(f))[0][4:]  # get stations from the mtf
 
     with open(mtf, 'a') as f:
-        f.write('{}, {}, {}'.format(h5parm, direction[0], direction[1]))
+        f.write('{}, {}, {}, {}'.format(h5parm, direction[0], direction[1], solution_table))
 
         for mtf_station in mtf_stations:
             # look up the statistic for a station and determine if it is good
@@ -404,7 +415,10 @@ def main():
     cores = args.cores
     directions = args.directions
 
-    evaluate_solutions(h5parm='/data020/scratch/sean/letsgetloopy/M1344+5503.ms_02_c0.h5', mtf='/data020/scratch/sean/letsgetloopy/mtf.txt', threshold=threshold)
+    evaluate_solutions_wrapper(h5parm='/data020/scratch/sean/letsgetloopy/M1344+5503.ms_02_c0.h5',
+                               mtf='/data020/scratch/sean/letsgetloopy/mtf.txt',
+                               solution_tables='phase',
+                               threshold=0.25)
 
     # new_h5parms = dir2phasesol_wrapper(mtf=mtf, ms=ms, directions=directions,
     #                                    cores=cores)
