@@ -22,7 +22,6 @@ import subprocess
 __author__ = 'Sean Mooney'
 __date__ = '01 November 2018'
 
-
 def interpolate_nan(x_):
     '''Interpolate NaN values using this answer from Stack Overflow:
     https://stackoverflow.com/a/6520696/6386612.'''
