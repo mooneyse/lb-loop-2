@@ -404,10 +404,10 @@ def main():
     cores = args.cores
     directions = args.directions
 
-    evaluate_solutions(h5parm='M1344+5503.ms_A_05_c0.h5', mtf='/data020/scratch/sean/letsgetloopy/mtf.txt', threshold=threshold)
-    evaluate_solutions(h5parm='M1350+5447.ms_A_05_c0.h5', mtf='/data020/scratch/sean/letsgetloopy/mtf.txt', threshold=threshold)
-    evaluate_solutions(h5parm='N1350+5447.ms_A_05_c0.h5', mtf='/data020/scratch/sean/letsgetloopy/mtf.txt', threshold=threshold)
-    evaluate_solutions(h5parm='O1350+5447.ms_A_05_c0.h5', mtf='/data020/scratch/sean/letsgetloopy/mtf.txt', threshold=threshold)
+    evaluate_solutions(h5parm='/data020/scratch/sean/letsgetloopy/M1344+5503.ms_A_05_c0.h5', mtf='/data020/scratch/sean/letsgetloopy/mtf.txt', threshold=threshold)
+    evaluate_solutions(h5parm='/data020/scratch/sean/letsgetloopy/M1350+5447.ms_A_05_c0.h5', mtf='/data020/scratch/sean/letsgetloopy/mtf.txt', threshold=threshold)
+    evaluate_solutions(h5parm='/data020/scratch/sean/letsgetloopy/N1350+5447.ms_A_05_c0.h5', mtf='/data020/scratch/sean/letsgetloopy/mtf.txt', threshold=threshold)
+    evaluate_solutions(h5parm='/data020/scratch/sean/letsgetloopy/O1350+5447.ms_A_05_c0.h5', mtf='/data020/scratch/sean/letsgetloopy/mtf.txt', threshold=threshold)
 
     # new_h5parms = dir2phasesol_wrapper(mtf=mtf, ms=ms, directions=directions,
     #                                    cores=cores)
