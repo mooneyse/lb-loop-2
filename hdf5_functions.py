@@ -359,19 +359,19 @@ def main():
 
     parser.add_argument('-m',
                         '--mtf',
-                        required=True,
+                        required=False,
                         type=str,
                         help='master text file')
 
     parser.add_argument('-p',
                         '--h5parm',
-                        required=True,
+                        required=False,
                         type=str,
                         help='hdf5 file')
 
     parser.add_argument('-f',
                         '--ms',
-                        required=True,
+                        required=False,
                         type=str,
                         help='measurement set')
 
