@@ -55,7 +55,6 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
     solname = h.getSolsetNames()[0]  # set to -1 to use only the last solset
     solset = h.getSolset(solname)
     soltabnames = solset.getSoltabNames()
-    print(soltabnames)
     phase = solset.getSoltab('phase000')
     stations = phase.ant
     source = solset.getSou()  # dictionary
@@ -69,6 +68,7 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
     for station in stations:
         xx = temporary['XX_' + station]
         yy = temporary['YY_' + station]
+        print('asdf', coherence_metric(xx, yy))
         evaluations[station] = coherence_metric(xx, yy)  # 0 = best
 
     with open(mtf) as f:
