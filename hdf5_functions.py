@@ -420,8 +420,10 @@ def main():
                                solution_tables='phase',
                                threshold=0.25)
 
-    # new_h5parms = dir2phasesol_wrapper(mtf=mtf, ms=ms, directions=directions,
-    #                                    cores=cores)
+    new_h5parms = dir2phasesol_wrapper(mtf='/data020/scratch/sean/letsgetloopy/mtf.txt',
+                                       ms='/data020/scratch/sean/letsgetloopy/SILTJ133437.19+563147.6_L693725_phasecal.MS',
+                                       directions=[0.226893, 0.9512044, 0.244346, 0.9686577],
+                                       cores=cores)
 
     # apply_h5parm(h5parm=new_h5parms[0], ms=ms)  # new_h5parms[0] used as a test
 
