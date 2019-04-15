@@ -36,7 +36,7 @@ def coherence_metric(xx, yy):
     return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
 
 
-def evaluate_solutions(h5parm, mtf, threshold=0.25):
+def evaluate_solutions(h5parm, mtf, solution_table='phase', threshold=0.25):
     '''Get the direction from the h5parm. Evaluate the phase solutions in the
     h5parm for each station using the coherence metric. Determine the validity
     of each coherence metric that was calculated. Append the right ascension,
@@ -55,11 +55,11 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
     solname = h.getSolsetNames()[0]  # set to -1 to use only the last solset
     solset = h.getSolset(solname)
     soltabnames = solset.getSoltabNames()
-    phase = solset.getSoltab('phase000')
-    stations = phase.ant
+    soltab = solset.getSoltab(solution_table + '000')
+    stations = soltab.ant
     source = solset.getSou()  # dictionary
     direction = np.degrees(np.array(source[list(source.keys())[0]]))  # degrees
-    generator = phase.getValuesIter(returnAxes=['freq', 'time'])
+    generator = soltab.getValuesIter(returnAxes=['freq', 'time'])
     evaluations, temporary = {}, {}  # evaluations holds the coherence metrics
 
     for g in generator:
@@ -68,8 +68,6 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
     for station in stations:
         xx = temporary['XX_' + station]
         yy = temporary['YY_' + station]
-        print('ALPHA GOOOOO')
-        print(h5parm, coherence_metric(xx, yy))
         evaluations[station] = coherence_metric(xx, yy)  # 0 = best
 
     with open(mtf) as f:
@@ -407,12 +405,9 @@ def main():
     directions = args.directions
 
     evaluate_solutions(h5parm='/data020/scratch/sean/letsgetloopy/M1344+5503.ms_02_c0.h5', mtf='/data020/scratch/sean/letsgetloopy/mtf.txt', threshold=threshold)
-    evaluate_solutions(h5parm='/data020/scratch/sean/letsgetloopy/M1350+5447.ms_02_c0.h5', mtf='/data020/scratch/sean/letsgetloopy/mtf.txt', threshold=threshold)
-    evaluate_solutions(h5parm='/data020/scratch/sean/letsgetloopy/N1350+5447.ms_02_c0.h5', mtf='/data020/scratch/sean/letsgetloopy/mtf.txt', threshold=threshold)
-    evaluate_solutions(h5parm='/data020/scratch/sean/letsgetloopy/O1350+5447.ms_02_c0.h5', mtf='/data020/scratch/sean/letsgetloopy/mtf.txt', threshold=threshold)
 
-    # new_h5parms = dir2phasesol_wrapper(mtf=mtf, ms=ms, directions=directions,
-    #                                    cores=cores)
+    new_h5parms = dir2phasesol_wrapper(mtf=mtf, ms=ms, directions=directions,
+                                       cores=cores)
 
     # apply_h5parm(h5parm=new_h5parms[0], ms=ms)  # new_h5parms[0] used as a test
 
