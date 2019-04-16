@@ -215,7 +215,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
         if 'dir' not in axes_names:
             axes_names.append('dir')  # add the direction dimension
 
-        reordered_values = reorderAxes(phase.vals, axes_names,
+        reordered_values = reorderAxes(phase.val, axes_names,
                                        ['time', 'freq', 'ant', 'pol', 'dir'])
 
         for s in range(len(phase.ant[:])):  # stations
