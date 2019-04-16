@@ -233,7 +233,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
             antenna_soltab = soltab.getAnt()  # dictionary
             source_soltab = soltab.getSou()  # dictionary
             pol = phase.pol[:]
-            dir = 0  # phase.dir[:]
+            dir = [0]  # phase.dir[:]
             ant = phase.ant[:]
             time = phase.time[:]
             freq = phase.freq[:]
