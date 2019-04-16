@@ -69,8 +69,9 @@ def evaluate_solutions(h5parm, mtf, solution_table, threshold=0.25):
     solname = h.getSolsetNames()[0]  # set to -1 to use only the last solset
     solset = h.getSolset(solname)
     soltabnames = solset.getSoltabNames()
-    print('SOLTABNAMES:', soltabnames)
     soltab = solset.getSoltab(solution_table + '000')
+    asdf = soltab.getSolsetNames(soltab)
+    print('SOLTABNAME:', asdf)
     stations = soltab.ant
     source = solset.getSou()  # dictionary
     direction = np.degrees(np.array(source[list(source.keys())[0]]))  # degrees
