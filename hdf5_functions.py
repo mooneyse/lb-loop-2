@@ -229,7 +229,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
             if phase.ant[s] == my_station.strip():
                 # copy values and weights
                 v = reordered_values[:, :, s, :, :]  # time, freq, ant, pol, dir
-                w = reordered_weight[:, :, s, :, :]  # time, freq, ant, pol, dir
+                w = reordered_weights[:, :, s, :, :]  # time, freq, ant, pol, dir
                 v_expanded = np.expand_dims(v, axis=2)
                 w_expanded = np.expand_dims(w, axis=2)
                 val.append(v_expanded)
