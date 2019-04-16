@@ -233,7 +233,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
             antenna_soltab = soltab.getAnt()  # dictionary
             source_soltab = soltab.getSou()  # dictionary
             pol = phase.pol[:]
-            dir = [0]  # phase.dir[:]
+            # dir = phase.dir[:]
             ant = phase.ant[:]
             time = phase.time[:]
             freq = phase.freq[:]
@@ -245,8 +245,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     # write these best phase solutions to the new h5parm
     c = solset.makeSoltab('phase',
-                          axesNames=['pol', 'dir', 'ant', 'freq', 'time'],
-                          axesVals=[pol, dir, ant, freq, time],
+                          axesNames=['pol', 'ant', 'freq', 'time'],  # 'dir',
+                          axesVals=[pol, ant, freq, time],  # dir, 
                           vals=vals,
                           weights=weights)  # creates phase000
 
