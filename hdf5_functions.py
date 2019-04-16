@@ -244,7 +244,6 @@ def dir2phasesol(mtf, ms='', directions=[]):
             antenna_soltab = soltab.getAnt()  # dictionary
             source_soltab = soltab.getSou()  # dictionary
             pol = phase.pol[:]
-            print('POL:', pol)
             try:  #  may not contain a direction dimension
                 dir = phase.dir[:]
             except:
@@ -259,7 +258,6 @@ def dir2phasesol(mtf, ms='', directions=[]):
     weights = np.concatenate(weight, axis=2)
 
     # write these best phase solutions to the new h5parm
-    print('list(vals.shape):', list(vals.shape))  # WARNING this leads to an assert dim == list(vals.shape) AssertionError if the order changes
     c = solset.makeSoltab('phase',
                           axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
                           axesVals=[time, freq, ant, pol, dir],
