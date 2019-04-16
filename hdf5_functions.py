@@ -70,8 +70,6 @@ def evaluate_solutions(h5parm, mtf, solution_table, threshold=0.25):
     solset = h.getSolset(solname)
     soltabnames = solset.getSoltabNames()
     soltab = solset.getSoltab(solution_table + '000')
-    asdf = soltab.getSolsetNames(soltab)
-    print('SOLTABNAME:', asdf)
     stations = soltab.ant
     source = solset.getSou()  # dictionary
     direction = np.degrees(np.array(source[list(source.keys())[0]]))  # degrees
@@ -216,6 +214,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
         # use the station to get the relevant data to be copied from the h5parm
         lo = lh5.h5parm(my_h5parm, readonly=False)  # NB change this to True
         phase = lo.getSolset('sol000').getSoltab('phase000')
+
+        print('AXES NAMES:', phase.getAxesNames())
 
         for s in range(len(phase.ant[:])):  # stations
             if phase.ant[s] == my_station.strip():
