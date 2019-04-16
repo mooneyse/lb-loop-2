@@ -245,7 +245,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
             source_soltab = soltab.getSou()  # dictionary
             pol = phase.pol[:]
             print('POL:', pol)
-            dir = phase.dir[:]
+            dir = ['0']  # phase.dir[:]
             ant = phase.ant[:]
             time = phase.time[:]
             freq = phase.freq[:]
@@ -258,8 +258,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
     # write these best phase solutions to the new h5parm
     print('list(vals.shape):', list(vals.shape))  # WARNING this leads to an assert dim == list(vals.shape) AssertionError if the order changes
     c = solset.makeSoltab('phase',
-                          axesNames=['time', 'freq', 'ant', 'pol'],  # 'dir',
-                          axesVals=[time, freq, ant, pol],  # dir,
+                          axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+                          axesVals=[time, freq, ant, pol, dir],
                           vals=vals,
                           weights=weights)  # creates phase000
 
