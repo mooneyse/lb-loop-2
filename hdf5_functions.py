@@ -245,7 +245,10 @@ def dir2phasesol(mtf, ms='', directions=[]):
             source_soltab = soltab.getSou()  # dictionary
             pol = phase.pol[:]
             print('POL:', pol)
-            dir = ['0']  # phase.dir[:]
+            try:  #  may not contain a direction dimension
+                dir = phase.dir[:]
+            except:
+                dir = ['0']
             ant = phase.ant[:]
             time = phase.time[:]
             freq = phase.freq[:]
