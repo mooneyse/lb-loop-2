@@ -148,7 +148,6 @@ def dir2phasesol(mtf, ms='', directions=[]):
     print('MS:', ms)
     print('DIR:', directions)
 
-
     # get the direction from the master text file
     # HACK genfromtxt gives empty string for h5parms when names=True is used
     # importing them separately as a work around
@@ -218,8 +217,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
         for s in range(len(phase.ant[:])):  # stations
             if phase.ant[s] == my_station.strip():
                 # copy values and weights
-                v = phase.val[:, :, s, :, :]
-                w = phase.weight[:, :, s, :, :]
+                v = phase.val[:, :, s, :]
+                w = phase.weight[:, :, s, :]
                 v_expanded = np.expand_dims(v, axis=2)
                 w_expanded = np.expand_dims(w, axis=2)
                 val.append(v_expanded)
