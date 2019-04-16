@@ -213,11 +213,11 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
         axes_names = phase.getAxesNames()
         values = phase.val
-        print('SHAPE0', values.shape)
+        print('SHAPE0', axes_names, values.shape)
         if 'dir' not in axes_names:
-            axes_names.append('dir')  # add the direction dimension
+            axes_names = ['dir'] + axes_names  # add the direction dimension
             values = np.expand_dims(phase.val, 0)
-            print('SHAPE1', values.shape)
+            print('SHAPE1', axes_names, values.shape)
 
         reordered_values = reorderAxes(values, axes_names,
                                        ['time', 'freq', 'ant', 'pol', 'dir'])
@@ -225,8 +225,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
         for s in range(len(phase.ant[:])):  # stations
             if phase.ant[s] == my_station.strip():
                 # copy values and weights
-                v = phase.val[:, :, s, :]
-                w = phase.weight[:, :, s, :]
+                v = phase.val[:, :, :, s, :]
+                w = phase.weight[:, :, :, s, :]
                 v_expanded = np.expand_dims(v, axis=2)
                 w_expanded = np.expand_dims(w, axis=2)
                 val.append(v_expanded)
