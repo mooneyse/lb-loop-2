@@ -145,10 +145,6 @@ def dir2phasesol(mtf, ms='', directions=[]):
     Returns:
     The new h5parm to be applied to the measurement set. (str)'''
 
-    print('MTF:', mtf)
-    print('MS:', ms)
-    print('DIR:', directions)
-
     # get the direction from the master text file
     # HACK genfromtxt gives empty string for h5parms when names=True is used
     # importing them separately as a work around
@@ -218,7 +214,9 @@ def dir2phasesol(mtf, ms='', directions=[]):
         axes_names = phase.getAxesNames()
         if 'dir' not in axes_names:
             axes_names.append('dir')  # add the direction dimension
-        print(axes_names)
+
+        reordered_values = reorderAxes(phase.vals, axes_names,
+                                       ['time', 'freq', 'ant', 'pol', 'dir'])
 
         for s in range(len(phase.ant[:])):  # stations
             if phase.ant[s] == my_station.strip():
