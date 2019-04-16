@@ -245,7 +245,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
             source_soltab = soltab.getSou()  # dictionary
             pol = phase.pol[:]
             print('POL:', pol)
-            # dir = phase.dir[:]
+            dir = phase.dir[:]
             ant = phase.ant[:]
             time = phase.time[:]
             freq = phase.freq[:]
