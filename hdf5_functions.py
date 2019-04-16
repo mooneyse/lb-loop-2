@@ -144,6 +144,11 @@ def dir2phasesol(mtf, ms='', directions=[]):
     Returns:
     The new h5parm to be applied to the measurement set. (str)'''
 
+    print('MTF:', mtf)
+    print('MS:', ms)
+    print('DIR:', directions)
+
+
     # get the direction from the master text file
     # HACK genfromtxt gives empty string for h5parms when names=True is used
     # importing them separately as a work around
