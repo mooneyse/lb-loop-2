@@ -215,7 +215,10 @@ def dir2phasesol(mtf, ms='', directions=[]):
         lo = lh5.h5parm(my_h5parm, readonly=False)  # NB change this to True
         phase = lo.getSolset('sol000').getSoltab('phase000')
 
-        print('AXES NAMES:', phase.getAxesNames())
+        axes_names = phase.getAxesNames()
+        if 'dir' not in axes_names:
+            axes_names.append('dir')  # add the direction dimension
+        print(axes_names)
 
         for s in range(len(phase.ant[:])):  # stations
             if phase.ant[s] == my_station.strip():
