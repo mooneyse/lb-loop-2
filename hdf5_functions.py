@@ -212,10 +212,14 @@ def dir2phasesol(mtf, ms='', directions=[]):
         phase = lo.getSolset('sol000').getSoltab('phase000')
 
         axes_names = phase.getAxesNames()
+        values = phase.val
+        print('SHAPE0', values.shape)
         if 'dir' not in axes_names:
             axes_names.append('dir')  # add the direction dimension
+            values = np.expand_dims(phase.val, 0)
+            print('SHAPE1', values.shape)
 
-        reordered_values = reorderAxes(phase.val, axes_names,
+        reordered_values = reorderAxes(values, axes_names,
                                        ['time', 'freq', 'ant', 'pol', 'dir'])
 
         for s in range(len(phase.ant[:])):  # stations
