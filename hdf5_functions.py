@@ -40,8 +40,10 @@ def evaluate_solutions_wrapper(h5parm, mtf, solution_tables, threshold):
     '''Executes the evaluate_solutions function for each solution table. If a
     list of solution tables are given, a corresponding list of thresholds must
     also be given.'''
+
     if type(solution_tables) is str:
         evaluate_solutions(h5parm, mtf, solution_tables, threshold=threshold)
+
     elif type(solution_tables) is list:
         for solution_table, threshold in zip(solutions_tables, threshold):
             evaluate_solutions(h5parm, mtf, solution_table, threshold=threshold)
@@ -129,7 +131,7 @@ def dir2phasesol_multiprocessing(args):
 
 def dir2phasesol(mtf, ms='', directions=[]):
     '''Get the directions of the h5parms from the master text file. Calculate
-    the separation between the measurement set direction and the h5parm
+    the separation between a list of given directions and the h5parm
     directions. For each station, find the h5parm of smallest separation which
     has valid phase solutions. Create a new h5parm. Write these phase solutions
     to this new h5parm.
@@ -421,7 +423,7 @@ def main():
                                threshold=0.25)
 
     new_h5parms = dir2phasesol_wrapper(mtf='/data020/scratch/sean/letsgetloopy/mtf.txt',
-                                       ms='/data020/scratch/sean/letsgetloopy/SILTJ133437.19+563147.6_L693725_phasecal.MS',
+                                       ms='/data020/scratch/sean/letsgetloopy/L693725_SB256_uv.ndppp_prep_target',
                                        directions=[0.226893, 0.9512044, 0.244346, 0.9686577],
                                        cores=cores)
 
