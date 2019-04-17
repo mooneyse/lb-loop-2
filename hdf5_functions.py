@@ -393,7 +393,7 @@ def update_list(new_h5parm, loop3_h5parm, mtf, soltab, threshold=0.25):
     h = lh5.h5parm(combined_h5parm, readonly=False)
 
     table = h.makeSolset()  # creates sol000
-
+    print('SHAPE:', vals.shape, weights.shape)
     solset = h.getSolset('sol000')
     c = solset.makeSoltab('phase',
                           axesNames=['pol', 'dir', 'ant', 'freq', 'time'],
