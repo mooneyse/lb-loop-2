@@ -327,6 +327,7 @@ def apply_h5parm(h5parm, ms, column_out='DATA'):
     f.close()
 
     ndppp_output = subprocess.check_output(['NDPPP', '--help'])  # NOTE update
+    os.remove(parset)
 
 
 def update_list(new_h5parm, loop3_h5parm, mtf, threshold=0.25):
