@@ -330,7 +330,7 @@ def apply_h5parm(h5parm, ms, column_out='DATA'):
     os.remove(parset)
 
 
-def update_list(new_h5parm, loop3_h5parm, mtf, soltab, threshold=0.25):
+def update_list(new_h5parm, loop3_h5parm, mtf, soltab_, threshold=0.25):
     '''Combine the phase solutions from the initial h5parm and the final
     h5parm. Calls evaluate_solutions to update the master file with a new line
     appended.
@@ -348,7 +348,7 @@ def update_list(new_h5parm, loop3_h5parm, mtf, soltab, threshold=0.25):
 
     # get solutions from new_h5parm and loop3_h5parm
     h = lh5.h5parm(new_h5parm)  # from new_h5parm
-    phase = h.getSolset('sol000').getSoltab(soltab + '000')
+    phase = h.getSolset('sol000').getSoltab(soltab_ + '000')
     pol = phase.pol[:]
     try:  #  may not contain a direction dimension
         dir = phase.dir[:]
@@ -364,7 +364,7 @@ def update_list(new_h5parm, loop3_h5parm, mtf, soltab, threshold=0.25):
 
     h = lh5.h5parm(loop3_h5parm)  # from loop3_h5parm
     soltab = h.getSolset('sol000')  # NB change to take highest solset
-    phase = soltab.getSoltab(soltab + '000')
+    phase = soltab.getSoltab(soltab_ + '000')
     antenna_soltab = soltab.getAnt().items()  # dictionary to list
     source_soltab = soltab.getSou().items()  # dictionary to list
 
