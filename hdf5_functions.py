@@ -262,6 +262,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     # check that every entry in the *_check lists are identical
     for my_list in [time_check, freq_check, pol_check, ant_check, dir_check]:
+        print(my_list)
         check = all(_.all() == my_list[0] for _ in my_list)
         if not check:
             raise NotImplementedError('I am trying to make a new HDF5 file from'
