@@ -260,7 +260,15 @@ def dir2phasesol(mtf, ms='', directions=[]):
         antenna_soltab = lo.getSolset('sol000').getAnt()  # dictionary
         source_soltab = lo.getSolset('sol000').getSou()  # dictionary
 
+        lo.close()
+
     # check that every entry in the *_check lists are identical
+    # TODO better behaviour is needed here - we want to make sure the frequency,
+    #      polarisations, and possibly directions are the same, but for time,
+    #      it should use the minimum and maximum times and with the smallest
+    #      interval from all the HDF5 files. For the antennas, by definition it
+    #      should have a value for them all. What if there is no good solutions
+    #      from any of the HDF5 files
     for my_list in [time_check, freq_check, pol_check, ant_check, dir_check]:
         check = all(list(_) == list(my_list[0]) for _ in my_list)
         if not check:
