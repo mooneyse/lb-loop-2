@@ -37,7 +37,7 @@ def coherence_metric(xx, yy):
     return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
 
 
-def evaluate_solutions_wrapper(h5parm, mtf, solution_tables, threshold):
+def evaluate_solutions_wrapper(h5parm, mtf, solution_tables, threshold=0.25):
     '''Executes the evaluate_solutions function for each solution table. If a
     list of solution tables are given, a corresponding list of thresholds must
     also be given.'''
