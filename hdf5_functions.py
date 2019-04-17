@@ -257,8 +257,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
         ant_check.append(ant)
         dir_check.append(dir)
 
-        antenna_soltab = soltab.getAnt()  # dictionary
-        source_soltab = soltab.getSou()  # dictionary
+        antenna_soltab = lo.getSolset('sol000').getAnt()  # dictionary
+        source_soltab = lo.getSolset('sol000').getSou()  # dictionary
 
     # check that every entry in the *_check lists are identical
     for my_list in [time_check, freq_check, pol_check, ant_check, dir_check]:
