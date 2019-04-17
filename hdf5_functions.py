@@ -417,18 +417,21 @@ def main():
                         '--mtf',
                         required=False,
                         type=str,
+                        default='/data020/scratch/sean/letsgetloopy/mtf.txt',
                         help='master text file')
 
     parser.add_argument('-p',
                         '--h5parm',
                         required=False,
                         type=str,
+                        default='/data020/scratch/sean/letsgetloopy/M1344+5503.ms_02_c0.h5',
                         help='hdf5 file')
 
     parser.add_argument('-f',
                         '--ms',
                         required=False,
                         type=str,
+                        default='/data020/scratch/sean/letsgetloopy/L693725_SB256_uv.ndppp_prep_target',
                         help='measurement set')
 
     parser.add_argument('-t',
@@ -448,9 +451,16 @@ def main():
     parser.add_argument('-d',
                         '--directions',
                         type=float,
-                        default=0,
+                        default=[0.226893, 0.9512044, 0.244346, 0.9686577],
                         nargs='+',
                         help='source positions (radians; RA DEC RA DEC...)')
+
+    parser.add_argument('-s',
+                        '--soltabs',
+                        required=False,
+                        type=str,
+                        default='phase',
+                        help='measurement set')
 
     args = parser.parse_args()
     mtf = args.mtf
@@ -459,15 +469,15 @@ def main():
     threshold = args.threshold
     cores = args.cores
     directions = args.directions
+    soltabs = args.soltabs
 
-    evaluate_solutions_wrapper(h5parm='/data020/scratch/sean/letsgetloopy/M1344+5503.ms_02_c0.h5',
-                               mtf='/data020/scratch/sean/letsgetloopy/mtf.txt',
-                               solution_tables='phase',
-                               threshold=0.25)
+    evaluate_solutions_wrapper(h5parm=h5parm,
+                               mtf=mtf,
+                               solution_tables=soltabs)
 
-    new_h5parms = dir2phasesol_wrapper(mtf='/data020/scratch/sean/letsgetloopy/mtf.txt',
-                                       ms='/data020/scratch/sean/letsgetloopy/L693725_SB256_uv.ndppp_prep_target',
-                                       directions=[0.226893, 0.9512044, 0.244346, 0.9686577],
+    new_h5parms = dir2phasesol_wrapper(mtf=mtf,
+                                       ms=ms,
+                                       directions=directions,
                                        cores=cores)
 
     for new_h5parm in new_h5parms:
