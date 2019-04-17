@@ -409,7 +409,8 @@ def update_list(new_h5parm, loop3_h5parm, mtf, soltab, threshold=0.25):
     h.close()
 
     # evaluate the solutions and update the master file
-    evaluate_solutions(h5parm=combined_h5parm, mtf=mtf, threshold=threshold)
+    evaluate_solutions(h5parm=combined_h5parm, mtf=mtf, threshold=threshold,
+                       solution_tables=soltab)
     return combined_h5parm
 
 
