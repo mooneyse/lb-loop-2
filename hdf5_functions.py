@@ -468,13 +468,9 @@ def main():
                                        ms='/data020/scratch/sean/letsgetloopy/L693725_SB256_uv.ndppp_prep_target',
                                        directions=[0.226893, 0.9512044, 0.244346, 0.9686577],
                                        cores=cores)
-    # new_h5parms = dir2phasesol(mtf='/data020/scratch/sean/letsgetloopy/mtf.txt',
-    #                            ms='/data020/scratch/sean/letsgetloopy/L693725_SB256_uv.ndppp_prep_target',
-    #                            directions=[0.226893, 0.9512044])
-    # new_h5parms = dir2phasesol(mtf='/data020/scratch/sean/letsgetloopy/mtf.txt',
-    #                            ms='/data020/scratch/sean/letsgetloopy/L693725_SB256_uv.ndppp_prep_target',
-    #                            directions=[0.244346, 0.9686577])
-    # apply_h5parm(h5parm=new_h5parms[0], ms=ms)  # new_h5parms[0] used as a test
+
+    for new_h5parm in new_h5parms:
+        apply_h5parm(h5parm=new_h5parm, ms=ms)  # new_h5parms[0] used as a test
 
     # loop 3 goes here
 
