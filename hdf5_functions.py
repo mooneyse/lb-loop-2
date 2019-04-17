@@ -249,7 +249,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
         try:  #  may not contain a direction dimension
             dir = phase.dir[:]
         except:
-            dir = ['0']
+            dir = ['0']  # NB this should be the position for the h5parm
 
         time_check.append(time)
         freq_check.append(freq)
@@ -330,7 +330,7 @@ def apply_h5parm(h5parm, ms, column_out='DATA'):
     os.remove(parset)
 
 
-def update_list(new_h5parm, loop3_h5parm, mtf, threshold=0.25):
+def update_list(new_h5parm, loop3_h5parm, mtf, soltab, threshold=0.25):
     '''Combine the phase solutions from the initial h5parm and the final
     h5parm. Calls evaluate_solutions to update the master file with a new line
     appended.
@@ -339,15 +339,21 @@ def update_list(new_h5parm, loop3_h5parm, mtf, threshold=0.25):
     new_h5parm (str): The initial h5parm (i.e. from make_h5parm).
     loop3_h5parm (str): The final h5parm from loop 3.
     mtf (str): Master text file.
+    soltab (str): Solution table (e.g. phase or TEC).
+    threshold (float, default=0.25): Threshold determining goodness passed to
+                                     evaluate_solutions.
 
     Returns:
     A new h5parm that is a combination of new_h5parm and loop3_h5parm (str).'''
 
     # get solutions from new_h5parm and loop3_h5parm
     h = lh5.h5parm(new_h5parm)  # from new_h5parm
-    phase = h.getSolset('sol000').getSoltab('phase000')
+    phase = h.getSolset('sol000').getSoltab(soltab + '000')
     pol = phase.pol[:]
-    dir = phase.dir[:]
+    try:  #  may not contain a direction dimension
+        dir = phase.dir[:]
+    except:
+        dir = ['0']  # NB this should be the position for the h5parm
     ant = phase.ant[:]
     time = phase.time[:]
     freq = phase.freq[:]
@@ -358,12 +364,15 @@ def update_list(new_h5parm, loop3_h5parm, mtf, threshold=0.25):
 
     h = lh5.h5parm(loop3_h5parm)  # from loop3_h5parm
     soltab = h.getSolset('sol000')  # NB change to take highest solset
-    phase = soltab.getSoltab('phase000')
+    phase = soltab.getSoltab(soltab + '000')
     antenna_soltab = soltab.getAnt().items()  # dictionary to list
     source_soltab = soltab.getSou().items()  # dictionary to list
 
     pol = phase.pol[:]
-    dir = phase.dir[:]
+    try:  #  may not contain a direction dimension
+        dir = phase.dir[:]
+    except:
+        dir = ['0']  # NB this should be the position for the h5parm
     ant = phase.ant[:]
     time = phase.time[:]
     freq = phase.freq[:]
@@ -373,7 +382,9 @@ def update_list(new_h5parm, loop3_h5parm, mtf, threshold=0.25):
     h.close()
 
     # for comined_h5parm
-    vals = val_new_h5parm + val_loop3_h5parm
+    vals = val_new_h5parm + val_loop3_h5parm  # TODO something more complicated needed here
+    print(val_loop3_h5parm.shape)
+    # complex_number = 1 + 1j
     weights = weight_new_h5parm + weight_loop3_h5parm
     combined_h5parm = (os.path.splitext(new_h5parm)[0] + '-' +
                        os.path.basename(loop3_h5parm))
@@ -485,8 +496,8 @@ def main():
 
     # loop 3 goes here
 
-    # update_list(new_h5parm=new_h5parms[0], loop3_h5parm=new_h5parms[1],
-    #             mtf=mtf, threshold=threshold)  # new_h5parms used as a test
+    update_list(new_h5parm=new_h5parms[0], loop3_h5parm=new_h5parms[1],
+                mtf=mtf, soltab='phase', threshold=threshold)  # new_h5parms used as a test
 
 if __name__ == '__main__':
     main()
