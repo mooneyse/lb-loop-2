@@ -170,7 +170,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     # find the closest h5parm which has an acceptable solution for each station
     parts = {'prefix': os.path.dirname(os.path.dirname(ms)),
-             'ra': directions.ra.deg, 'dec': directions.dec.deg}
+             'ra': directions.ra.deg,
+             'dec': directions.dec.deg}
 
     working_file = '{prefix}/make_h5parm_{ra}_{dec}.txt'.format(**parts)
     f = open(working_file, 'w')
@@ -202,6 +203,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     working_data = np.genfromtxt(working_file, delimiter='\t', dtype=str)
     working_data = sorted(working_data.tolist())  # stations are alphabetised
     val, weight = [], []
+    time_check, freq_check, pol_check, ant_check, dir_check = [], [], [], [], []
 
     for my_line in range(len(working_data)):  # one line per station
         my_station = working_data[my_line][0]
@@ -239,20 +241,34 @@ def dir2phasesol(mtf, ms='', directions=[]):
         # so using the last one in the loop for that information (could be a
         # source of error in future)
         # also getting the antenna and source table from this last h5parm
-        if my_line == len(working_data) - 1:
-            soltab = lo.getSolset('sol000')
-            antenna_soltab = soltab.getAnt()  # dictionary
-            source_soltab = soltab.getSou()  # dictionary
-            pol = phase.pol[:]
-            try:  #  may not contain a direction dimension
-                dir = phase.dir[:]
-            except:
-                dir = ['0']
-            ant = phase.ant[:]
-            time = phase.time[:]
-            freq = phase.freq[:]
 
-        lo.close()
+        time = phase.time[:]
+        freq = phase.freq[:]
+        pol = phase.pol[:]
+        ant = phase.ant[:]
+        try:  #  may not contain a direction dimension
+            dir = phase.dir[:]
+        except:
+            dir = ['0']
+
+        time_check.append(time)
+        freq_check.append(freq)
+        pol_check.append(pol)
+        ant_check.append(ant)
+        dir_check.append(dir)
+
+        antenna_soltab = soltab.getAnt()  # dictionary
+        source_soltab = soltab.getSou()  # dictionary
+
+    # check that every entry in the *_check lists are identical
+    for my_list in [time_check, freq_check, pol_check, ant_check, dir_check]:
+        check = all(_ == my_list[0] for _ in my_list)
+        if not check:
+            raise NotImplementedError('I am trying to make a new HDF5 file from'
+                                      ' a few other HDF5 files. However, at '
+                                      'least one of the time, frequency, '
+                                      'polarisation, antenna, or direction axes'
+                                      ' do not match.')
 
     vals = np.concatenate(val, axis=2)
     weights = np.concatenate(weight, axis=2)
