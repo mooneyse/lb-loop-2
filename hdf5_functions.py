@@ -396,8 +396,8 @@ def update_list(new_h5parm, loop3_h5parm, mtf, soltab, threshold=0.25):
     print('SHAPE:', vals.shape, weights.shape)
     solset = h.getSolset('sol000')
     c = solset.makeSoltab('phase',
-                          axesNames=['pol', 'dir', 'ant', 'freq', 'time'],
-                          axesVals=[pol, dir, ant, freq, time],
+                          axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+                          axesVals=[time, freq, ant, pol, dir],
                           vals=vals,
                           weights=weights)  # creates phase000
 
