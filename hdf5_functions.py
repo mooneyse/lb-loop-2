@@ -383,7 +383,7 @@ def update_list(new_h5parm, loop3_h5parm, mtf, soltab, threshold=0.25):
 
     # for comined_h5parm
     vals = val_new_h5parm + val_loop3_h5parm  # TODO something more complicated needed here
-    print(val_loop3_h5parm.shape)
+
     # complex_number = 1 + 1j
     weights = weight_new_h5parm + weight_loop3_h5parm
     combined_h5parm = (os.path.splitext(new_h5parm)[0] + '-' +
@@ -393,11 +393,11 @@ def update_list(new_h5parm, loop3_h5parm, mtf, soltab, threshold=0.25):
     h = lh5.h5parm(combined_h5parm, readonly=False)
 
     table = h.makeSolset()  # creates sol000
-    print('SHAPE:', vals.shape, weights.shape)
+
     solset = h.getSolset('sol000')
     c = solset.makeSoltab('phase',
-                          axesNames=['time', 'freq', 'ant', 'pol'],
-                          axesVals=[time, freq, ant, pol],
+                          axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+                          axesVals=[time, freq, ant, pol, dir],
                           vals=vals,
                           weights=weights)  # creates phase000
 
