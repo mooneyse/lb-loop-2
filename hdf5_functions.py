@@ -23,6 +23,15 @@ import subprocess
 __author__ = 'Sean Mooney'
 __date__ = '01 November 2018'
 
+def make_blank_mtf(mtf):
+    '''Create an empty master text file containing all of the LOFAR remote and
+    international stations, and ST001.'''
+
+    mtf_header = '# h5parm, ra, dec, solutions, ST001, RS106HBA, RS205HBA, RS208HBA, RS210HBA, RS305HBA, RS306HBA, RS307HBA, RS310HBA, RS404HBA, RS406HBA, RS407HBA, RS409HBA, RS410HBA, RS503HBA, RS508HBA, RS509HBA, DE601HBA, DE602HBA, DE603HBA, DE604HBA, DE605HBA, FR606HBA, SE607HBA, UK608HBA, DE609HBA, PL610HBA, PL611HBA, PL612HBA, IE613HBA\n'
+    with open(mtf, 'w+') as the_file:
+        the_file.write(mtf_header)
+
+
 def interpolate_nan(x_):
     '''Interpolate NaN values using this answer from Stack Overflow:
     https://stackoverflow.com/a/6520696/6386612. This works even if the first
@@ -181,7 +190,6 @@ def dir2phasesol(mtf, ms='', directions=[]):
              'dec': directions.dec.deg}
 
     working_file = '{prefix}/make_h5parm_{ra}_{dec}.txt'.format(**parts)
-    print('WORKIINIIN', working_file)
     f = open(working_file, 'w')
     successful_stations = []
 
@@ -496,6 +504,8 @@ def main():
     cores = args.cores
     directions = args.directions
     soltabs = args.soltabs
+
+    make_blank_mtf(mtf='/data020/scratch/sean/letsgetloopy/MYmtf.txt')
 
     evaluate_solutions_wrapper(h5parm=h5parm,
                                mtf=mtf,
