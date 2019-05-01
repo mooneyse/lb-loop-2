@@ -506,7 +506,12 @@ def main():
     directions = args.directions
     soltabs = args.soltabs
 
-    blank_mtf = make_blank_mtf(mtf='/data020/scratch/sean/letsgetloopy/MYmtf.txt')
+    import os
+    exists = os.path.isfile('/data020/scratch/sean/letsgetloopy/MYmtf.txt')
+    if exists:
+        blank_mtf = '/data020/scratch/sean/letsgetloopy/MYmtf.txt'
+    else:
+        blank_mtf = make_blank_mtf(mtf='/data020/scratch/sean/letsgetloopy/MYmtf.txt')
 
     evaluate_solutions_wrapper(h5parm=h5parm,
                                mtf=blank_mtf,
