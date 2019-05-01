@@ -175,12 +175,12 @@ def dir2phasesol(mtf, ms='', directions=[]):
         mtf_stations = [x.lstrip() for x in mtf_stations]  # remove first space
 
     # find the closest h5parm which has an acceptable solution for each station
-    parts = {'prefix': os.path.dirname(os.path.dirname(ms)),
+    # a forward slash is added to the ms name in case it does not end in one
+    parts = {'prefix': os.path.dirname(os.path.dirname(ms + '/')),
              'ra': directions.ra.deg,
              'dec': directions.dec.deg}
 
     working_file = '{prefix}/make_h5parm_{ra}_{dec}.txt'.format(**parts)
-    print('WORKING!!!', working_file)
     f = open(working_file, 'w')
     successful_stations = []
 
