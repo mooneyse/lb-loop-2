@@ -78,7 +78,6 @@ def evaluate_solutions(h5parm, mtf, solution_table, threshold=0.25):
     soltab = solset.getSoltab(solution_table + '000')
     stations = soltab.ant
     source = solset.getSou()  # dictionary
-    print('SOURCES:',source)
     direction = np.degrees(np.array(source[list(source.keys())[0]]))  # degrees
     generator = soltab.getValuesIter(returnAxes=['freq', 'time'])
     evaluations, temporary = {}, {}  # evaluations holds the coherence metrics
@@ -510,8 +509,8 @@ def main():
 
     # loop 3 goes here
 
-    update_list(new_h5parm=new_h5parms[0], loop3_h5parm=new_h5parms[1],
-                mtf=mtf, soltab='phase', threshold=threshold)  # new_h5parms used as a test
+    # update_list(new_h5parm=new_h5parms[0], loop3_h5parm=new_h5parms[1],
+    #             mtf=mtf, soltab='phase', threshold=threshold)  # new_h5parms used as a test
 
 if __name__ == '__main__':
     main()
