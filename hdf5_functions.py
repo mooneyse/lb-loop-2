@@ -170,7 +170,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
                             usecols=0)
 
     if h5parms.size == 1:
-        raise NotImplementedError('I cannot yet handle an empty HDF5 file.')
+        raise NotImplementedError('I cannot yet handle an empty master text '
+                                  'file just yet.')
 
     # calculate the distance betweeen the ms and the h5parm directions
     # there is one entry in mtf_directions for each unique line in the mtf
