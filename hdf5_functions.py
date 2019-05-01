@@ -171,6 +171,10 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     if h5parms.size == 1:
         h5parms = [h5parms]
+        print('WE ARE PROBLEMED')
+        print(h5parms)
+    else:
+        print('WE ARE ALL GOOD')
         print(h5parms)
     # calculate the distance betweeen the ms and the h5parm directions
     # there is one entry in mtf_directions for each unique line in the mtf
