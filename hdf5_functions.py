@@ -169,7 +169,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     h5parms = np.genfromtxt(mtf, delimiter=',', unpack=True, dtype=str,
                             usecols=0)
 
-    if h5parms.size == 1:
+    if h5parms.size == 1:  # HACK stops the script crashing
         raise NotImplementedError('I cannot yet handle an empty master text '
                                   'file just yet.')
 
@@ -517,10 +517,12 @@ def main():
                                mtf=mtf,
                                solution_tables=soltabs)
 
-    new_h5parms = dir2phasesol_wrapper(mtf=mtf,
-                                       ms=ms,
-                                       directions=directions,
-                                       cores=cores)
+    dir2phasesol(mtf, ms=ms, directions=[0.226893, 0.9512044]):
+
+    # new_h5parms = dir2phasesol_wrapper(mtf=mtf,
+    #                                    ms=ms,
+    #                                    directions=directions,
+    #                                    cores=cores)
 
     for new_h5parm in new_h5parms:
         apply_h5parm(h5parm=new_h5parm, ms=ms)  # new_h5parms[0] used as a test
