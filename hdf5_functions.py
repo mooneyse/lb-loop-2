@@ -26,7 +26,8 @@ __date__ = '01 November 2018'
 def interpolate_nan(x_):
     '''Interpolate NaN values using this answer from Stack Overflow:
     https://stackoverflow.com/a/6520696/6386612. This works even if the first
-    or last value is nan.'''
+    or last value is nan or if there are multiple nans. It raises an error if
+    all values are nan.'''
     x_ = np.array(x_)
     if np.isnan(x_).all():  # if all values are nan
         raise ValueError('All values in the array are nan, so interpolation is'
