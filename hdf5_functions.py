@@ -172,7 +172,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     # if h5parms.size == 1:  # HACK stops the script crashing
     #     raise NotImplementedError('I cannot yet handle an empty master text '
     #                               'file just yet.')
-
+    print(h5parms)
     # calculate the distance betweeen the ms and the h5parm directions
     # there is one entry in mtf_directions for each unique line in the mtf
     directions = SkyCoord(directions[0], directions[1], unit='rad')
