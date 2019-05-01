@@ -209,6 +209,12 @@ def dir2phasesol(mtf, ms='', directions=[]):
     # get data to be copied from the working file
     working_data = np.genfromtxt(working_file, delimiter='\t', dtype=str)
     working_data = sorted(working_data.tolist())  # stations are alphabetised
+    # TODO here I have the list of nearest stations with good solutions. If for
+    #      one station there is no good solutions in any of the h5parms, what is
+    #      to be done? For now, the new h5parm will simply have excluded that
+    #      station. But if there is good solutions for a station for any source,
+    #      it will be included. It is possible that for PL612 the solutions
+    #      might be bad in all directions, for example.
     val, weight = [], []
     time_check, freq_check, pol_check, ant_check, dir_check = [], [], [], [], []
 
@@ -279,11 +285,11 @@ def dir2phasesol(mtf, ms='', directions=[]):
     for my_list in [time_check, freq_check, pol_check, ant_check, dir_check]:
         check = all(list(_) == list(my_list[0]) for _ in my_list)
         if not check:
-            raise NotImplementedError('I am trying to make a new HDF5 file from'
-                                      ' a few other HDF5 files. However, at '
-                                      'least one of the time, frequency, '
-                                      'polarisation, antenna, or direction axes'
-                                      ' do not match.')
+            raise NotImplementedError('A new HDF5 file cannot be made from a '
+                                      'few other HDF5 files because at least '
+                                      'one of the time, frequency, polarisation'
+                                      ', antenna, or direction axes do not '
+                                      'match.')
 
     vals = np.concatenate(val, axis=2)
     weights = np.concatenate(weight, axis=2)
