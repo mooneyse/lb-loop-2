@@ -508,7 +508,7 @@ def main():
     make_blank_mtf(mtf='/data020/scratch/sean/letsgetloopy/MYmtf.txt')
 
     evaluate_solutions_wrapper(h5parm=h5parm,
-                               mtf=mtf,
+                               mtf='/data020/scratch/sean/letsgetloopy/MYmtf.txt',
                                solution_tables=soltabs)
 
     new_h5parms = dir2phasesol_wrapper(mtf=mtf,
