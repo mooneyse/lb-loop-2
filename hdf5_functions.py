@@ -452,7 +452,7 @@ def main():
                         '--mtf',
                         required=False,
                         type=str,
-                        default='/data020/scratch/sean/letsgetloopy/mtf.txt',
+                        default='/data020/scratch/sean/letsgetloopy/my-mtf.txt',
                         help='master text file')
 
     parser.add_argument('-p',
@@ -506,22 +506,19 @@ def main():
     directions = args.directions
     soltabs = args.soltabs
 
-    import os
-    exists = os.path.isfile('/data020/scratch/sean/letsgetloopy/MYmtf.txt')
-    if exists:
-        blank_mtf = '/data020/scratch/sean/letsgetloopy/MYmtf.txt'
-    else:
-        blank_mtf = make_blank_mtf(mtf='/data020/scratch/sean/letsgetloopy/MYmtf.txt')
+    if not os.path.isfile(mtf):
+        mtf = make_blank_mtf(mtf=mtf)
 
     evaluate_solutions_wrapper(h5parm=h5parm,
-                               mtf=blank_mtf,
+                               mtf=mtf,
                                solution_tables=soltabs)
 
-    new_h5parms = dir2phasesol_wrapper(mtf=blank_mtf,
+    print('after eval_sols')
+    new_h5parms = dir2phasesol_wrapper(mtf=mtf,
                                        ms=ms,
                                        directions=directions,
                                        cores=cores)
-
+    print('after dir2phasesol_wrapper')
     for new_h5parm in new_h5parms:
         apply_h5parm(h5parm=new_h5parm, ms=ms)  # new_h5parms[0] used as a test
 
