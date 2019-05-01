@@ -512,7 +512,7 @@ def main():
                                mtf=blank_mtf,
                                solution_tables=soltabs)
 
-    new_h5parms = dir2phasesol_wrapper(mtf=mtf,
+    new_h5parms = dir2phasesol_wrapper(mtf=blank_mtf,
                                        ms=ms,
                                        directions=directions,
                                        cores=cores)
