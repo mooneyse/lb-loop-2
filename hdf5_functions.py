@@ -169,19 +169,23 @@ def dir2phasesol(mtf, ms='', directions=[]):
     h5parms = np.genfromtxt(mtf, delimiter=',', unpack=True, dtype=str,
                             usecols=0)
 
-    # if h5parms.size == 1:  # HACK stops the script crashing
-    #     raise NotImplementedError('I cannot yet handle an empty master text '
-    #                               'file just yet.')
-    print(h5parms)
     # calculate the distance betweeen the ms and the h5parm directions
     # there is one entry in mtf_directions for each unique line in the mtf
     directions = SkyCoord(directions[0], directions[1], unit='rad')
     mtf_directions = {}
 
-    for h5parm, ra, dec in zip([h5parms], [data['ra']], [data['dec']]):
-        mtf_direction = SkyCoord(float(ra), float(dec), unit='deg')
+    if h5parms.size == 1:
+        # to handle mtf files with one row which cannot be iterated over
+        mtf_direction = SkyCoord(float(data['ra']), float(data['dec']), unit='deg')
         separation = directions.separation(mtf_direction)
-        mtf_directions[separation] = h5parm  # distances from ms to each h5parm
+        mtf_directions[separation] = h5parms
+
+    else:
+        for h5parm, ra, dec in zip(h5parms, data['ra'], data['dec']):
+            mtf_direction = SkyCoord(float(ra), float(dec), unit='deg')
+            separation = directions.separation(mtf_direction)
+            mtf_directions[separation] = h5parm  # distances from ms to each h5parm
+
 
     # read in the stations from the master text file
     with open(mtf) as f:
