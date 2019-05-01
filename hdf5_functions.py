@@ -178,7 +178,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     directions = SkyCoord(directions[0], directions[1], unit='rad')
     mtf_directions = {}
 
-    for h5parm, ra, dec in zip(h5parms, data['ra'], data['dec']):
+    for h5parm, ra, dec in zip([h5parms], data['ra'], data['dec']):
         mtf_direction = SkyCoord(float(ra), float(dec), unit='deg')
         separation = directions.separation(mtf_direction)
         mtf_directions[separation] = h5parm  # distances from ms to each h5parm
