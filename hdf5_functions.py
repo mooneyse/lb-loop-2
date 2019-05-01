@@ -180,6 +180,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
              'dec': directions.dec.deg}
 
     working_file = '{prefix}/make_h5parm_{ra}_{dec}.txt'.format(**parts)
+    print('WORKING!!!', working)
     f = open(working_file, 'w')
     successful_stations = []
 
