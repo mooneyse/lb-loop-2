@@ -170,7 +170,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
                             usecols=0)
 
     if h5parms.size == 1:
-        h5parms = [h5parms]
+        h5parms = np.array([['/data020/scratch/sean/letsgetloopy/M1344+5503.ms_02_c0.h5'])
         print('WE ARE PROBLEMED')
         print(h5parms)
     else:
