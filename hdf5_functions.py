@@ -204,7 +204,10 @@ def dir2phasesol(mtf, ms='', directions=[]):
     for mtf_station in mtf_stations:  # for each station
         for key in sorted(mtf_directions.keys()):  # shortest separation first
             h5parm = mtf_directions[key]
-            row = list(h5parms).index(h5parm)  # row in mtf
+            try:  # TODO I am here! remove this try except
+                row = list(h5parms).index(h5parm)  # row in mtf
+            except TypeError:
+                row = 0
             value = data[mtf_station][row]  # boolean for h5parm and station
 
             if value == 1 and mtf_station not in successful_stations:
