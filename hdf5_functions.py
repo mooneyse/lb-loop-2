@@ -10,7 +10,7 @@ from multiprocessing import Pool
 from pathlib import Path  # on CEP3, "pip install --user pathlib"
 from astropy.coordinates import SkyCoord
 from losoto.lib_operations import reorderAxes
-import losoto.h5parm as lh5  # on CEP3, "module load losoto/2.0 on CEP3"
+import losoto.h5parm as lh5  # on CEP3, "module load losoto/2.0"
 import astropy.units as u
 import pyrap.tables as pt
 import numpy as np
@@ -25,7 +25,12 @@ __date__ = '01 November 2018'
 
 def interpolate_nan(x_):
     '''Interpolate NaN values using this answer from Stack Overflow:
-    https://stackoverflow.com/a/6520696/6386612.'''
+    https://stackoverflow.com/a/6520696/6386612. This works even if the first
+    or last value is nan.'''
+    x_ = np.array(x_)
+    if np.isnan(x_).all():  # if all values are nan
+        raise ValueError('All values in the array are nan, so interpolation is'
+                         ' not possible.')
     nans, x = np.isnan(x_), lambda z: z.nonzero()[0]
     x_[nans] = np.interp(x(nans), x(~nans), x_[~nans])
     return x_
