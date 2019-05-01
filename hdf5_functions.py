@@ -186,7 +186,6 @@ def dir2phasesol(mtf, ms='', directions=[]):
             separation = directions.separation(mtf_direction)
             mtf_directions[separation] = h5parm  # distances from ms to each h5parm
 
-
     # read in the stations from the master text file
     with open(mtf) as f:
         mtf_stations = list(csv.reader(f))[0][4:]  # skip h5parm, ra, and dec
