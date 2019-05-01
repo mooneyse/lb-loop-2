@@ -132,7 +132,7 @@ def dir2phasesol_wrapper(mtf, ms, directions=[], cores=4):
     for i in range(int(len(directions) / 2)):
         mtf_list.append(mtf)
         ms_list.append(ms)
-
+    print('MTMTMTM', mtf_list)
     directions_paired = list(zip(directions[::2], directions[1::2]))
     multiprocessing = list(zip(mtf_list, ms_list, directions_paired))
     pool = Pool(cores)  # specify cores
