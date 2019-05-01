@@ -170,7 +170,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
                             usecols=0)
     print('H5PARMS:', h5parms)
     print('TYPE:   ', type(h5parms))
-    print('SIZE:   ', h5parms.shape)
+    print('SIZE:   ', h5parms.size)
     # calculate the distance betweeen the ms and the h5parm directions
     # there is one entry in mtf_directions for each unique line in the mtf
     directions = SkyCoord(directions[0], directions[1], unit='rad')
