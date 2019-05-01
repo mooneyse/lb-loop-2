@@ -168,7 +168,10 @@ def dir2phasesol(mtf, ms='', directions=[]):
                          names=True)
     h5parms = np.genfromtxt(mtf, delimiter=',', unpack=True, dtype=str,
                             usecols=0)
-    print('H5PARMS TYPE:', len(h5parms))
+    try:
+        test = len(h5parms)  # TODO TODO TODO I AM HERE
+    except:
+        h5parms = np.array(h5parms)
     # calculate the distance betweeen the ms and the h5parm directions
     # there is one entry in mtf_directions for each unique line in the mtf
     directions = SkyCoord(directions[0], directions[1], unit='rad')
