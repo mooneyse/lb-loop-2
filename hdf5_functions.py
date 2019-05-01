@@ -170,12 +170,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
                             usecols=0)
 
     if h5parms.size == 1:
-        h5parms = np.array(['/data020/scratch/sean/letsgetloopy/M1344+5503.ms_02_c0.h5'])
-        print('WE ARE PROBLEMED')
-        print(h5parms)
-    else:
-        print('WE ARE ALL GOOD')
-        print(h5parms)
+        raise NotImplementedError('I cannot yet handle an empty HDF5 file.')
+
     # calculate the distance betweeen the ms and the h5parm directions
     # there is one entry in mtf_directions for each unique line in the mtf
     directions = SkyCoord(directions[0], directions[1], unit='rad')
