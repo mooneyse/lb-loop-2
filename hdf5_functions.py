@@ -132,7 +132,7 @@ def dir2phasesol_wrapper(mtf, ms, directions=[], cores=4):
     for i in range(int(len(directions) / 2)):
         mtf_list.append(mtf)
         ms_list.append(ms)
-    print('MTMTMTM', mtf_list)
+
     directions_paired = list(zip(directions[::2], directions[1::2]))
     multiprocessing = list(zip(mtf_list, ms_list, directions_paired))
     pool = Pool(cores)  # specify cores
@@ -513,10 +513,12 @@ def main():
                                mtf=mtf,
                                solution_tables=soltabs)
 
-    new_h5parms = dir2phasesol_wrapper(mtf=mtf,
-                                       ms=ms,
-                                       directions=directions,
-                                       cores=cores)
+    dir2phasesol(mtf, ms=ms, directions=[0.226893, 0.9512044])
+
+    # new_h5parms = dir2phasesol_wrapper(mtf=mtf,
+    #                                    ms=ms,
+    #                                    directions=directions,
+    #                                    cores=cores)
 
     for new_h5parm in new_h5parms:
         apply_h5parm(h5parm=new_h5parm, ms=ms)  # new_h5parms[0] used as a test
