@@ -28,8 +28,9 @@ def make_blank_mtf(mtf):
     international stations, and ST001.'''
 
     mtf_header = '# h5parm, ra, dec, solutions, ST001, RS106HBA, RS205HBA, RS208HBA, RS210HBA, RS305HBA, RS306HBA, RS307HBA, RS310HBA, RS404HBA, RS406HBA, RS407HBA, RS409HBA, RS410HBA, RS503HBA, RS508HBA, RS509HBA, DE601HBA, DE602HBA, DE603HBA, DE604HBA, DE605HBA, FR606HBA, SE607HBA, UK608HBA, DE609HBA, PL610HBA, PL611HBA, PL612HBA, IE613HBA\n'
-    with open(mtf, 'w+') as the_file:
-        the_file.write(mtf_header)
+    if not os.path.isfile(mtf):  # if it does not already exist
+        with open(mtf, 'w+') as the_file:
+            the_file.write(mtf_header)
 
     return mtf
 
@@ -523,8 +524,7 @@ def main():
     directions = args.directions
     soltabs = args.soltabs
 
-    if not os.path.isfile(mtf):
-        mtf = make_blank_mtf(mtf=mtf)
+    make_blank_mtf(mtf=mtf)
 
     evaluate_solutions_wrapper(h5parm=h5parm,
                                mtf=mtf,
@@ -540,8 +540,8 @@ def main():
 
     # loop 3 goes here
 
-    # update_list(new_h5parm=new_h5parms[0], loop3_h5parm=new_h5parms[1],
-    #             mtf=mtf, soltab='phase', threshold=threshold)  # new_h5parms used as a test
+    update_list(new_h5parm=new_h5parms[0], loop3_h5parm=new_h5parms[1],
+                mtf=mtf, soltab='phase', threshold=threshold)  # new_h5parms used as a test
 
 if __name__ == '__main__':
     main()
