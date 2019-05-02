@@ -208,8 +208,10 @@ def dir2phasesol(mtf, ms='', directions=[]):
             try:
                 row = list(h5parms).index(h5parm)  # row in mtf
                 value = data[mtf_station][row]  # boolean for h5parm and station
+                print(row, 'row!')
 
             except:
+                row = 0
                 value = data[mtf_station]
 
             if value == 1 and mtf_station not in successful_stations:
