@@ -281,10 +281,6 @@ def dir2phasesol(mtf, ms='', directions=[]):
                 val.append(v_expanded)
                 weight.append(w_expanded)
 
-        # WARNING pol, dir, ant, time, freq should be the same in all h5parms
-        # so using the last one in the loop for that information (could be a
-        # source of error in future)
-        # also getting the antenna and source table from this last h5parm
 
         time = phase.time[:]
         freq = phase.freq[:]
@@ -301,18 +297,23 @@ def dir2phasesol(mtf, ms='', directions=[]):
         ant_check.append(ant)
         dir_check.append(dir)
 
+        # WARNING 1 taking the antenna and source tables from the last h5parm;
+        #         the antenna table should be the same across all h5parms but it
+        #         would be better to write the stations in ant, and the source
+        #         table will be different for each h5parm so update this
+        #         correctly
         antenna_soltab = lo.getSolset('sol000').getAnt()  # dictionary
         source_soltab = lo.getSolset('sol000').getSou()  # dictionary
 
         lo.close()
 
     # check that every entry in the *_check lists are identical
-    # TODO better behaviour is needed here - we want to make sure the frequency,
-    #      polarisations, and possibly directions are the same, but for time,
-    #      it should use the minimum and maximum times and with the smallest
-    #      interval from all the HDF5 files. For the antennas, by definition it
-    #      should have a value for them all. What if there is no good solutions
-    #      from any of the HDF5 files
+    # TODO 1 better behaviour is needed here; we want to make sure the
+    #      frequency, polarisations, and possibly directions are the same, but
+    #      for time, it should use the minimum and maximum times and with the
+    #      smallest interval from all the HDF5 files; for the antennas, by
+    #      definition it should have a value for them all; then remove the
+    #      NotImplementedError
     for my_list in [time_check, freq_check, pol_check, ant_check, dir_check]:
         check = all(list(_) == list(my_list[0]) for _ in my_list)
         if not check:
@@ -342,7 +343,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     return new_h5parm
 
 
-def apply_h5parm(h5parm, ms, column_out='DATA'):
+def apply_h5parm(h5parm, ms, column_out='CORRECTED_DATA'):
     '''Creates an NDPPP parset. Applies the output of make_h5parm to the
     measurement set.
 
@@ -427,7 +428,8 @@ def update_list(new_h5parm, loop3_h5parm, mtf, soltab, threshold=0.25):
     h.close()
 
     # for comined_h5parm
-    vals = val_new_h5parm + val_loop3_h5parm  # TODO something more complicated needed here
+    # TODO something more complicated needed here
+    vals = val_new_h5parm + val_loop3_h5parm
 
     # complex_number = 1 + 1j
     weights = weight_new_h5parm + weight_loop3_h5parm
@@ -540,7 +542,7 @@ def main():
                                        cores=cores)
 
     for new_h5parm in new_h5parms:
-        apply_h5parm(h5parm=new_h5parm, ms=ms)  # new_h5parms[0] used as a test
+        apply_h5parm(h5parm=new_h5parm, ms=ms)  # outputs a ms per direction
 
     # loop 3 goes here
 
