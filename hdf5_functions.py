@@ -205,6 +205,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
         for key in sorted(mtf_directions.keys()):  # shortest separation first
             h5parm = mtf_directions[key]
 
+            # this try/except block is necessary because otherwise this function
+            # crashes when the master text file only has one h5parm in it
             try:
                 row = list(h5parms).index(h5parm)  # row in mtf
                 value = data[mtf_station][row]  # boolean for h5parm and station
