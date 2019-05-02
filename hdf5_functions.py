@@ -483,7 +483,7 @@ def main():
                         '--ms',
                         required=False,
                         type=str,
-                        default='/data020/scratch/sean/letsgetloopy/L693725_SB256_uv.ndppp_prep_target/',
+                        default='/data020/scratch/sean/letsgetloopy/L693725_SB256_uv.ndppp_prep_target',
                         help='measurement set')
 
     parser.add_argument('-t',
