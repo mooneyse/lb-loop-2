@@ -204,21 +204,22 @@ def dir2phasesol(mtf, ms='', directions=[]):
     for mtf_station in mtf_stations:  # for each station
         for key in sorted(mtf_directions.keys()):  # shortest separation first
             h5parm = mtf_directions[key]
-            # TODO I am here! This is to get around the error of having one row in the mtf
-            print(h5parms, h5parm)
+
             try:
                 row = list(h5parms).index(h5parm)  # row in mtf
+                value = data[mtf_station][row]  # boolean for h5parm and station
+                if value == 1 and mtf_station not in successful_stations:
+                    w = '{}\t{}\t{}\t{}\t{}'.format(mtf_station.ljust(8),
+                    round(key.deg, 6), int(value),
+                    row, h5parm)
+                    f.write('{}\n'.format(w))
+                    successful_stations.append(mtf_station)
+
             except:
+                print(data[mtf_station])
                 row = 0
                 print('fail!')
-            value = data[mtf_station][row]  # boolean for h5parm and station
 
-            if value == 1 and mtf_station not in successful_stations:
-                w = '{}\t{}\t{}\t{}\t{}'.format(mtf_station.ljust(8),
-                                                round(key.deg, 6), int(value),
-                                                row, h5parm)
-                f.write('{}\n'.format(w))
-                successful_stations.append(mtf_station)
     f.close()
 
     # create a new h5parm
