@@ -469,7 +469,7 @@ def main():
                         '--mtf',
                         required=False,
                         type=str,
-                        default='/data020/scratch/sean/letsgetloopy/my-mtf.txt',
+                        default='/data020/scratch/sean/letsgetloopy/mtf.txt',
                         help='master text file')
 
     parser.add_argument('-p',
