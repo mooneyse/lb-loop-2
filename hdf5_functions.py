@@ -206,7 +206,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
             h5parm = mtf_directions[key]
             # TODO I am here! This is to get around the error of having one row in the mtf
             print(h5parms, h5parm)
-            row = list(h5parms).index(h5parm)  # row in mtf
+            row = [h5parms].index(h5parm)  # row in mtf
             value = data[mtf_station][row]  # boolean for h5parm and station
 
             if value == 1 and mtf_station not in successful_stations:
