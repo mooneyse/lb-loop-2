@@ -333,6 +333,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     antenna_table = table.obj._f_get_child('antenna')
     antenna_table.append(antenna_soltab.items())  # from dictionary to list
     h.close()  # close the new h5parm
+    os.remove(working_file)
     return new_h5parm
 
 
