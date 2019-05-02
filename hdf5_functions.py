@@ -409,7 +409,7 @@ def update_list(new_h5parm, loop3_h5parm, mtf, soltab, threshold=0.25):
     h.close()
 
     h = lh5.h5parm(loop3_h5parm)  # from loop3_h5parm
-    sol000 = h.getSolset('sol000')  # NB change to take highest solset
+    sol000 = h.getSolset('sol000')  # change to take highest solset?
     phase = sol000.getSoltab(soltab + '000')
     antenna_soltab = sol000.getAnt().items()  # dictionary to list
     source_soltab = sol000.getSou().items()  # dictionary to list
