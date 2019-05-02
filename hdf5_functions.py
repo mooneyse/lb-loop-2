@@ -26,12 +26,15 @@ __date__ = '01 November 2018'
 def make_blank_mtf(mtf):
     '''Create an empty master text file containing all of the LOFAR remote and
     international stations, and ST001.'''
-
-    mtf_header = '# h5parm, ra, dec, solutions, ST001, RS106HBA, RS205HBA, RS208HBA, RS210HBA, RS305HBA, RS306HBA, RS307HBA, RS310HBA, RS404HBA, RS406HBA, RS407HBA, RS409HBA, RS410HBA, RS503HBA, RS508HBA, RS509HBA, DE601HBA, DE602HBA, DE603HBA, DE604HBA, DE605HBA, FR606HBA, SE607HBA, UK608HBA, DE609HBA, PL610HBA, PL611HBA, PL612HBA, IE613HBA\n'
+    mtf_header = ('# h5parm, ra, dec, solutions, ST001, RS106HBA, RS205HBA, '
+                  'RS208HBA, RS210HBA, RS305HBA, RS306HBA, RS307HBA, RS310HBA,'
+                  ' RS404HBA, RS406HBA, RS407HBA, RS409HBA, RS410HBA, '
+                  'RS503HBA, RS508HBA, RS509HBA, DE601HBA, DE602HBA, DE603HBA,'
+                  ' DE604HBA, DE605HBA, FR606HBA, SE607HBA, UK608HBA, '
+                  'DE609HBA, PL610HBA, PL611HBA, PL612HBA, IE613HBA\n')
     if not os.path.isfile(mtf):  # if it does not already exist
         with open(mtf, 'w+') as the_file:
             the_file.write(mtf_header)
-
     return mtf
 
 def interpolate_nan(x_):
@@ -54,7 +57,8 @@ def coherence_metric(xx, yy):
     return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
 
 
-def evaluate_solutions_wrapper(h5parm, mtf, solution_tables, threshold=0.25):
+def evaluate_solutions_wrapper(h5parm, mtf, solution_tables='phase',
+                               threshold=0.25):
     '''Executes the evaluate_solutions function for each solution table. If a
     list of solution tables are given, a corresponding list of thresholds must
     also be given.'''
@@ -67,7 +71,7 @@ def evaluate_solutions_wrapper(h5parm, mtf, solution_tables, threshold=0.25):
             evaluate_solutions(h5parm, mtf, solution_table, threshold=threshold)
 
 
-def evaluate_solutions(h5parm, mtf, solution_table, threshold=0.25):
+def evaluate_solutions(h5parm, mtf, solution_table='phase', threshold=0.25):
     '''Get the direction from the h5parm. Evaluate the phase solutions in the
     h5parm for each station using the coherence metric. Determine the validity
     of each coherence metric that was calculated. Append the right ascension,
@@ -177,7 +181,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     if h5parms.size == 1:
         # to handle mtf files with one row which cannot be iterated over
-        mtf_direction = SkyCoord(float(data['ra']), float(data['dec']), unit='deg')
+        mtf_direction = SkyCoord(float(data['ra']), float(data['dec']),
+                                 unit='deg')
         separation = directions.separation(mtf_direction)
         mtf_directions[separation] = h5parms
 
@@ -185,7 +190,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
         for h5parm, ra, dec in zip(h5parms, data['ra'], data['dec']):
             mtf_direction = SkyCoord(float(ra), float(dec), unit='deg')
             separation = directions.separation(mtf_direction)
-            mtf_directions[separation] = h5parm  # distances from ms to each h5parm
+            mtf_directions[separation] = h5parm  # distances from ms to h5parms
 
     # read in the stations from the master text file
     with open(mtf) as f:
@@ -236,12 +241,11 @@ def dir2phasesol(mtf, ms='', directions=[]):
     # get data to be copied from the working file
     working_data = np.genfromtxt(working_file, delimiter='\t', dtype=str)
     working_data = sorted(working_data.tolist())  # stations are alphabetised
-    # TODO here I have the list of nearest stations with good solutions. If for
-    #      one station there is no good solutions in any of the h5parms, what is
-    #      to be done? For now, the new h5parm will simply have excluded that
-    #      station. But if there is good solutions for a station for any source,
-    #      it will be included. It is possible that for PL612 the solutions
-    #      might be bad in all directions, for example.
+
+    # NOTE working_data is the list of nearest stations with good solutions; if
+    #      for a station there is no good solution in any h5parm the new h5parm
+    #      will exclude that station
+
     val, weight = [], []
     time_check, freq_check, pol_check, ant_check, dir_check = [], [], [], [], []
 
@@ -271,7 +275,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
             if phase.ant[s] == my_station.strip():
                 # copy values and weights
                 v = reordered_values[:, :, s, :, :]  # time, freq, ant, pol, dir
-                w = reordered_weights[:, :, s, :, :]  # time, freq, ant, pol, dir
+                w = reordered_weights[:, :, s, :, :]  # same order as v
                 v_expanded = np.expand_dims(v, axis=2)
                 w_expanded = np.expand_dims(w, axis=2)
                 val.append(v_expanded)
