@@ -285,6 +285,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
                 weight.append(w_expanded)
 
         time = phase.time[:]
+        print('TIMESHAPE', time.shape)
         time_mins.append(np.min(time))
         time_maxs.append(np.max(time))
         time_steps.append((np.max(time) - np.min(time)) / (len(time) - 1))
@@ -315,6 +316,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     num_of_steps = (np.max(time_maxs) - np.min(time_mins)) / np.min(time_steps)
     time = np.linspace(np.min(time_mins), np.max(time_maxs), num_of_steps)
     print('HEY...', np.min(time_mins), np.max(time_maxs), num_of_steps)
+    print('TIMEBIGSHAPE', time.shape)
 
     freq = [np.average(frequencies)]  # all items in the list should be equal
     pol = ['XX', 'YY']  # as standard
