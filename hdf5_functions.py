@@ -286,6 +286,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
         time = phase.time[:]
         freq = phase.freq[:]
         pol = phase.pol[:]
+        print(pol)
         ant = phase.ant[:]
 
         time_check.append(time)
