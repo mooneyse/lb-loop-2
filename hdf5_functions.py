@@ -283,7 +283,12 @@ def dir2phasesol(mtf, ms='', directions=[]):
                 val.append(v_expanded)
                 weight.append(w_expanded)
 
-        times.append(phase.time[:])
+        time = phase.time[:]
+        time_min = np.min(time)
+        time_max = np.max(time)
+        time_step = (time_max - time_min) / (len(time) - 1)
+        times.append({'time min': time_min, 'time max': time_max,
+                      'time step': time_step})
         frequencies.append(phase.freq[:])
         ant = phase.ant[:]
         ant_check.append(ant)
