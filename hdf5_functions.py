@@ -312,6 +312,10 @@ def dir2phasesol(mtf, ms='', directions=[]):
     #                                   'match.')
 
     # properties of the new h5parm
+    for thing in times:
+        if thing['time min'] < here_look:
+            here_look = thing['time min']
+            print('ah now')
     print('asdf',np.min(times), np.max(times))
     freq = [np.average(frequencies)]  # all items in the list should be equal
     pol = ['XX', 'YY']  # as standard
