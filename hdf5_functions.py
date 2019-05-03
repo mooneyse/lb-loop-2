@@ -287,16 +287,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
         time_maxs.append(np.max(time))
         time_intervals.append((np.max(time) - np.min(time)) / (len(time) - 1))
         frequencies.append(phase.freq[:])
-        print('ANTY',phase.ant[:])
         lo.close()
-
-    # check that every entry in the *_check lists are identical
-    # TODO 1 better behaviour is needed here; we want to make sure the
-    #      frequency, polarisations, and possibly directions are the same, but
-    #      for time, it should use the minimum and maximum times and with the
-    #      smallest interval from all the HDF5 files; for the antennas, by
-    #      definition it should have a value for them all; then remove the
-    #      NotImplementedError
 
     # properties of the new h5parm
     # the time ranges from the lowest to the highest on the smallest interval
@@ -304,7 +295,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
                         np.min(time_intervals))
     time = np.linspace(np.min(time_mins), np.max(time_maxs), num_of_steps)
     freq = [np.average(frequencies)]  # all items in the list should be equal
-    print('ANTY BIG',successful_stations)
+    ant = successful_stations  # antennas that will be in the new h5parm
     pol = ['XX', 'YY']  # as standard
     dir = [str(directions.ra.rad) + ', ' + str(directions.dec.rad)]  # given
 
