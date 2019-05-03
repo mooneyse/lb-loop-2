@@ -284,6 +284,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
                 weight.append(w_expanded)
 
         time = phase.time[:]
+        print(time)
         ant = phase.ant[:]
         time_check.append(time)
         ant_check.append(ant)
