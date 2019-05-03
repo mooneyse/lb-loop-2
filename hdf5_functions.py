@@ -335,9 +335,9 @@ def dir2phasesol(mtf, ms='', directions=[]):
                           weights=weights)  # creates phase000
 
     # copy source and antenna tables into the new h5parm
-    source_soltab = {'POINTING': np.array([directions.ra.rad,
-                                           directions.dec.rad],
-                                          dtype='float32')}
+    source_soltab = {'POINTING':
+                     np.array([directions.ra.rad, directions.dec.rad],
+                              dtype='float32')}
     antenna_soltab = {'ST001'   : np.array([0, 0, 0], dtype='float32'),
                       'RS106HBA': np.array([0, 0, 0], dtype='float32'),
                       'RS205HBA': np.array([0, 0, 0], dtype='float32'),
@@ -362,7 +362,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
                       'DE605HBA': np.array([0, 0, 0], dtype='float32'),
                       'FR606HBA': np.array([0, 0, 0], dtype='float32'),
                       'SE607HBA': np.array([0, 0, 0], dtype='float32'),
-                      'UK608HBA': np.array([0, 0, 0], dtype='float32')
+                      'UK608HBA': np.array([0, 0, 0], dtype='float32'),
                       'DE609HBA': np.array([0, 0, 0], dtype='float32'),
                       'PL610HBA': np.array([0, 0, 0], dtype='float32'),
                       'PL611HBA': np.array([0, 0, 0], dtype='float32'),
