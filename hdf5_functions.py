@@ -338,7 +338,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
     source_table.append(source_soltab.items())  # from dictionary to list
     antenna_table = table.obj._f_get_child('antenna')
     antenna_table.append(antenna_soltab.items())  # from dictionary to list
-    print('DIRS', directions.ra.rad, directions.dec.rad)
+    scoop = {'POINTING': np.array([directions.ra.rad, directions.dec.rad])}
+    print('DIRS', scoop)
     print('sols', source_soltab)
     print('solkeys', source_soltab.keys())
     print('solits', source_soltab.items())
