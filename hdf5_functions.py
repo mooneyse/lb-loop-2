@@ -339,6 +339,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     antenna_table = table.obj._f_get_child('antenna')
     antenna_table.append(antenna_soltab.items())  # from dictionary to list
     print('asdf')
+    print('DIRS', directions.ra.deg, directions.dec.deg)
     print(source_soltab)
     print(antenna_soltab)
     h.close()  # close the new h5parm
