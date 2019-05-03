@@ -338,7 +338,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     source_soltab = {'POINTING':
                      np.array([directions.ra.rad, directions.dec.rad],
                               dtype='float32')}
-    antenna_soltab = {'ST001'   : np.array([0, 0, 0], dtype='float32'),
+    antenna_soltab = {'ST001': np.array([0, 0, 0], dtype='float32'),
                       'RS106HBA': np.array([0, 0, 0], dtype='float32'),
                       'RS205HBA': np.array([0, 0, 0], dtype='float32'),
                       'RS208HBA': np.array([0, 0, 0], dtype='float32'),
