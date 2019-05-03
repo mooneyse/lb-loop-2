@@ -228,7 +228,6 @@ def dir2phasesol(mtf, ms='', directions=[]):
                 row, h5parm)
                 f.write('{}\n'.format(w))
                 successful_stations.append(mtf_station)
-
     f.close()
 
     # create a new h5parm
@@ -248,7 +247,6 @@ def dir2phasesol(mtf, ms='', directions=[]):
     #      will exclude that station
 
     val, weight = [], []
-    ant_check = []
     time_mins, time_maxs, time_intervals = [], [], []
     frequencies = []
 
@@ -285,14 +283,11 @@ def dir2phasesol(mtf, ms='', directions=[]):
                 weight.append(w_expanded)
 
         time = phase.time[:]
-        # print('TIMESHAPE', time.shape)
         time_mins.append(np.min(time))
         time_maxs.append(np.max(time))
         time_intervals.append((np.max(time) - np.min(time)) / (len(time) - 1))
-        # print('HEY...', np.min(time), np.max(time), (np.max(time) - np.min(time)) / (len(time) - 1))
         frequencies.append(phase.freq[:])
-        ant = phase.ant[:]
-        ant_check.append(ant)
+        print('ANTY',phase.ant[:])
         lo.close()
 
     # check that every entry in the *_check lists are identical
@@ -303,25 +298,17 @@ def dir2phasesol(mtf, ms='', directions=[]):
     #      definition it should have a value for them all; then remove the
     #      NotImplementedError
 
-    # for my_list in [ant_check]:
-    #     check = all(list(_) == list(my_list[0]) for _ in my_list)
-    #     if not check:
-    #         raise NotImplementedError('A new HDF5 file cannot be made from a '
-    #                                   'few other HDF5 files because at least '
-    #                                   'one of the time, frequency, polarisation'
-    #                                   ', antenna, or direction axes do not '
-    #                                   'match.')
-
     # properties of the new h5parm
+    # the time ranges from the lowest to the highest on the smallest interval
     num_of_steps = 1 + ((np.max(time_maxs) - np.min(time_mins)) /
                         np.min(time_intervals))
     time = np.linspace(np.min(time_mins), np.max(time_maxs), num_of_steps)
-    # print('BIGHEY...', np.min(time_mins), np.max(time_maxs), num_of_steps)
-    print('BIGTIMESHAPE', time.shape)
-
     freq = [np.average(frequencies)]  # all items in the list should be equal
+    print('ANTY BIG',successful_stations)
     pol = ['XX', 'YY']  # as standard
     dir = [str(directions.ra.rad) + ', ' + str(directions.dec.rad)]  # given
+
+    # TODO this will crash as the values are not being interpolated per h5parm
     vals = np.concatenate(val, axis=2)
     weights = np.concatenate(weight, axis=2)
 
@@ -336,6 +323,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     source_soltab = {'POINTING':
                      np.array([directions.ra.rad, directions.dec.rad],
                               dtype='float32')}
+    # the X, Y, Z coordinates of the stations sould be in these arrays
     antenna_soltab = {'ST001': np.array([0, 0, 0], dtype='float32'),
                       'RS106HBA': np.array([0, 0, 0], dtype='float32'),
                       'RS205HBA': np.array([0, 0, 0], dtype='float32'),
@@ -569,19 +557,19 @@ def main():
                                mtf=mtf,
                                solution_tables=soltabs)
 
-    dir2phasesol(mtf, ms=ms, directions=[0.226893, 0.9512044])
-    # new_h5parms = dir2phasesol_wrapper(mtf=mtf,
-    #                                    ms=ms,
-    #                                    directions=directions,
-    #                                    cores=cores)
+    new_h5parms = dir2phasesol_wrapper(mtf=mtf,
+                                       ms=ms,
+                                       directions=directions,
+                                       cores=cores)
 
     for new_h5parm in new_h5parms:
         apply_h5parm(h5parm=new_h5parm, ms=ms)  # outputs a ms per direction
 
     # loop 3 goes here
 
+    # new_h5parms used as a test
     update_list(new_h5parm=new_h5parms[0], loop3_h5parm=new_h5parms[1],
-                mtf=mtf, soltab='phase', threshold=threshold)  # new_h5parms used as a test
+                mtf=mtf, soltab='phase', threshold=threshold)
 
 
 if __name__ == '__main__':
