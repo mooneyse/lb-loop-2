@@ -248,8 +248,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
     #      will exclude that station
 
     val, weight = [], []
-    time_check, ant_check = [], []
-    frequencies = []
+    ant_check = []
+    times, frequencies = []
 
     for my_line in range(len(working_data)):  # one line per station
         my_station = working_data[my_line][0]
@@ -283,12 +283,10 @@ def dir2phasesol(mtf, ms='', directions=[]):
                 val.append(v_expanded)
                 weight.append(w_expanded)
 
-        time = phase.time[:]
-        print(time)
-        ant = phase.ant[:]
-        time_check.append(time)
-        ant_check.append(ant)
+        times.append(phase.time[:])
         frequencies.append(phase.freq[:])
+        ant = phase.ant[:]
+        ant_check.append(ant)
         lo.close()
 
     # check that every entry in the *_check lists are identical
@@ -299,7 +297,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     #      definition it should have a value for them all; then remove the
     #      NotImplementedError
 
-    for my_list in [time_check, ant_check]:
+    for my_list in [ant_check]:
         check = all(list(_) == list(my_list[0]) for _ in my_list)
         if not check:
             raise NotImplementedError('A new HDF5 file cannot be made from a '
@@ -309,6 +307,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
                                       'match.')
 
     # properties of the new h5parm
+    print('asdf',np.min(times), np.max(times))
     freq = [np.average(frequencies)]  # all items in the list should be equal
     pol = ['XX', 'YY']  # as standard
     dir = [str(directions.ra.rad) + ', ' + str(directions.dec.rad)]  # given
