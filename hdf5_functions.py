@@ -312,6 +312,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     #                                   'match.')
 
     # properties of the new h5parm
+    here_look = 9999999999999
     for thing in times:
         if thing['time min'] < here_look:
             here_look = thing['time min']
