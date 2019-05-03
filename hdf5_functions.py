@@ -300,6 +300,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     #      definition it should have a value for them all; then remove the
     #      NotImplementedError
     print(freq_check)
+    print('SASSSSSS', np.avearge(freq_check))
     for my_list in [time_check, freq_check, ant_check]:
         check = all(list(_) == list(my_list[0]) for _ in my_list)
         if not check:
