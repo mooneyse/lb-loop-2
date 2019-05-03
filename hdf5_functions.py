@@ -249,7 +249,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     val, weight = [], []
     ant_check = []
-    time_mins, time_maxs, time_steps = [], [], []
+    time_mins, time_maxs, time_intervals = [], [], []
     frequencies = []
 
     for my_line in range(len(working_data)):  # one line per station
@@ -288,7 +288,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
         print('TIMESHAPE', time.shape)
         time_mins.append(np.min(time))
         time_maxs.append(np.max(time))
-        time_steps.append((np.max(time) - np.min(time)) / (len(time) - 1))
+        time_intervals.append((np.max(time) - np.min(time)) / (len(time) - 1))
         print('HEY...', np.min(time), np.max(time), (np.max(time) - np.min(time)) / (len(time) - 1))
 
         frequencies.append(phase.freq[:])
@@ -314,7 +314,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
     #                                   'match.')
 
     # properties of the new h5parm
-    num_of_steps = (np.max(time_maxs) - np.min(time_mins)) / np.min(time_steps)
+    num_of_steps = 1 + (np.max(time_maxs) - np.min(time_mins)) /
+                   np.min(time_intervals)
     time = np.linspace(np.min(time_mins), np.max(time_maxs), num_of_steps)
     print('BIGHEY...', np.min(time_mins), np.max(time_maxs), num_of_steps)
     print('BIGTIMESHAPE', time.shape)
