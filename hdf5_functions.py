@@ -287,16 +287,11 @@ def dir2phasesol(mtf, ms='', directions=[]):
         freq = phase.freq[:]
         pol = phase.pol[:]
         ant = phase.ant[:]
-        try:  #  may not contain a direction dimension
-            dir = phase.dir[:]
-        except:
-            dir = ['0']  # NB this should be the position for the h5parm
 
         time_check.append(time)
         freq_check.append(freq)
         pol_check.append(pol)
         ant_check.append(ant)
-        dir_check.append(dir)
         lo.close()
 
     # check that every entry in the *_check lists are identical
@@ -306,7 +301,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     #      smallest interval from all the HDF5 files; for the antennas, by
     #      definition it should have a value for them all; then remove the
     #      NotImplementedError
-    for my_list in [time_check, freq_check, pol_check, ant_check, dir_check]:
+    for my_list in [time_check, freq_check, pol_check, ant_check]:
         check = all(list(_) == list(my_list[0]) for _ in my_list)
         if not check:
             raise NotImplementedError('A new HDF5 file cannot be made from a '
@@ -315,6 +310,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
                                       ', antenna, or direction axes do not '
                                       'match.')
 
+    # direction of new h5parm
+    dir = [str(directions.ra.rad) + ', ' + str(directions.dec.rad)]
     vals = np.concatenate(val, axis=2)
     weights = np.concatenate(weight, axis=2)
 
