@@ -248,7 +248,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
     #      will exclude that station
 
     val, weight = [], []
-    time_check, freq_check, pol_check, ant_check, dir_check = [], [], [], [], []
+    time_check, ant_check = [], []
+    frequencies = []
 
     for my_line in range(len(working_data)):  # one line per station
         my_station = working_data[my_line][0]
@@ -282,14 +283,11 @@ def dir2phasesol(mtf, ms='', directions=[]):
                 val.append(v_expanded)
                 weight.append(w_expanded)
 
-
         time = phase.time[:]
-        freq = phase.freq[:]
         ant = phase.ant[:]
-
         time_check.append(time)
-        freq_check.append(freq)
         ant_check.append(ant)
+        frequencies.append(phase.freq[:])
         lo.close()
 
     # check that every entry in the *_check lists are identical
@@ -299,9 +297,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
     #      smallest interval from all the HDF5 files; for the antennas, by
     #      definition it should have a value for them all; then remove the
     #      NotImplementedError
-    print(freq_check)
-    print('SASSSSSS', np.avearge(freq_check))
-    for my_list in [time_check, freq_check, ant_check]:
+
+    for my_list in [time_check, ant_check]:
         check = all(list(_) == list(my_list[0]) for _ in my_list)
         if not check:
             raise NotImplementedError('A new HDF5 file cannot be made from a '
@@ -311,6 +308,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
                                       'match.')
 
     # direction of new h5parm
+    freq = [np.average(frequencies)]
     pol = ['XX', 'YY']
     dir = [str(directions.ra.rad) + ', ' + str(directions.dec.rad)]
     vals = np.concatenate(val, axis=2)
