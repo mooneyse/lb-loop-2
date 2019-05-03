@@ -297,15 +297,6 @@ def dir2phasesol(mtf, ms='', directions=[]):
         pol_check.append(pol)
         ant_check.append(ant)
         dir_check.append(dir)
-
-        # WARNING 1 taking the antenna and source tables from the last h5parm;
-        #         the antenna table should be the same across all h5parms but it
-        #         would be better to write the stations in ant, and the source
-        #         table will be different for each h5parm so update this
-        #         correctly
-        # antenna_soltab = lo.getSolset('sol000').getAnt()  # dictionary
-        # source_soltab = lo.getSolset('sol000').getSou()  # dictionary
-
         lo.close()
 
     # check that every entry in the *_check lists are identical
@@ -373,8 +364,6 @@ def dir2phasesol(mtf, ms='', directions=[]):
     source_table.append(source_soltab.items())  # from dictionary to list
     antenna_table = table.obj._f_get_child('antenna')
     antenna_table.append(antenna_soltab.items())  # from dictionary to list
-
-    print(antenna_soltab.keys())
     h.close()  # close the new h5parm
     os.remove(working_file)
     return new_h5parm
