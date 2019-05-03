@@ -339,7 +339,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     antenna_table = table.obj._f_get_child('antenna')
     antenna_table.append(antenna_soltab.items())  # from dictionary to list
     print('asdf')
-    print('DIRS', directions.ra.deg, directions.dec.deg)
+    print('DIRS', directions.ra.deg, directions.dec.deg, directions.ra.rad, directions)
     print(source_soltab)
     print(antenna_soltab)
     h.close()  # close the new h5parm
@@ -552,6 +552,7 @@ def main():
 
     update_list(new_h5parm=new_h5parms[0], loop3_h5parm=new_h5parms[1],
                 mtf=mtf, soltab='phase', threshold=threshold)  # new_h5parms used as a test
+
 
 if __name__ == '__main__':
     main()
