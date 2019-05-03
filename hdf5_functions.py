@@ -249,7 +249,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     val, weight = [], []
     ant_check = []
-    times, frequencies = [], []
+    time_mins, time_maxs, time_steps = [], [], []
+    frequencies = []
 
     for my_line in range(len(working_data)):  # one line per station
         my_station = working_data[my_line][0]
@@ -284,11 +285,10 @@ def dir2phasesol(mtf, ms='', directions=[]):
                 weight.append(w_expanded)
 
         time = phase.time[:]
-        time_min = np.min(time)
-        time_max = np.max(time)
-        time_step = (time_max - time_min) / (len(time) - 1)
-        times.append({'time min': time_min, 'time max': time_max,
-                      'time step': time_step})
+        time_mins.append(np.min(time))
+        time_maxs.append(np.max(time))
+        time_steps.append(np.max(time) - np.min(time)) / (len(time) - 1)
+
         frequencies.append(phase.freq[:])
         ant = phase.ant[:]
         ant_check.append(ant)
@@ -312,12 +312,12 @@ def dir2phasesol(mtf, ms='', directions=[]):
     #                                   'match.')
 
     # properties of the new h5parm
-    here_look = 9999999999999
-    for thing in times:
-        if thing['time step'] < here_look:
-            here_look = thing['time step']
-            print('ah now')
-    print('asdf',np.min(times), np.max(times))
+    time_min = np.min(time_mins)
+    time_max = np.max(time_maxs)
+    time_step = np.min(time_steps)
+    print('HEY...', time_min, time_max, time_step)
+
+
     freq = [np.average(frequencies)]  # all items in the list should be equal
     pol = ['XX', 'YY']  # as standard
     dir = [str(directions.ra.rad) + ', ' + str(directions.dec.rad)]  # given
