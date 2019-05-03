@@ -297,14 +297,14 @@ def dir2phasesol(mtf, ms='', directions=[]):
     #      definition it should have a value for them all; then remove the
     #      NotImplementedError
 
-    for my_list in [ant_check]:
-        check = all(list(_) == list(my_list[0]) for _ in my_list)
-        if not check:
-            raise NotImplementedError('A new HDF5 file cannot be made from a '
-                                      'few other HDF5 files because at least '
-                                      'one of the time, frequency, polarisation'
-                                      ', antenna, or direction axes do not '
-                                      'match.')
+    # for my_list in [ant_check]:
+    #     check = all(list(_) == list(my_list[0]) for _ in my_list)
+    #     if not check:
+    #         raise NotImplementedError('A new HDF5 file cannot be made from a '
+    #                                   'few other HDF5 files because at least '
+    #                                   'one of the time, frequency, polarisation'
+    #                                   ', antenna, or direction axes do not '
+    #                                   'match.')
 
     # properties of the new h5parm
     print('asdf',np.min(times), np.max(times))
