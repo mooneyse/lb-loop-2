@@ -307,7 +307,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     #                                   'match.')
 
     # properties of the new h5parm
-    # print('asdf',np.min(times), np.max(times))
+    print('asdf',np.min(times), np.max(times))
     freq = [np.average(frequencies)]  # all items in the list should be equal
     pol = ['XX', 'YY']  # as standard
     dir = [str(directions.ra.rad) + ', ' + str(directions.dec.rad)]  # given
