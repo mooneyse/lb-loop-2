@@ -285,12 +285,11 @@ def dir2phasesol(mtf, ms='', directions=[]):
                 weight.append(w_expanded)
 
         time = phase.time[:]
-        print('TIMESHAPE', time.shape)
+        # print('TIMESHAPE', time.shape)
         time_mins.append(np.min(time))
         time_maxs.append(np.max(time))
         time_intervals.append((np.max(time) - np.min(time)) / (len(time) - 1))
-        print('HEY...', np.min(time), np.max(time), (np.max(time) - np.min(time)) / (len(time) - 1))
-
+        # print('HEY...', np.min(time), np.max(time), (np.max(time) - np.min(time)) / (len(time) - 1))
         frequencies.append(phase.freq[:])
         ant = phase.ant[:]
         ant_check.append(ant)
@@ -314,10 +313,10 @@ def dir2phasesol(mtf, ms='', directions=[]):
     #                                   'match.')
 
     # properties of the new h5parm
-    num_of_steps = 1 + (np.max(time_maxs) - np.min(time_mins)) /
-                   np.min(time_intervals)
+    num_of_steps = 1 + ((np.max(time_maxs) - np.min(time_mins)) /
+                        np.min(time_intervals))
     time = np.linspace(np.min(time_mins), np.max(time_maxs), num_of_steps)
-    print('BIGHEY...', np.min(time_mins), np.max(time_maxs), num_of_steps)
+    # print('BIGHEY...', np.min(time_mins), np.max(time_maxs), num_of_steps)
     print('BIGTIMESHAPE', time.shape)
 
     freq = [np.average(frequencies)]  # all items in the list should be equal
