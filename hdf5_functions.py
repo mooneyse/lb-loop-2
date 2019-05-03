@@ -303,7 +303,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
         #         would be better to write the stations in ant, and the source
         #         table will be different for each h5parm so update this
         #         correctly
-        antenna_soltab = lo.getSolset('sol000').getAnt()  # dictionary
+        # antenna_soltab = lo.getSolset('sol000').getAnt()  # dictionary
         # source_soltab = lo.getSolset('sol000').getSou()  # dictionary
 
         lo.close()
@@ -368,7 +368,6 @@ def dir2phasesol(mtf, ms='', directions=[]):
                       'PL611HBA': np.array([0, 0, 0], dtype='float32'),
                       'PL612HBA': np.array([0, 0, 0], dtype='float32'),
                       'IE613HBA': np.array([0, 0, 0], dtype='float32')}
-
 
     source_table = table.obj._f_get_child('source')
     source_table.append(source_soltab.items())  # from dictionary to list
