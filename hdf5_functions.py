@@ -311,7 +311,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
                                       'match.')
 
     # direction of new h5parm
-    dir = [str(directions.ra.rad) + ', ' + str(directions.dec.rad)]
+    dir = [0]  #str(directions.ra.rad) + ', ' + str(directions.dec.rad)]
     vals = np.concatenate(val, axis=2)
     weights = np.concatenate(weight, axis=2)
 
