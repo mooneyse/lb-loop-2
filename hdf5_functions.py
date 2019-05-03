@@ -37,6 +37,7 @@ def make_blank_mtf(mtf):
             the_file.write(mtf_header)
     return mtf
 
+
 def interpolate_nan(x_):
     '''Interpolate NaN values using this answer from Stack Overflow:
     https://stackoverflow.com/a/6520696/6386612. This works even if the first
@@ -303,7 +304,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
         #         table will be different for each h5parm so update this
         #         correctly
         antenna_soltab = lo.getSolset('sol000').getAnt()  # dictionary
-        source_soltab = lo.getSolset('sol000').getSou()  # dictionary
+        # source_soltab = lo.getSolset('sol000').getSou()  # dictionary
 
         lo.close()
 
@@ -334,16 +335,47 @@ def dir2phasesol(mtf, ms='', directions=[]):
                           weights=weights)  # creates phase000
 
     # copy source and antenna tables into the new h5parm
+    source_soltab = {'POINTING': np.array([directions.ra.rad,
+                                           directions.dec.rad],
+                                          dtype='float32')}
+    antenna_soltab = {'ST001'   : np.array([0, 0, 0], dtype='float32'),
+                      'RS106HBA': np.array([0, 0, 0], dtype='float32'),
+                      'RS205HBA': np.array([0, 0, 0], dtype='float32'),
+                      'RS208HBA': np.array([0, 0, 0], dtype='float32'),
+                      'RS210HBA': np.array([0, 0, 0], dtype='float32'),
+                      'RS305HBA': np.array([0, 0, 0], dtype='float32'),
+                      'RS306HBA': np.array([0, 0, 0], dtype='float32'),
+                      'RS307HBA': np.array([0, 0, 0], dtype='float32'),
+                      'RS310HBA': np.array([0, 0, 0], dtype='float32'),
+                      'RS404HBA': np.array([0, 0, 0], dtype='float32'),
+                      'RS406HBA': np.array([0, 0, 0], dtype='float32'),
+                      'RS407HBA': np.array([0, 0, 0], dtype='float32'),
+                      'RS409HBA': np.array([0, 0, 0], dtype='float32'),
+                      'RS410HBA': np.array([0, 0, 0], dtype='float32'),
+                      'RS503HBA': np.array([0, 0, 0], dtype='float32'),
+                      'RS508HBA': np.array([0, 0, 0], dtype='float32'),
+                      'RS509HBA': np.array([0, 0, 0], dtype='float32'),
+                      'DE601HBA': np.array([0, 0, 0], dtype='float32'),
+                      'DE602HBA': np.array([0, 0, 0], dtype='float32'),
+                      'DE603HBA': np.array([0, 0, 0], dtype='float32'),
+                      'DE604HBA': np.array([0, 0, 0], dtype='float32'),
+                      'DE605HBA': np.array([0, 0, 0], dtype='float32'),
+                      'FR606HBA': np.array([0, 0, 0], dtype='float32'),
+                      'SE607HBA': np.array([0, 0, 0], dtype='float32'),
+                      'UK608HBA': np.array([0, 0, 0], dtype='float32')
+                      'DE609HBA': np.array([0, 0, 0], dtype='float32'),
+                      'PL610HBA': np.array([0, 0, 0], dtype='float32'),
+                      'PL611HBA': np.array([0, 0, 0], dtype='float32'),
+                      'PL612HBA': np.array([0, 0, 0], dtype='float32'),
+                      'IE613HBA': np.array([0, 0, 0], dtype='float32')}
+
+
     source_table = table.obj._f_get_child('source')
     source_table.append(source_soltab.items())  # from dictionary to list
     antenna_table = table.obj._f_get_child('antenna')
     antenna_table.append(antenna_soltab.items())  # from dictionary to list
-    scoop = {'POINTING': np.array([directions.ra.rad, directions.dec.rad], dtype='float32')}
-    print('DIRS', scoop)
-    print('sols', source_soltab)
-    print('solkeys', source_soltab.keys())
-    print('solits', source_soltab.items())
-    print(antenna_soltab)
+
+    print(antenna_soltab.keys())
     h.close()  # close the new h5parm
     os.remove(working_file)
     return new_h5parm
