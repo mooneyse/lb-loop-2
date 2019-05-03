@@ -249,7 +249,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     val, weight = [], []
     ant_check = []
-    times, frequencies = []
+    times, frequencies = [], []
 
     for my_line in range(len(working_data)):  # one line per station
         my_station = working_data[my_line][0]
