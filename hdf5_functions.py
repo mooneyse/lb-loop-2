@@ -312,11 +312,9 @@ def dir2phasesol(mtf, ms='', directions=[]):
     #                                   'match.')
 
     # properties of the new h5parm
-    time_min = np.min(time_mins)
-    time_max = np.max(time_maxs)
-    time_step = np.min(time_steps)
-    print('HEY...', time_min, time_max, time_step)
-
+    num_of_steps = (np.max(time_maxs) - np.min(time_mins)) / np.min(time_steps)
+    time = np.linspace(np.min(time_mins), np.max(time_maxs), number_of_steps)
+    print('HEY...', np.min(time_mins), np.max(time_maxs), number_of_steps)
 
     freq = [np.average(frequencies)]  # all items in the list should be equal
     pol = ['XX', 'YY']  # as standard
