@@ -307,10 +307,10 @@ def dir2phasesol(mtf, ms='', directions=[]):
                                       ', antenna, or direction axes do not '
                                       'match.')
 
-    # direction of new h5parm
-    freq = [np.average(frequencies)]
-    pol = ['XX', 'YY']
-    dir = [str(directions.ra.rad) + ', ' + str(directions.dec.rad)]
+    # properties of the new h5parm
+    freq = [np.average(frequencies)]  # all items in the list should be equal
+    pol = ['XX', 'YY']  # as standard
+    dir = [str(directions.ra.rad) + ', ' + str(directions.dec.rad)]  # given
     vals = np.concatenate(val, axis=2)
     weights = np.concatenate(weight, axis=2)
 
