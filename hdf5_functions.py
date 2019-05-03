@@ -287,7 +287,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
         time = phase.time[:]
         time_mins.append(np.min(time))
         time_maxs.append(np.max(time))
-        time_steps.append(np.max(time) - np.min(time)) / (len(time) - 1)
+        time_steps.append((np.max(time) - np.min(time)) / (len(time) - 1))
 
         frequencies.append(phase.freq[:])
         ant = phase.ant[:]
