@@ -8,6 +8,7 @@ from __future__ import print_function
 from functools import partial
 from multiprocessing import Pool
 from pathlib import Path  # on CEP3, "pip install --user pathlib"
+from scipy.interpolate import interp1d
 from astropy.coordinates import SkyCoord
 from losoto.lib_operations import reorderAxes
 import losoto.h5parm as lh5  # on CEP3, "module load losoto/2.0"
@@ -152,6 +153,43 @@ def dir2phasesol_multiprocessing(args):
     return dir2phasesol(mtf=mtf, ms=ms, directions=directions)
 
 
+def interpolate_time(the_array, the_times, new_times):
+    '''Given a h5parm array, it will interpolate the values in the time axis
+    from whatever it is to a given value.
+
+    Args:
+    the_array (numpy array): The array of values or weights from the h5parm.
+    the_times (numpy array): The 1D array of values along the time axis.
+    new_times (numpy array): The 1D time axis that the values will be mapped
+                             to.
+
+    Returns:
+    The array of values or weights for a h5parm expanded to fit the new time
+    axis. (numpy array).
+    '''
+
+    # get the original data
+    time, freq, ant, pol, dir = the_array.shape  # axes were reordered earlier
+    old_x_values = the_array[:, 0, 0, 0, 0]  # for one antenna only
+    old_y_values = the_array[:, 0, 0, 1, 0]  # for one antenna only
+
+    # make the new array
+    interpolated_array = np.ones(shape=(len(new_times), freq, ant, pol, dir))
+
+    # calculate the interpolated values
+    x1 = interp1d(the_times, old_x_values, kind='nearest', bounds_error=False)
+    y1 = interp1d(the_times, old_y_values, kind='nearest', bounds_error=False)
+
+    new_x_values = x1(new_times)
+    new_y_values = y1(new_times)
+
+    # assign the interpolated values to the new array
+    interpolated_array[:, 0, 0, 0, 0] = new_x_values  # new x values
+    interpolated_array[:, 0, 0, 1, 0] = new_y_values  # new y values
+
+    return interpolated_array
+
+
 def dir2phasesol(mtf, ms='', directions=[]):
     '''Get the directions of the h5parms from the master text file. Calculate
     the separation between a list of given directions and the h5parm
@@ -250,6 +288,29 @@ def dir2phasesol(mtf, ms='', directions=[]):
     time_mins, time_maxs, time_intervals = [], [], []
     frequencies = []
 
+    # WARNING below added 07 May 2019
+    # finding the shortest time interval of all h5parms being copied
+    for my_line in range(len(working_data)):  # one line per station
+        my_station = working_data[my_line][0]
+        my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
+
+        # use the station to get the relevant data to be copied from the h5parm
+        lo = lh5.h5parm(my_h5parm, readonly=False)  # NB change this to True
+        phase = lo.getSolset('sol000').getSoltab('phase000')
+        time = phase.time[:]
+        time_mins.append(np.min(time))
+        time_maxs.append(np.max(time))
+        time_intervals.append((np.max(time) - np.min(time)) / (len(time) - 1))
+        frequencies.append(phase.freq[:])
+        lo.close()
+
+    # properties of the new h5parm
+    # the time ranges from the lowest to the highest on the smallest interval
+    num_of_steps = 1 + ((np.max(time_maxs) - np.min(time_mins)) /
+                        np.min(time_intervals))
+    new_time = np.linspace(np.min(time_mins), np.max(time_maxs), num_of_steps)
+    # WARNING above added 07 May 2019
+
     for my_line in range(len(working_data)):  # one line per station
         my_station = working_data[my_line][0]
         my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
@@ -279,34 +340,33 @@ def dir2phasesol(mtf, ms='', directions=[]):
                 w = reordered_weights[:, :, s, :, :]  # same order as v
                 v_expanded = np.expand_dims(v, axis=2)
                 w_expanded = np.expand_dims(w, axis=2)
-                val.append(v_expanded)
-                weight.append(w_expanded)
+                # TODO interpolate down to 1 second, here @ 07 May 2019 - see time.py
+                v_interpolated = interpolate_time(the_array=v_expanded,
+                                                  the_times=phase.time[:],
+                                                  new_times=new_time)
+                w_interpolated = interpolate_time(the_array=w_expanded,
+                                                  the_times=phase.time[:],
+                                                  new_times=new_time)
+                val.append(v_interpolated)
+                weight.append(w_interpolated)
 
-        time = phase.time[:]
-        time_mins.append(np.min(time))
-        time_maxs.append(np.max(time))
-        time_intervals.append((np.max(time) - np.min(time)) / (len(time) - 1))
         frequencies.append(phase.freq[:])
         lo.close()
 
     # properties of the new h5parm
     # the time ranges from the lowest to the highest on the smallest interval
-    num_of_steps = 1 + ((np.max(time_maxs) - np.min(time_mins)) /
-                        np.min(time_intervals))
-    time = np.linspace(np.min(time_mins), np.max(time_maxs), num_of_steps)
     freq = [np.average(frequencies)]  # all items in the list should be equal
     ant = successful_stations  # antennas that will be in the new h5parm
     pol = ['XX', 'YY']  # as standard
     dir = [str(directions.ra.rad) + ', ' + str(directions.dec.rad)]  # given
 
-    # TODO this will crash as the values are not being interpolated per h5parm
     vals = np.concatenate(val, axis=2)
     weights = np.concatenate(weight, axis=2)
 
     # write these best phase solutions to the new h5parm
     c = solset.makeSoltab('phase',
                           axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                          axesVals=[time, freq, ant, pol, dir],
+                          axesVals=[new_time, freq, ant, pol, dir],
                           vals=vals,
                           weights=weights)  # creates phase000
 
