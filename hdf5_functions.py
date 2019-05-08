@@ -94,7 +94,7 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
         evaluations[station] = coherence_metric(xx, yy)  # 0 = best
 
     with open(mtf) as f:
-        mtf_stations = list(csv.reader(f))[0][4:]  # get stations from the mtf
+        mtf_stations = list(csv.reader(f))[0][3:]  # get stations from the mtf
 
     with open(mtf, 'a') as f:
         f.write('{}, {}, {}'.format(h5parm, direction[0], direction[1]))
@@ -591,8 +591,6 @@ def main():
 
     evaluate_solutions(h5parm=h5parm, mtf=mtf)
 
-    dir2phasesol(mtf, ms=ms, directions=[0.226893, 0.9512044])
-    print('BLOOPERS')
     new_h5parms = dir2phasesol_wrapper(mtf=mtf,
                                        ms=ms,
                                        directions=directions,
