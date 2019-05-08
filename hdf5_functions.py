@@ -565,13 +565,6 @@ def main():
                         nargs='+',
                         help='source positions (radians; RA DEC RA DEC...)')
 
-    parser.add_argument('-s',
-                        '--soltabs',
-                        required=False,
-                        type=str,
-                        default='phase',
-                        help='measurement set')
-
     args = parser.parse_args()
     mtf = args.mtf
     h5parm = args.h5parm
@@ -579,7 +572,6 @@ def main():
     threshold = args.threshold
     cores = args.cores
     directions = args.directions
-    soltabs = args.soltabs
 
     make_blank_mtf(mtf=mtf)
 
