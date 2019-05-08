@@ -591,6 +591,8 @@ def main():
 
     evaluate_solutions(h5parm=h5parm, mtf=mtf)
 
+    dir2phasesol(mtf, ms=ms, directions=[0.226893, 0.9512044])
+    print('BLOOPERS')
     new_h5parms = dir2phasesol_wrapper(mtf=mtf,
                                        ms=ms,
                                        directions=directions,
