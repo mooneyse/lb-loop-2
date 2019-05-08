@@ -288,8 +288,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
     time_mins, time_maxs, time_intervals = [], [], []
     frequencies = []
 
-    # WARNING below added 07 May 2019
-    # finding the shortest time interval of all h5parms being copied
+    # looping through the h5parms that will be used in the new h5parm to find
+    # the shortest time interval of all h5parms being copied
     for my_line in range(len(working_data)):  # one line per station
         my_station = working_data[my_line][0]
         my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
@@ -309,8 +309,9 @@ def dir2phasesol(mtf, ms='', directions=[]):
     num_of_steps = 1 + ((np.max(time_maxs) - np.min(time_mins)) /
                         np.min(time_intervals))
     new_time = np.linspace(np.min(time_mins), np.max(time_maxs), num_of_steps)
-    # WARNING above added 07 May 2019
 
+    # looping through the h5parms to get the solutions for the good stations
+    # needed to build the new h5parm
     for my_line in range(len(working_data)):  # one line per station
         my_station = working_data[my_line][0]
         my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
@@ -340,7 +341,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
                 w = reordered_weights[:, :, s, :, :]  # same order as v
                 v_expanded = np.expand_dims(v, axis=2)
                 w_expanded = np.expand_dims(w, axis=2)
-                # TODO interpolate down to 1 second, here @ 07 May 2019 - see time.py
+                # TODO interpolate
                 v_interpolated = interpolate_time(the_array=v_expanded,
                                                   the_times=phase.time[:],
                                                   new_times=new_time)
