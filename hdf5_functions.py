@@ -11,7 +11,7 @@ from pathlib import Path  # on CEP3, "pip install --user pathlib"
 from scipy.interpolate import interp1d
 from astropy.coordinates import SkyCoord
 from losoto.lib_operations import reorderAxes
-import losoto.h5parm as lh5  # on CEP3, "module load losoto/2.0"
+import losoto.h5parm as lh5  # on CEP3, "module load losoto"
 import astropy.units as u
 import pyrap.tables as pt
 import numpy as np
@@ -22,11 +22,18 @@ import os
 import subprocess
 
 __author__ = 'Sean Mooney'
-__date__ = '01 November 2018'
+__date__ = '01 May 2019'
 
 def make_blank_mtf(mtf):
     '''Create an empty master text file containing all of the LOFAR remote and
-    international stations, and ST001.'''
+    international stations, and ST001.
+
+    Args:
+    mtf (str): The master text file to be created.
+
+    Returns:
+    The name of the master text file (str).'''
+
     mtf_header = ('# h5parm, ra, dec, ST001, RS106HBA, RS205HBA, RS208HBA, '
                   'RS210HBA, RS305HBA, RS306HBA, RS307HBA, RS310HBA, RS404HBA,'
                   ' RS406HBA, RS407HBA, RS409HBA, RS410HBA, RS503HBA, '
@@ -36,6 +43,7 @@ def make_blank_mtf(mtf):
     if not os.path.isfile(mtf):  # if it does not already exist
         with open(mtf, 'w+') as the_file:
             the_file.write(mtf_header)
+
     return mtf
 
 
@@ -43,19 +51,36 @@ def interpolate_nan(x_):
     '''Interpolate NaN values using this answer from Stack Overflow:
     https://stackoverflow.com/a/6520696/6386612. This works even if the first
     or last value is nan or if there are multiple nans. It raises an error if
-    all values are nan.'''
+    all values are nan.
+
+    Args:
+    x_ (list or NumPy array): Values to interpolate.
+
+    Returns:
+    The interpolated values. (NumPy array)'''
+
     x_ = np.array(x_)
     if np.isnan(x_).all():  # if all values are nan
         raise ValueError('All values in the array are nan, so interpolation is'
                          ' not possible.')
     nans, x = np.isnan(x_), lambda z: z.nonzero()[0]
     x_[nans] = np.interp(x(nans), x(~nans), x_[~nans])
+
     return x_
 
 
 def coherence_metric(xx, yy):
-    '''Calculates the coherence metric by comparing the XX and YY phases.'''
+    '''Calculates the coherence metric by comparing the XX and YY phases.
+
+    Args:
+    xx (list or NumPy array): One set of phase solutions.
+    yy (list or NumPy array): The other set of phase solutions.
+
+    Returns:
+    The coherence metric. (float)'''
+
     xx, yy = interpolate_nan(xx), interpolate_nan(yy)
+
     return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
 
 
@@ -68,8 +93,8 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
     Args:
     h5parm (str): LOFAR HDF5 parameter file.
     mtf (str): Master text file.
-    threshold (float, optional): threshold to determine the goodness of the
-        coherence metric.
+    threshold (float; default = 0.25): threshold to determine the goodness of
+        the coherence metric.
 
     Returns:
     The coherence metric for each station. (dict)'''
@@ -119,7 +144,18 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
 
 
 def dir2phasesol_wrapper(mtf, ms, directions=[], cores=4):
-    '''Book-keeping to get the multiprocessing set up and running.'''
+    '''Book-keeping to get the multiprocessing set up and running.
+
+    Args:
+    mtf (str): The master text file.
+    ms (str): The measurement set.
+    directions (list; default = []): Directions in radians, of the form RA1,
+        Dec1, RA2, Dec2, etc.
+    cores (float; default = 4): Number of cores to use.
+
+    Returns:
+    The names of the newly created h5parms in the directions specified. (list)
+    '''
 
     mtf_list, ms_list = [], []
     for i in range(int(len(directions) / 2)):
@@ -130,6 +166,7 @@ def dir2phasesol_wrapper(mtf, ms, directions=[], cores=4):
     multiprocessing = list(zip(mtf_list, ms_list, directions_paired))
     pool = Pool(cores)  # specify cores
     new_h5parms = pool.map(dir2phasesol_multiprocessing, multiprocessing)
+
     return new_h5parms
 
 
@@ -138,14 +175,14 @@ def interpolate_time(the_array, the_times, new_times):
     from whatever it is to a given value.
 
     Args:
-    the_array (numpy array): The array of values or weights from the h5parm.
-    the_times (numpy array): The 1D array of values along the time axis.
-    new_times (numpy array): The 1D time axis that the values will be mapped
-    to.
+    the_array (NumPy array): The array of values or weights from the h5parm.
+    the_times (NumPy array): The 1D array of values along the time axis.
+    new_times (NumPy array): The 1D time axis that the values will be mapped
+        to.
 
     Returns:
     The array of values or weights for a h5parm expanded to fit the new time
-    axis. (numpy array).'''
+    axis. (NumPy array)'''
 
     # get the original data
     time, freq, ant, pol, dir = the_array.shape  # axes were reordered earlier
@@ -170,8 +207,18 @@ def interpolate_time(the_array, the_times, new_times):
 
 
 def dir2phasesol_multiprocessing(args):
-    '''Wrapper to parallelize make_h5parm.'''
+    '''Wrapper to parallelise make_h5parm.
+
+    Args:
+    args (list or tuple): Parameters to be passed to the dir2phasesol
+        function.
+
+    Returns:
+    The output of the dir2phasesol function, which is the name of a new
+        h5parm file. (str)'''
+
     mtf, ms, directions = args
+
     return dir2phasesol(mtf=mtf, ms=ms, directions=directions)
 
 
@@ -185,7 +232,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     Args:
     mtf (str): Master text file with list of h5parms.
     ms (str): Measurement set to be self-calibrated.
-    directions (list, default = []): RA, Dec of source (radians).
+    directions (list; default = []): RA, Dec of one source in radians.
 
     Returns:
     The new h5parm to be applied to the measurement set. (str)'''
@@ -405,9 +452,9 @@ def apply_h5parm(h5parm, ms, column_out='CORRECTED_DATA'):
     measurement set.
 
     Args:
-    new_h5parm (str): The output of make_h5parm.
+    new_h5parm (str): The output of dir2phasesol.
     ms (str): The measurement set for self-calibration.
-    column_out (str, default='DATA'): The column for NDPPP to write to.
+    column_out (str; default = 'CORRECTED_DATA'): The column NDPPP writes to.
 
     Returns:
     None.'''
@@ -439,11 +486,11 @@ def update_list(new_h5parm, loop3_h5parm, mtf, threshold=0.25):
     appended.
 
     Args:
-    new_h5parm (str): The initial h5parm (i.e. from make_h5parm).
+    new_h5parm (str): The initial h5parm (i.e. from dir2phasesol).
     loop3_h5parm (str): The final h5parm from loop 3.
     mtf (str): Master text file.
-    threshold (float, default=0.25): Threshold determining goodness passed to
-                                     evaluate_solutions.
+    threshold (float; default = 0.25): Threshold determining goodness passed to
+        evaluate_solutions.
 
     Returns:
     A new h5parm that is a combination of new_h5parm and loop3_h5parm (str).'''
@@ -451,10 +498,10 @@ def update_list(new_h5parm, loop3_h5parm, mtf, threshold=0.25):
     # get solutions from new_h5parm and loop3_h5parm
     h = lh5.h5parm(new_h5parm)  # from new_h5parm
     phase = h.getSolset('sol000').getSoltab('phase000')
-    try:  #  may not contain a direction dimension
+    try:  # h5parms from dir2phasesol have a direction, but just in case
         dir_new_h5parm = phase.dir[:]
     except:
-        dir_new_h5parm = ['0']  # NB this should be the position for the h5parm
+        dir_new_h5parm = ['0']  # if it is missing
 
     val_new_h5parm = phase.val[:]
     weight_new_h5parm = phase.weight[:]
