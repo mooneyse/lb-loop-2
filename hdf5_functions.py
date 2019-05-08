@@ -597,7 +597,7 @@ def main():
 
     # new_h5parms used as a test
     update_list(new_h5parm=new_h5parms[0], loop3_h5parm=new_h5parms[1],
-                mtf=mtf, soltab='phase', threshold=threshold)
+                mtf=mtf, threshold=threshold)
 
 
 if __name__ == '__main__':
