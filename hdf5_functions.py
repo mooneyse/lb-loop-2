@@ -27,12 +27,12 @@ __date__ = '01 November 2018'
 def make_blank_mtf(mtf):
     '''Create an empty master text file containing all of the LOFAR remote and
     international stations, and ST001.'''
-    mtf_header = ('# h5parm, ra, dec, solutions, ST001, RS106HBA, RS205HBA, '
-                  'RS208HBA, RS210HBA, RS305HBA, RS306HBA, RS307HBA, RS310HBA,'
-                  ' RS404HBA, RS406HBA, RS407HBA, RS409HBA, RS410HBA, '
-                  'RS503HBA, RS508HBA, RS509HBA, DE601HBA, DE602HBA, DE603HBA,'
-                  ' DE604HBA, DE605HBA, FR606HBA, SE607HBA, UK608HBA, '
-                  'DE609HBA, PL610HBA, PL611HBA, PL612HBA, IE613HBA\n')
+    mtf_header = ('# h5parm, ra, dec, ST001, RS106HBA, RS205HBA, RS208HBA, '
+                  'RS210HBA, RS305HBA, RS306HBA, RS307HBA, RS310HBA, RS404HBA,'
+                  ' RS406HBA, RS407HBA, RS409HBA, RS410HBA, RS503HBA, '
+                  'RS508HBA, RS509HBA, DE601HBA, DE602HBA, DE603HBA, DE604HBA,'
+                  ' DE605HBA, FR606HBA, SE607HBA, UK608HBA, DE609HBA, '
+                  'PL610HBA, PL611HBA, PL612HBA, IE613HBA\n')
     if not os.path.isfile(mtf):  # if it does not already exist
         with open(mtf, 'w+') as the_file:
             the_file.write(mtf_header)
@@ -59,21 +59,7 @@ def coherence_metric(xx, yy):
     return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
 
 
-def evaluate_solutions_wrapper(h5parm, mtf, solution_tables='phase',
-                               threshold=0.25):
-    '''Executes the evaluate_solutions function for each solution table. If a
-    list of solution tables are given, a corresponding list of thresholds must
-    also be given.'''
-
-    if type(solution_tables) is str:
-        evaluate_solutions(h5parm, mtf, solution_tables, threshold=threshold)
-
-    elif type(solution_tables) is list:
-        for solution_table, threshold in zip(solutions_tables, threshold):
-            evaluate_solutions(h5parm, mtf, solution_table, threshold=threshold)
-
-
-def evaluate_solutions(h5parm, mtf, solution_table='phase', threshold=0.25):
+def evaluate_solutions(h5parm, mtf, threshold=0.25):
     '''Get the direction from the h5parm. Evaluate the phase solutions in the
     h5parm for each station using the coherence metric. Determine the validity
     of each coherence metric that was calculated. Append the right ascension,
@@ -92,7 +78,7 @@ def evaluate_solutions(h5parm, mtf, solution_table='phase', threshold=0.25):
     solname = h.getSolsetNames()[0]  # set to -1 to use only the last solset
     solset = h.getSolset(solname)
     soltabnames = solset.getSoltabNames()
-    soltab = solset.getSoltab(solution_table + '000')
+    soltab = solset.getSoltab('phase000')
     stations = soltab.ant
     source = solset.getSou()  # dictionary
     direction = np.degrees(np.array(source[list(source.keys())[0]]))  # degrees
@@ -111,7 +97,7 @@ def evaluate_solutions(h5parm, mtf, solution_table='phase', threshold=0.25):
         mtf_stations = list(csv.reader(f))[0][4:]  # get stations from the mtf
 
     with open(mtf, 'a') as f:
-        f.write('{}, {}, {}, {}'.format(h5parm, direction[0], direction[1], solution_table))
+        f.write('{}, {}, {}'.format(h5parm, direction[0], direction[1]))
 
         for mtf_station in mtf_stations:
             # look up the statistic for a station and determine if it is good
@@ -147,12 +133,6 @@ def dir2phasesol_wrapper(mtf, ms, directions=[], cores=4):
     return new_h5parms
 
 
-def dir2phasesol_multiprocessing(args):
-    '''Wrapper to parallelize make_h5parm.'''
-    mtf, ms, directions = args
-    return dir2phasesol(mtf=mtf, ms=ms, directions=directions)
-
-
 def interpolate_time(the_array, the_times, new_times):
     '''Given a h5parm array, it will interpolate the values in the time axis
     from whatever it is to a given value.
@@ -161,12 +141,11 @@ def interpolate_time(the_array, the_times, new_times):
     the_array (numpy array): The array of values or weights from the h5parm.
     the_times (numpy array): The 1D array of values along the time axis.
     new_times (numpy array): The 1D time axis that the values will be mapped
-                             to.
+    to.
 
     Returns:
     The array of values or weights for a h5parm expanded to fit the new time
-    axis. (numpy array).
-    '''
+    axis. (numpy array).'''
 
     # get the original data
     time, freq, ant, pol, dir = the_array.shape  # axes were reordered earlier
@@ -188,6 +167,12 @@ def interpolate_time(the_array, the_times, new_times):
     interpolated_array[:, 0, 0, 1, 0] = new_y_values  # new y values
 
     return interpolated_array
+
+
+def dir2phasesol_multiprocessing(args):
+    '''Wrapper to parallelize make_h5parm.'''
+    mtf, ms, directions = args
+    return dir2phasesol(mtf=mtf, ms=ms, directions=directions)
 
 
 def dir2phasesol(mtf, ms='', directions=[]):
@@ -233,7 +218,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     # read in the stations from the master text file
     with open(mtf) as f:
-        mtf_stations = list(csv.reader(f))[0][4:]  # skip h5parm, ra, and dec
+        mtf_stations = list(csv.reader(f))[0][3:]  # skip h5parm, ra, and dec
         mtf_stations = [x.lstrip() for x in mtf_stations]  # remove first space
 
     # find the closest h5parm which has an acceptable solution for each station
@@ -529,8 +514,7 @@ def update_list(new_h5parm, loop3_h5parm, mtf, soltab, threshold=0.25):
     h.close()
 
     # evaluate the solutions and update the master file
-    evaluate_solutions(h5parm=combined_h5parm, mtf=mtf, threshold=threshold,
-                       solution_table=soltab)
+    evaluate_solutions(h5parm=combined_h5parm, mtf=mtf, threshold=threshold)
     return combined_h5parm
 
 
@@ -605,9 +589,7 @@ def main():
 
     make_blank_mtf(mtf=mtf)
 
-    evaluate_solutions_wrapper(h5parm=h5parm,
-                               mtf=mtf,
-                               solution_tables=soltabs)
+    evaluate_solutions(h5parm=h5parm, mtf=mtf)
 
     new_h5parms = dir2phasesol_wrapper(mtf=mtf,
                                        ms=ms,
