@@ -480,10 +480,39 @@ def apply_h5parm(h5parm, ms, column_out='CORRECTED_DATA'):
     os.remove(parset)
 
 
-def update_list(new_h5parm, loop3_h5parm, mtf, threshold=0.25):
+def add_amplitude_and_phase_solutions(ampltides, amplitude_phases, phases):
+    '''Convert amplitude and phase solutions into complex numbers, add them,
+    and return the amplitude and phase components of the result. The solutions
+    must be on the same time axis.
+
+    Args:
+    amplitudes (list or NumPy array): Amplitude solutions.
+    amplitude_phases (list or NumPy array): Phase solutions from the amplitude
+        solve.
+    phases (list or NumPy array): Phase solutions.
+
+    Returns:
+    Amplitude solutions (NumPy array), phase solutions (NumPy array)'''
+
+    amplitude_final, phase_final = [], []
+
+    for A, A_theta, theta in zip(ampltides, amplitude_phases, phases):
+        complex_amplitude = A * complex(np.cos(A_theta), np.sin(A_theta))
+        complex_phase = complex(np.cos(theta), np.sin(theta))  # A is unity
+        complex_ = complex_amplitude + complex_phase
+
+        amplitude_final.append(abs(complex_))
+        phase_final.append(np.arctan2(complex_.imag, complex_.real))
+
+    return np.array(amplitude_final), np.array(phase_final)
+
+
+def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25):
     '''Combine the phase solutions from the initial h5parm and the final
-    h5parm. Calls evaluate_solutions to update the master file with a new line
-    appended.
+    h5parm. The initial h5parm contains the initial solutions and the final
+    h5parm contains the incremental solutions so they need to be added to form
+    the final solutions. Calls evaluate_solutions to update the master file
+    with a new line appended.
 
     Args:
     new_h5parm (str): The initial h5parm (i.e. from dir2phasesol).
@@ -496,44 +525,44 @@ def update_list(new_h5parm, loop3_h5parm, mtf, threshold=0.25):
     A new h5parm that is a combination of new_h5parm and loop3_h5parm (str).'''
 
     # get solutions from new_h5parm and loop3_h5parm
-    h = lh5.h5parm(new_h5parm)  # from new_h5parm
-    phase = h.getSolset('sol000').getSoltab('phase000')
-    try:  # h5parms from dir2phasesol have a direction, but just in case
-        dir_new_h5parm = phase.dir[:]
+    h = lh5.h5parm(initial_h5parm)  # from new_h5parm
+    initial_phase = h.getSolset('sol000').getSoltab('phase000')
+    try:  # h5parms from dir2phasesol have a direction, but in case not
+        dir_initial = initial_phase.dir[:]
     except:
-        dir_new_h5parm = ['0']  # if it is missing
+        dir_initial = ['0']  # if it is missing
 
-    val_new_h5parm = phase.val[:]
-    weight_new_h5parm = phase.weight[:]
+    val_initial = initial_phase.val[:]
+    weight_initial = initial_phase.weight[:]
     h.close()
 
-    h = lh5.h5parm(loop3_h5parm)  # from loop3_h5parm
+    h = lh5.h5parm(incremental_h5parm)  # from loop3_h5parm
     sol000 = h.getSolset('sol000')  # change to take highest solset?
-    phase = sol000.getSoltab('phase000')
-    antenna_soltab = sol000.getAnt().items()  # dictionary to list
-    source_soltab = sol000.getSou().items()  # dictionary to list
+    incremental_phase = h.getSolset('sol000').getSoltab('phase000')
+    antenna_soltab = h.getSolset('sol000').getAnt().items()  # dict to list
+    source_soltab = h.getSolset('sol000').getSou().items()  # dict to list
 
-    pol = phase.pol[:]
+    pol = incremental_phase.pol[:]
     try:  #  may not contain a direction dimension
-        dir = phase.dir[:]
+        dir = incremental_phase.dir[:]
     except:
-        dir = dir_new_h5parm  # if it does not exist take it from the other h5
-    ant = phase.ant[:]
-    time = phase.time[:]
-    freq = phase.freq[:]
+        dir = dir_initial  # if none, take it from the other h5
+    ant = incremental_phase.ant[:]
+    time = incremental_phase.time[:]
+    freq = incremental_phase.freq[:]
 
-    val_loop3_h5parm = phase.val[:]
-    weight_loop3_h5parm = phase.weight[:]
+    val_incremental = incremental_phase.val[:]
+    weight_incremental = incremental_phase.weight[:]
     h.close()
 
     # for comined_h5parm
-    # TODO something more complicated needed here
-    vals = val_new_h5parm + val_loop3_h5parm
-
-    # complex_number = 1 + 1j
-    weights = weight_new_h5parm + weight_loop3_h5parm
-    combined_h5parm = (os.path.splitext(new_h5parm)[0] + '-' +
-                       os.path.basename(loop3_h5parm))
+    # TODO 10 May 2019
+    # interpolate_time(the_array, the_times, new_times)
+    # add_amplitude_and_phase_solutions(ampltides, amplitude_phases, phases)
+    vals = val_initial + val_incremental
+    weights = val_initial + weight_incremental
+    combined_h5parm = (os.path.splitext(initial_h5parm)[0] + '-' +
+                       os.path.basename(incremental_h5parm))
 
     # write these best phase solutions to the combined_h5parm
     h = lh5.h5parm(combined_h5parm, readonly=False)
