@@ -576,35 +576,33 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25):
     A new h5parm that is a combination of new_h5parm and loop3_h5parm (str).'''
 
     # get solutions from new_h5parm and loop3_h5parm
-    h = lh5.h5parm(initial_h5parm)  # from new_h5parm
-    initial_phase = h.getSolset('sol000').getSoltab('phase000')
+    f = lh5.h5parm(initial_h5parm)  # from new_h5parm
+    initial_phase = f.getSolset('sol000').getSoltab('phase000')
     try:  # h5parms from dir2phasesol have a direction, but in case not
         initial_dir = initial_phase.dir[:]
     except:
         initial_dir = ['0']  # if it is missing
 
-    initial_time = incremental_phase.time[:]
+    initial_time = initial_phase.time[:]
+    initial_freq = initial_phase.freq[:]
     initial_val = initial_phase.val[:]
     initial_weight = initial_phase.weight[:]
-    h.close()
 
-    h = lh5.h5parm(incremental_h5parm)  # from loop3_h5parm
-    sol000 = h.getSolset('sol000')  # change to take highest solset?
-    incremental_phase = h.getSolset('sol000').getSoltab('phase000')
-    antenna_soltab = h.getSolset('sol000').getAnt().items()  # dict to list
-    source_soltab = h.getSolset('sol000').getSou().items()  # dict to list
+    g = lh5.h5parm(incremental_h5parm)  # from loop3_h5parm
+    sol000 = g.getSolset('sol000')  # change to take highest solset?
+    incremental_phase = g.getSolset('sol000').getSoltab('phase000')
+    antenna_soltab = g.getSolset('sol000').getAnt().items()  # dict to list
+    source_soltab = g.getSolset('sol000').getSou().items()  # dict to list
 
     try:  #  may not contain a direction dimension
         dir = incremental_phase.dir[:]
     except:
-        dir = dir_initial  # if none, take it from the other h5
+        dir = initial_dir  # if none, take it from the other h5
     ant = incremental_phase.ant[:]
     incremental_time = incremental_phase.time[:]
-    freq = incremental_phase.freq[:]
-
+    incremental_freq = incremental_phase.freq[:]
     incremental_val = incremental_phase.val[:]
     incremental_weight = incremental_phase.weight[:]
-    h.close()
 
     # for comined_h5parm
     # make val_initial and val_incremental on the same time axis
@@ -619,15 +617,21 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25):
     incremental_val_new = interpolate_time(incremental_sorted_val, incremental_time, new_times)
     incremental_weight_new = interpolate_time(incremental_sorted_weight, incremental_time, new_times)
 
-    print('RPOGRESS?')
-    print(initial_val_new.shape)
-    print(incremental_val_new.shape)
+    # BEFORE ADDING WE HAVE TO MAKE SURE OF THE FOLLOWING. THE ANTENNAS ARE IN THE SAME ORDER,
+    # OR MAKE THE NEW ARRAY OF VALUES HAVE ALL ANTENNAS AND WRITE NAN FOR ANTENNAS WHERE THERE IS NO
+    # SOLUTION IN EITHER H5PARM.
+    # FIRST, CHECK IF THE H5PARMS HAVE AMPLITUDE SOLUTION TABLES AND IF SO, GET THE AMPLITUDE AND
+    # PHASES AND MAKE AN ARRAY OF VALUES WHICH ARE THE COMPLEX NUMBERS FOR EACH ARRAY, AND THEN
+    # ADD THESE TOGETHER
 
     # add_amplitude_and_phase_solutions(ampltides, amplitude_phases, phases)
     vals = val_initial + val_incremental
     weights = val_initial + weight_incremental
     combined_h5parm = (os.path.splitext(initial_h5parm)[0] + '-' +
                        os.path.basename(incremental_h5parm))
+
+    freq = np.array([np.mean([initial_freq, incremental_freq])])
+    pol = np.array(['XX', 'YY'])
 
     # write these best phase solutions to the combined_h5parm
     h = lh5.h5parm(combined_h5parm, readonly=False)
@@ -637,7 +641,7 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25):
     solset = h.getSolset('sol000')
     c = solset.makeSoltab('phase',
                           axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                          axesVals=[time, freq, ant, pol, dir],
+                          axesVals=[new_times, freq, ant, pol, dir],
                           vals=vals,
                           weights=weights)  # creates phase000
 
@@ -646,8 +650,10 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25):
     source_table.append(source_soltab)
     antenna_table = table.obj._f_get_child('antenna')
     antenna_table.append(antenna_soltab)  # from dictionary to list
-    h.close()
 
+    f.close()
+    g.close()
+    h.close()
     # evaluate the solutions and update the master file
     evaluate_solutions(h5parm=combined_h5parm, mtf=mtf, threshold=threshold)
     return combined_h5parm
@@ -714,17 +720,17 @@ def main():
     cores = args.cores
     directions = args.directions
 
-    make_blank_mtf(mtf=mtf)
-
-    evaluate_solutions(h5parm=h5parm, mtf=mtf)
-
-    new_h5parms = dir2phasesol_wrapper(mtf=mtf,
-                                       ms=ms,
-                                       directions=directions,
-                                       cores=cores)
-
-    for new_h5parm in new_h5parms:
-        apply_h5parm(h5parm=new_h5parm, ms=ms)  # outputs a ms per direction
+    # make_blank_mtf(mtf=mtf)
+    #
+    # evaluate_solutions(h5parm=h5parm, mtf=mtf)
+    #
+    # new_h5parms = dir2phasesol_wrapper(mtf=mtf,
+    #                                    ms=ms,
+    #                                    directions=directions,
+    #                                    cores=cores)
+    #
+    # for new_h5parm in new_h5parms:
+    #     apply_h5parm(h5parm=new_h5parm, ms=ms)  # outputs a ms per direction
 
     # loop 3 goes here
 
