@@ -729,7 +729,7 @@ def main():
     # loop 3 goes here
 
     # new_h5parms used as a test
-    update_list(new_h5parm=new_h5parms[0], loop3_h5parm=new_h5parms[1],
+    update_list(initial_h5parm='/data020/scratch/sean/letsgetloopy/phases.h5', incremental_h5parm='/data020/scratch/sean/letsgetloopy/amplitudes.h5',
                 mtf=mtf, threshold=threshold)
 
 
