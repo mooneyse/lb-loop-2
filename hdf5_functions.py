@@ -185,23 +185,25 @@ def interpolate_time(the_array, the_times, new_times):
     axis. (NumPy array)'''
 
     # get the original data
-    time, freq, ant, pol, dir = the_array.shape  # axes were reordered earlier
-    old_x_values = the_array[:, 0, 0, 0, 0]  # for one antenna only
-    old_y_values = the_array[:, 0, 0, 1, 0]  # for one antenna only
+    time, freq, ant, pol, dir_ = the_array.shape  # axes were reordered earlier
 
     # make the new array
-    interpolated_array = np.ones(shape=(len(new_times), freq, ant, pol, dir))
+    interpolated_array = np.ones(shape=(len(new_times), freq, ant, pol, dir_))
 
-    # calculate the interpolated values
-    x1 = interp1d(the_times, old_x_values, kind='nearest', bounds_error=False)
-    y1 = interp1d(the_times, old_y_values, kind='nearest', bounds_error=False)
+    for a in range(ant):  # for one antenna only
+        old_x_values = the_array[:, 0, a, 0, 0]  # xx
+        old_y_values = the_array[:, 0, a, 1, 0]  # yy
 
-    new_x_values = x1(new_times)
-    new_y_values = y1(new_times)
+        # calculate the interpolated values
+        x1 = interp1d(the_times, old_x_values, kind='nearest', bounds_error=False)
+        y1 = interp1d(the_times, old_y_values, kind='nearest', bounds_error=False)
 
-    # assign the interpolated values to the new array
-    interpolated_array[:, 0, 0, 0, 0] = new_x_values  # new x values
-    interpolated_array[:, 0, 0, 1, 0] = new_y_values  # new y values
+        new_x_values = x1(new_times)
+        new_y_values = y1(new_times)
+
+        # assign the interpolated values to the new array
+        interpolated_array[:, 0, a, 0, 0] = new_x_values  # new x values
+        interpolated_array[:, 0, a, 1, 0] = new_y_values  # new y values
 
     return interpolated_array
 
@@ -496,8 +498,8 @@ def add_amplitude_and_phase_solutions(ampltides, amplitude_phases, phases):
 
     amplitude_final, phase_final = [], []
 
-    for A, A_theta, theta in zip(ampltides, amplitude_phases, phases):
-        complex_amplitude = A * complex(np.cos(A_theta), np.sin(A_theta))
+    for A, theta_A, theta in zip(ampltides, amplitude_phases, phases):
+        complex_amplitude = A * complex(np.cos(theta_A), np.sin(theta_A))
         complex_phase = complex(np.cos(theta), np.sin(theta))  # A is unity
         complex_ = complex_amplitude + complex_phase
 
@@ -505,6 +507,55 @@ def add_amplitude_and_phase_solutions(ampltides, amplitude_phases, phases):
         phase_final.append(np.arctan2(complex_.imag, complex_.real))
 
     return np.array(amplitude_final), np.array(phase_final)
+
+
+def make_new_times(time1, time2):
+    '''Make a new time axis from two others, going from the minimum to the
+    maximum with the smallest time step.
+
+    Args:
+    time1 (list or NumPy array): Times.
+    time2 (list or NumPy array): Other times.
+
+    Returns:
+    New time axis (list).'''
+
+    times = [time1, time2]
+    time_intervals = []
+    for time in times:
+        time_intervals.append((np.max(time) - np.min(time)) / (len(time) - 1))
+
+    max_time = np.max([np.max(time1), np.max(time2)])
+    min_time = np.min([np.min(time1), np.min(time2)])
+    num_of_steps = 1 + (max_time - min_time) / np.min(time_intervals)
+    new_time = np.linspace(min_time, max_time, num_of_steps)
+
+    return new_time
+
+
+def sort_axes(soltab):
+    '''Add a direction axis if there is none and sort the axes
+    into a predefined order.
+
+    Args:
+    soltab (Losoto object): Solution table.
+
+    Returns:
+    Values ordered, with a direction axis included (NumPy array.)
+    Weights ordered, with a direction axis included (NumPy array.)'''
+
+    axes_names = soltab.getAxesNames()
+    if 'dir' not in axes_names:  # add the direction dimension
+            axes_names = ['dir'] + axes_names
+            values = np.expand_dims(soltab.val, 0)
+            weights = np.expand_dims(soltab.weight, 0)
+
+    reordered_values = reorderAxes(values, axes_names,
+                                   ['time', 'freq', 'ant','pol', 'dir'])
+    reordered_weights = reorderAxes(weights, axes_names,
+                                    ['time', 'freq', 'ant','pol', 'dir'])
+
+    return reordered_values, reordered_weights
 
 
 def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25):
@@ -528,12 +579,13 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25):
     h = lh5.h5parm(initial_h5parm)  # from new_h5parm
     initial_phase = h.getSolset('sol000').getSoltab('phase000')
     try:  # h5parms from dir2phasesol have a direction, but in case not
-        dir_initial = initial_phase.dir[:]
+        initial_dir = initial_phase.dir[:]
     except:
-        dir_initial = ['0']  # if it is missing
+        initial_dir = ['0']  # if it is missing
 
-    val_initial = initial_phase.val[:]
-    weight_initial = initial_phase.weight[:]
+    initial_time = incremental_phase.time[:]
+    initial_val = initial_phase.val[:]
+    initial_weight = initial_phase.weight[:]
     h.close()
 
     h = lh5.h5parm(incremental_h5parm)  # from loop3_h5parm
@@ -542,22 +594,35 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25):
     antenna_soltab = h.getSolset('sol000').getAnt().items()  # dict to list
     source_soltab = h.getSolset('sol000').getSou().items()  # dict to list
 
-    pol = incremental_phase.pol[:]
     try:  #  may not contain a direction dimension
         dir = incremental_phase.dir[:]
     except:
         dir = dir_initial  # if none, take it from the other h5
     ant = incremental_phase.ant[:]
-    time = incremental_phase.time[:]
+    incremental_time = incremental_phase.time[:]
     freq = incremental_phase.freq[:]
 
-    val_incremental = incremental_phase.val[:]
-    weight_incremental = incremental_phase.weight[:]
+    incremental_val = incremental_phase.val[:]
+    incremental_weight = incremental_phase.weight[:]
     h.close()
 
     # for comined_h5parm
-    # TODO 10 May 2019
-    # interpolate_time(the_array, the_times, new_times)
+    # make val_initial and val_incremental on the same time axis
+    # first, build the new time axis and order the array
+    new_times = make_new_times(initial_time, incremental_time)
+    initial_sorted_val, initial_sorted_weight = sort_axes(initial_phase)
+    incremental_sorted_val, incremental_sorted_weight = sort_axes(incremental_phase)
+
+    # interpolate the solutions from both h5parms onto this new time axis
+    initial_val_new = interpolate_time(initial_sorted_val, initial_time, new_times)
+    initial_weight_new = interpolate_time(initial_sorted_weight, initial_time, new_times)
+    incremental_val_new = interpolate_time(incremental_sorted_val, incremental_time, new_times)
+    incremental_weight_new = interpolate_time(incremental_sorted_weight, incremental_time, new_times)
+
+    print('RPOGRESS?')
+    print(initial_val_new.shape)
+    print(incremental_val_new.shape)
+
     # add_amplitude_and_phase_solutions(ampltides, amplitude_phases, phases)
     vals = val_initial + val_incremental
     weights = val_initial + weight_incremental
@@ -610,7 +675,7 @@ def main():
                         '--h5parm',
                         required=False,
                         type=str,
-                        default='/data020/scratch/sean/letsgetloopy/M1344+5503.ms_02_c0.h5',
+                        default='/data020/scratch/sean/letsgetloopy/phases.h5',
                         help='hdf5 file')
 
     parser.add_argument('-f',
