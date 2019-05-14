@@ -680,7 +680,7 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         # get list of antennas for the new array
         newest_ant = sorted(list(set(amplitude.ant.tolist() +
                                      amplitude_phases.ant.tolist() +
-                                     all_antennas.tolist())))
+                                     list(all_antennas))))
 
         # add the amplitude/phases to the phases
         default_shape = np.zeroes((len(newest_times), 1, 1, 1))  # time, freq, pol, dir
