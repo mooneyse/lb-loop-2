@@ -761,7 +761,7 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
                           weights=weights)  # creates phase000
 
     if amplitude_h5parm != '':
-        c = solset.makeSoltab('amplitude',
+        d = solset.makeSoltab('amplitude',
                               axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
                               axesVals=[new_times, freq, all_antennas, pol, dir],
                               vals=amp_vals,
@@ -803,7 +803,7 @@ def main():
                         '--h5parm',
                         required=False,
                         type=str,
-                        default='/data020/scratch/sean/letsgetloopy/phases.h5',
+                        default='/data020/scratch/sean/letsgetloopy/test.h5',
                         help='hdf5 file')
 
     parser.add_argument('-f',
@@ -842,23 +842,25 @@ def main():
     cores = args.cores
     directions = args.directions
 
-    # make_blank_mtf(mtf=mtf)
-    #
-    # evaluate_solutions(h5parm=h5parm, mtf=mtf)
-    #
-    # new_h5parms = dir2phasesol_wrapper(mtf=mtf,
-    #                                    ms=ms,
-    #                                    directions=directions,
-    #                                    cores=cores)
-    #
-    # for new_h5parm in new_h5parms:
-    #     apply_h5parm(h5parm=new_h5parm, ms=ms)  # outputs a ms per direction
+    make_blank_mtf(mtf=mtf)
 
-    # loop 3 goes here
+    evaluate_solutions(h5parm=h5parm, mtf=mtf)
+
+    new_h5parms = dir2phasesol_wrapper(mtf=mtf,
+                                       ms=ms,
+                                       directions=directions,
+                                       cores=cores)
+
+    for new_h5parm in new_h5parms:
+        apply_h5parm(h5parm=new_h5parm, ms=ms)  # outputs a ms per direction
+
+    # loop 3 goes here, simulated output
+    loop3_phases = '/data020/scratch/sean/letsgetloopy/phases.h5'
+    loop3_amplitudes = '/data020/scratch/sean/letsgetloopy/amplitudes.h5'
 
     # new_h5parms used as a test
-    update_list(initial_h5parm='/data020/scratch/sean/letsgetloopy/phases.h5', incremental_h5parm='/data020/scratch/sean/letsgetloopy/amplitudes.h5',
-                mtf=mtf, threshold=threshold, amplitude_h5parm='/data020/scratch/sean/letsgetloopy/amplitudes.h5')
+    update_list(initial_h5parm=h5parm, incremental_h5parm=loop3_phases,
+                mtf=mtf, threshold=threshold, amplitude_h5parm=loop3_amplitudes)
 
 
 if __name__ == '__main__':
