@@ -691,7 +691,7 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
 
         summed_values, summed_weights = [], []
 
-        for antenna in range(len(newest_ant)):  # for each antenna in either h5parm
+        for n in range(len(newest_ant)):  # for each antenna in either h5parm
             antenna = newest_ant[n]
             # set empty variables in case there is not data for all antennas
             amp_val_x, amp_val_y, amp_wgt_x, amp_wgt_y = default_shape, default_shape, default_shape, default_shape
