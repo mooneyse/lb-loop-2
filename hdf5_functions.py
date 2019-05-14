@@ -656,21 +656,19 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25):
     vals = np.concatenate(summed_values, axis=2)
     weights = np.concatenate(summed_weights, axis=2)
 
-    combined_h5parm = (os.path.splitext(initial_h5parm)[0] + '-' +
-                       os.path.basename(incremental_h5parm))
-
     freq = np.array([np.mean([initial_freq, incremental_freq])])
     pol = np.array(['XX', 'YY'])
 
+    combined_h5parm = (os.path.splitext(initial_h5parm)[0] + '-' +
+                       os.path.basename(incremental_h5parm))
+
     # write these best phase solutions to the combined_h5parm
     h = lh5.h5parm(combined_h5parm, readonly=False)
-
     table = h.makeSolset()  # creates sol000
-
     solset = h.getSolset('sol000')
     c = solset.makeSoltab('phase',
                           axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                          axesVals=[new_times, freq, ant, pol, dir],
+                          axesVals=[new_times, freq, all_antennas, pol, dir],
                           vals=vals,
                           weights=weights)  # creates phase000
 
