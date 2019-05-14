@@ -374,7 +374,6 @@ def dir2phasesol(mtf, ms='', directions=[]):
                 w = reordered_weights[:, :, s, :, :]  # same order as v
                 v_expanded = np.expand_dims(v, axis=2)
                 w_expanded = np.expand_dims(w, axis=2)
-                # TODO interpolate
                 v_interpolated = interpolate_time(the_array=v_expanded,
                                                   the_times=phase.time[:],
                                                   new_times=new_time)
@@ -585,6 +584,7 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25):
 
     initial_time = initial_phase.time[:]
     initial_freq = initial_phase.freq[:]
+    initial_ant = initial_phase.ant[:]
     initial_val = initial_phase.val[:]
     initial_weight = initial_phase.weight[:]
 
@@ -598,9 +598,9 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25):
         dir = incremental_phase.dir[:]
     except:
         dir = initial_dir  # if none, take it from the other h5
-    ant = incremental_phase.ant[:]
     incremental_time = incremental_phase.time[:]
     incremental_freq = incremental_phase.freq[:]
+    incremental_ant = incremental_phase.ant[:]
     incremental_val = incremental_phase.val[:]
     incremental_weight = incremental_phase.weight[:]
 
@@ -623,10 +623,39 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25):
     # FIRST, CHECK IF THE H5PARMS HAVE AMPLITUDE SOLUTION TABLES AND IF SO, GET THE AMPLITUDE AND
     # PHASES AND MAKE AN ARRAY OF VALUES WHICH ARE THE COMPLEX NUMBERS FOR EACH ARRAY, AND THEN
     # ADD THESE TOGETHER
-
     # add_amplitude_and_phase_solutions(ampltides, amplitude_phases, phases)
-    vals = val_initial + val_incremental
-    weights = val_initial + weight_incremental
+
+    all_antennas = sorted(list(set(initial_ant.tolist() + incremental_ant.tolist())))  # total unique list of antennas
+    default_shape = (len(new_times), 1, 2, 1)
+    summed_values, summed_weights = [], []
+
+    for antenna in all_antennas:  # for each antenna in either h5parm
+        # get values and weights from the first h5parm
+        val1 = np.zeros(default_shape)
+        wgt1 = np.zeros(default_shape)
+        for ant1 in range(len(initial_ant)):
+            if antenna == initial_ant[ant1]:
+                val1 = initial_val_new[:, :, ant1, :, :]
+                wgt1 = initial_weight_new[:, :, ant1, :, :]
+
+        # get values and weights from the second h5parm
+        val2 = np.zeros(default_shape)
+        wgt2 = np.zeros(default_shape)
+        for ant2 in range(len(incremental_ant)):
+            if antenna == incremental_ant[ant2]:
+                val2 = incremental_val_new[:, :, ant2, :, :]
+                wgt2 = incremental_weight_new[:, :, ant2, :, :]
+
+        # ... and add them ...
+        val_new = np.expand_dims(val1 + val2, axis=2)
+        wgt_new = np.expand_dims((wgt1 + wgt2) / 2, axis=2)
+
+        summed_values.append(val_new)
+        summed_weights.append(wgt_new)
+
+    vals = np.concatenate(summed_values, axis=2)
+    weights = np.concatenate(summed_weights, axis=2)
+
     combined_h5parm = (os.path.splitext(initial_h5parm)[0] + '-' +
                        os.path.basename(incremental_h5parm))
 
