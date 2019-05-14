@@ -684,10 +684,10 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
 
         # add the amplitude/phases to the phases
         default_shape = np.zeros((len(newest_times), 1, 1, 1))  # time, freq, pol, dir
-        empty_amp_val = np.zeros((len(newest_times), 1, len(newest_ant), 1, 1))  # time, freq, ant, pol, dir
-        empty_amp_wgt = np.zeros((len(newest_times), 1, len(newest_ant), 1, 1))  # time, freq, ant, pol, dir
-        empty_ph_val = np.zeros((len(newest_times), 1, len(newest_ant), 1, 1))  # time, freq, ant, pol, dir
-        empty_ph_wgt = np.zeros((len(newest_times), 1, len(newest_ant), 1, 1))  # time, freq, ant, pol, dir
+        empty_amp_val = np.zeros((len(newest_times), 1, len(newest_ant), 2, 1))  # time, freq, ant, pol, dir
+        empty_amp_wgt = np.zeros((len(newest_times), 1, len(newest_ant), 2, 1))  # time, freq, ant, pol, dir
+        empty_ph_val = np.zeros((len(newest_times), 1, len(newest_ant), 2, 1))  # time, freq, ant, pol, dir
+        empty_ph_wgt = np.zeros((len(newest_times), 1, len(newest_ant), 2, 1))  # time, freq, ant, pol, dir
 
         summed_values, summed_weights = [], []
 
