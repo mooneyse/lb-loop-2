@@ -760,6 +760,13 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
                           vals=vals,
                           weights=weights)  # creates phase000
 
+    if amplitude_h5parm != '':
+        c = solset.makeSoltab('amplitude',
+                              axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+                              axesVals=[new_times, freq, all_antennas, pol, dir],
+                              vals=amp_vals,
+                              weights=amp_weights)  # creates amplitude000
+
     # copy source and antenna tables into the new h5parm
     source_table = table.obj._f_get_child('source')
     source_table.append(source_soltab)
