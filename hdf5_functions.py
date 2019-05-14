@@ -716,10 +716,10 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
             # get values and weights from the second h5parm
             for ant in range(len(all_antennas)):
                 if antenna == all_antennas[ant]:
-                    ph_val_x = vals[:, 0, ant, 0, 0]
-                    ph_val_y = vals[:, 0, ant, 1, 0]
-                    ph_wgt_x = weights[:, 0, ant, 0, 0]
-                    ph_wgt_y = weights[:, 0, ant, 1, 0]
+                    ph_val_x = ph_val_interp[:, 0, ant, 0, 0]
+                    ph_val_y = ph_val_interp[:, 0, ant, 1, 0]
+                    ph_wgt_x = ph_wgt_interp[:, 0, ant, 0, 0]
+                    ph_wgt_y = ph_wgt_interp[:, 0, ant, 1, 0]
 
             # and add them
             new_amp_val_x, new_ph_val_x = add_amplitude_and_phase_solutions(amp_val_x, amp_ph_val_x, ph_val_x)
