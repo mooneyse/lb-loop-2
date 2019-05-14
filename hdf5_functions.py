@@ -859,8 +859,8 @@ def main():
     loop3_amplitudes = '/data020/scratch/sean/letsgetloopy/amplitudes.h5'
 
     # new_h5parms used as a test
-    # update_list(initial_h5parm=h5parm, incremental_h5parm=loop3_phases,
-    #             mtf=mtf, threshold=threshold, amplitude_h5parm=loop3_amplitudes)
+    update_list(initial_h5parm=h5parm, incremental_h5parm=loop3_phases,
+                mtf=mtf, threshold=threshold, amplitude_h5parm=loop3_amplitudes)
 
 
 if __name__ == '__main__':
