@@ -561,7 +561,8 @@ def sort_axes(soltab):
     return reordered_values, reordered_weights
 
 
-def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25):
+def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
+                amplitude_h5parm=''):
     '''Combine the phase solutions from the initial h5parm and the final
     h5parm. The initial h5parm contains the initial solutions and the final
     h5parm contains the incremental solutions so they need to be added to form
@@ -574,6 +575,8 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25):
     mtf (str): Master text file.
     threshold (float; default = 0.25): Threshold determining goodness passed to
         evaluate_solutions.
+    amplitude_h5parm (str): HDF5 file containing amplitude (and corresponding
+        phase) solutions.
 
     Returns:
     A new h5parm that is a combination of new_h5parm and loop3_h5parm (str).'''
@@ -621,14 +624,7 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25):
     incremental_val_new = interpolate_time(incremental_sorted_val, incremental_time, new_times)
     incremental_weight_new = interpolate_time(incremental_sorted_weight, incremental_time, new_times)
 
-    # BEFORE ADDING WE HAVE TO MAKE SURE OF THE FOLLOWING. THE ANTENNAS ARE IN THE SAME ORDER,
-    # OR MAKE THE NEW ARRAY OF VALUES HAVE ALL ANTENNAS AND WRITE NAN FOR ANTENNAS WHERE THERE IS NO
-    # SOLUTION IN EITHER H5PARM.
-    # FIRST, CHECK IF THE H5PARMS HAVE AMPLITUDE SOLUTION TABLES AND IF SO, GET THE AMPLITUDE AND
-    # PHASES AND MAKE AN ARRAY OF VALUES WHICH ARE THE COMPLEX NUMBERS FOR EACH ARRAY, AND THEN
-    # ADD THESE TOGETHER
-    # add_amplitude_and_phase_solutions(ampltides, amplitude_phases, phases)
-
+    # this protects against the antennas not being in the order in each h5parm
     all_antennas = sorted(list(set(initial_ant.tolist() + incremental_ant.tolist())))  # total unique list of antennas
     default_shape = (len(new_times), 1, 2, 1)
     summed_values, summed_weights = [], []
@@ -650,7 +646,7 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25):
                 val2 = incremental_val_new[:, :, ant2, :, :]
                 wgt2 = incremental_weight_new[:, :, ant2, :, :]
 
-        # ... and add them ...
+        # and add them
         val_new = np.expand_dims(val1 + val2, axis=2)
         wgt_new = np.expand_dims((wgt1 + wgt2) / 2, axis=2)
 
@@ -659,6 +655,94 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25):
 
     vals = np.concatenate(summed_values, axis=2)
     weights = np.concatenate(summed_weights, axis=2)
+
+    # if a h5parm is given with amplitude solutions, add this to our results
+    if amplitude_h5parm != '':
+        a = lh5.h5parm(amplitude_h5parm)
+        amplitude = a.getSolset('sol000').getSoltab('amplitude000')
+        amplitude_phases = a.getSolset('sol000').getSoltab('phase000')
+
+        # get amplitude, amplitude_phases and phases onto a new time axis
+        newest_times = make_new_times(new_times, amplitude.time[:])
+
+        amp_val, amp_wgt = sort_axes(amplitude)  # adds dir and reorders
+        amp_ph_val, amp_ph_wgt = sort_axes(amplitude_phases)
+
+        ph_val_interp = interpolate_time(vals, new_times, newest_times)
+        ph_wgt_interp = interpolate_time(vals, new_times, newest_times)
+
+        amp_val_interp = interpolate_time(amp_val, amplitude.time[:], newest_times)
+        amp_wgt_interp = interpolate_time(amp_wgt, amplitude.time[:], newest_times)
+
+        amp_ph_val_interp = interpolate_time(amp_ph_val, amplitude.time[:], newest_times)
+        amp_ph_wgt_interp = interpolate_time(amp_ph_wgt, amplitude.time[:], newest_times)
+
+        # get list of antennas for the new array
+        newest_ant = sorted(list(set(amplitude.ant.tolist() +
+                                     amplitude_phases.ant.tolist() +
+                                     all_antennas.tolist())))
+
+        # add the amplitude/phases to the phases
+        default_shape = np.zeroes((len(newest_times), 1, 1, 1))  # time, freq, pol, dir
+        empty_amp_val = np.zeroes((len(newest_times), 1, len(newest_ant), 1, 1))  # time, freq, ant, pol, dir
+        empty_amp_wgt = np.zeroes((len(newest_times), 1, len(newest_ant), 1, 1))  # time, freq, ant, pol, dir
+        empty_ph_val = np.zeroes((len(newest_times), 1, len(newest_ant), 1, 1))  # time, freq, ant, pol, dir
+        empty_ph_wgt = np.zeroes((len(newest_times), 1, len(newest_ant), 1, 1))  # time, freq, ant, pol, dir
+
+        summed_values, summed_weights = [], []
+
+        for antenna in range(len(newest_ant)):  # for each antenna in either h5parm
+            antenna = newest_ant[n]
+            # set empty variables in case there is not data for all antennas
+            amp_val_x, amp_val_y, amp_wgt_x, amp_wgt_y = default_shape, default_shape, default_shape, default_shape
+            amp_ph_val_x, amp_ph_val_y, amp_ph_wgt_x, amp_ph_wgt_y = default_shape, default_shape, default_shape, default_shape
+            ph_val_x, ph_val_y, ph_wgt_x, ph_wgt_y = default_shape, default_shape, default_shape, default_shape
+
+            # get values and weights from the first h5parm
+            for ant in range(len(amplitude.ant)):
+                if antenna == amplitude.ant[ant]:
+                    amp_val_x = amp_val_interp[:, 0, ant, 0, 0]
+                    amp_val_y = amp_val_interp[:, 0, ant, 1, 0]
+                    amp_wgt_x = amp_wgt_interp[:, 0, ant, 0, 0]
+                    amp_wgt_y = amp_wgt_interp[:, 0, ant, 1, 0]
+
+            for ant in range(len(amplitude_phases.ant)):
+                if antenna == amplitude_phases.ant[ant]:
+                    amp_ph_val_x = amp_ph_val_interp[:, 0, ant, 0, 0]
+                    amp_ph_val_y = amp_ph_val_interp[:, 0, ant, 1, 0]
+                    amp_ph_wgt_x = amp_ph_wgt_interp[:, 0, ant, 0, 0]
+                    amp_ph_wgt_y = amp_ph_wgt_interp[:, 0, ant, 1, 0]
+
+            # get values and weights from the second h5parm
+            for ant in range(len(all_antennas)):
+                if antenna == all_antennas[ant]:
+                    ph_val_x = vals[:, 0, ant, 0, 0]
+                    ph_val_y = vals[:, 0, ant, 1, 0]
+                    ph_wgt_x = weights[:, 0, ant, 0, 0]
+                    ph_wgt_y = weights[:, 0, ant, 1, 0]
+
+            # and add them
+            new_amp_val_x, new_ph_val_x = add_amplitude_and_phase_solutions(amp_val_x, amp_ph_val_x, ph_val_x)
+            new_amp_val_y, new_ph_val_y = add_amplitude_and_phase_solutions(amp_val_y, amp_ph_val_y, ph_val_y)
+            new_amp_wgt_x, new_ph_wgt_x = (amp_wgt_x + ph_wgt_x) / 2, (amp_ph_wgt_x + ph_wgt_x) / 2
+            new_amp_wgt_y, new_ph_wgt_y = (amp_wgt_y + ph_wgt_y) / 2, (amp_ph_wgt_y + ph_wgt_y) / 2
+
+            empty_amp_val[:, 0, ant, 0, 0] = new_amp_val_x
+            empty_amp_val[:, 0, ant, 1, 0] = new_amp_val_y
+            empty_amp_wgt[:, 0, ant, 0, 0] = new_amp_wgt_x
+            empty_amp_wgt[:, 0, ant, 1, 0] = new_amp_wgt_y
+            empty_ph_val[:, 0, ant, 0, 0] = new_ph_val_x
+            empty_ph_val[:, 0, ant, 1, 0] = new_ph_val_y
+            empty_ph_wgt[:, 0, ant, 0, 0] = new_ph_wgt_x
+            empty_ph_wgt[:, 0, ant, 1, 0] = new_ph_wgt_y
+
+        amp_vals = empty_amp_val
+        amp_weights = empty_amp_wgt
+        vals = empty_ph_val
+        weights = empty_ph_wgt
+        new_times = newest_times  # redefining these so the phase makeSoltab works correctly regardless
+        all_antennas = newest_ant
+        a.close()
 
     freq = np.array([np.mean([initial_freq, incremental_freq])])
     pol = np.array(['XX', 'YY'])
@@ -767,7 +851,7 @@ def main():
 
     # new_h5parms used as a test
     update_list(initial_h5parm='/data020/scratch/sean/letsgetloopy/phases.h5', incremental_h5parm='/data020/scratch/sean/letsgetloopy/amplitudes.h5',
-                mtf=mtf, threshold=threshold)
+                mtf=mtf, threshold=threshold, amplitude_h5parm='/data020/scratch/sean/letsgetloopy/amplitudes.h5')
 
 
 if __name__ == '__main__':
