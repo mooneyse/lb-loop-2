@@ -39,7 +39,19 @@ def make_blank_mtf(mtf):
                   ' RS406HBA, RS407HBA, RS409HBA, RS410HBA, RS503HBA, '
                   'RS508HBA, RS509HBA, DE601HBA, DE602HBA, DE603HBA, DE604HBA,'
                   ' DE605HBA, FR606HBA, SE607HBA, UK608HBA, DE609HBA, '
-                  'PL610HBA, PL611HBA, PL612HBA, IE613HBA\n')
+                  'PL610HBA, PL611HBA, PL612HBA, IE613HBA'
+                  'CS001HBA0, CS001HBA1, CS002HBA0, CS002HBA1, '
+                  'CS003HBA0, CS003HBA1, CS004HBA0, CS004HBA1, '
+                  'CS005HBA0, CS005HBA1, CS006HBA0, CS006HBA1, '
+                  'CS007HBA0, CS007HBA1, CS011HBA0, CS011HBA1, '
+                  'CS013HBA0, CS013HBA1, CS017HBA0, CS017HBA1, '
+                  'CS021HBA0, CS021HBA1, CS024HBA0, CS024HBA1, '
+                  'CS026HBA0, CS026HBA1, CS028HBA0, CS028HBA1, '
+                  'CS030HBA0, CS030HBA1, CS031HBA0, CS031HBA1, '
+                  'CS032HBA0, CS032HBA1, CS101HBA0, CS101HBA1, '
+                  'CS103HBA0, CS103HBA1, CS201HBA0, CS201HBA1, '
+                  'CS301HBA0, CS301HBA1, CS302HBA0, CS302HBA1, '
+                  'CS401HBA0, CS401HBA1, CS501HBA0, CS501HBA1\n')
     if not os.path.isfile(mtf):  # if it does not already exist
         with open(mtf, 'w+') as the_file:
             the_file.write(mtf_header)
