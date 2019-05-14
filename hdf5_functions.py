@@ -82,7 +82,8 @@ def coherence_metric(xx, yy):
     try:
         xx, yy = interpolate_nan(xx), interpolate_nan(yy)
     except:
-        return np.nan
+        return np.nan  # if the values are all nan, they cannot be interpolated
+                       # so return a coherence value of nan also
 
     return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
 
