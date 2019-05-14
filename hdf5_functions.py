@@ -79,7 +79,10 @@ def coherence_metric(xx, yy):
     Returns:
     The coherence metric. (float)'''
 
-    xx, yy = interpolate_nan(xx), interpolate_nan(yy)
+    try:
+        xx, yy = interpolate_nan(xx), interpolate_nan(yy)
+    except:
+        return np.nan
 
     return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
 
