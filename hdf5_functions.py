@@ -240,6 +240,74 @@ def dir2phasesol_multiprocessing(args):
     return dir2phasesol(mtf=mtf, ms=ms, directions=directions)
 
 
+def build_soltab(soltab, working_data):
+    '''Creates a solution table from many h5parms using data from the temporary
+    working file.
+
+    Args:
+    soltab (str): The name of the solution table to copy solutions from.
+    working_data (NumPy array): Data providing the list of good and bad
+        stations, which was taken from the temporary working file, and the
+        goodness relates to the coherence metric on the phase solutions.
+
+    Returns:
+    Values to populate the solution table (NumPy array).
+    Weights to populate the solution table (NumPy array).
+    Time axis to populate the solution table (NumPy array).
+    Frequency axis to populate the solution table (NumPy array).
+    Antenna axis to populate the solution table (NumPy array).'''
+
+    for my_line in range(len(working_data)):  # one line per station
+        my_station = working_data[my_line][0]
+        my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
+        lo = lh5.h5parm(my_h5parm, readonly=False)
+        tab = lo.getSolset('sol000').getSoltab(soltab + '000')
+        time_mins.append(np.min(tab.time[:]))
+        time_maxs.append(np.max(tab.time[:]))
+        time_intervals.append((np.max(tab.time[:]) - np.min(tab.time[:])) / (len(tab.time[:]) - 1))
+        frequencies.append(tab.freq[:])
+        lo.close()
+
+    # the time ranges from the lowest to the highest on the smallest interval
+    num_of_steps = 1 + ((np.max(time_maxs) - np.min(time_mins)) / np.min(time_intervals))
+    new_time = np.linspace(np.min(time_mins), np.max(time_maxs), num_of_steps)
+
+    # looping through the h5parms to get the solutions for the good stations
+    for my_line in range(len(working_data)):  # one line per station
+        my_station = working_data[my_line][0]
+        my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
+        lo = lh5.h5parm(my_h5parm, readonly=False)
+        tab = lo.getSolset('sol000').getSoltab(soltab + '000')
+        axes_names = tab.getAxesNames()
+        values = tab.val
+        weights = tab.weight
+
+        if 'dir' not in axes_names:  # add the direction dimension
+            axes_names = ['dir'] + axes_names
+            values = np.expand_dims(tab.val, 0)
+            weights = np.expand_dims(tab.weight, 0)
+
+        reordered_values = reorderAxes(values, axes_names, ['time', 'freq', 'ant', 'pol', 'dir'])
+        reordered_weights = reorderAxes(weights, axes_names, ['time', 'freq', 'ant', 'pol', 'dir'])
+
+        for s in range(len(tab.ant[:])):  # stations
+            if tab.ant[s] == my_station.strip():
+                v = reordered_values[:, :, s, :, :]  # time, freq, ant, pol, dir
+                w = reordered_weights[:, :, s, :, :]
+                v_expanded = np.expand_dims(v, axis=2)
+                w_expanded = np.expand_dims(w, axis=2)
+                v_interpolated = interpolate_time(the_array=v_expanded, the_times=tab.time[:], new_times=new_time)
+                w_interpolated = interpolate_time(the_array=w_expanded, the_times=tab.time[:], new_times=new_time)
+                val.append(v_interpolated)
+                weight.append(w_interpolated)
+        lo.close()
+
+    vals = np.concatenate(val, axis=2)
+    weights = np.concatenate(weight, axis=2)
+
+    return vals, weights, new_time, [np.average(frequencies)], successful_stations
+
+
 def dir2phasesol(mtf, ms='', directions=[]):
     '''Get the directions of the h5parms from the master text file. Calculate
     the separation between a list of given directions and the h5parm
@@ -353,7 +421,6 @@ def dir2phasesol(mtf, ms='', directions=[]):
         frequencies.append(phase.freq[:])
         lo.close()
 
-    # properties of the new h5parm
     # the time ranges from the lowest to the highest on the smallest interval
     num_of_steps = 1 + ((np.max(time_maxs) - np.min(time_mins)) /
                         np.min(time_intervals))
@@ -399,15 +466,13 @@ def dir2phasesol(mtf, ms='', directions=[]):
                 val.append(v_interpolated)
                 weight.append(w_interpolated)
 
-        frequencies.append(phase.freq[:])
         lo.close()
 
     # properties of the new h5parm
-    # the time ranges from the lowest to the highest on the smallest interval
     freq = [np.average(frequencies)]  # all items in the list should be equal
     ant = successful_stations  # antennas that will be in the new h5parm
     pol = ['XX', 'YY']  # as standard
-    dir = [str(directions.ra.rad) + ', ' + str(directions.dec.rad)]  # given
+    dir_ = [str(directions.ra.rad) + ', ' + str(directions.dec.rad)]  # given
 
     vals = np.concatenate(val, axis=2)
     weights = np.concatenate(weight, axis=2)
@@ -415,9 +480,30 @@ def dir2phasesol(mtf, ms='', directions=[]):
     # write these best phase solutions to the new h5parm
     c = solset.makeSoltab('phase',
                           axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                          axesVals=[new_time, freq, ant, pol, dir],
+                          axesVals=[new_time, freq, ant, pol, dir_],
                           vals=vals,
                           weights=weights)  # creates phase000
+
+    # WARNING the tec and amplitude soltab functionality has not been tested
+    try:
+        vals, weights, time, freq, ant = build_soltab(soltab='tec', working_data=working_data)
+        c = solset.makeSoltab('tec',
+                              axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+                              axesVals=[time, freq, ant, pol, dir_],
+                              vals=vals,
+                              weights=weights)  # creates tec000
+    except:
+        pass
+
+    try:
+        vals, weights, time, freq = build_soltab(soltab='amplitude', working_data=working_data)
+        c = solset.makeSoltab('amplitude',
+                              axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+                              axesVals=[time, freq, ant, pol, dir_],
+                              vals=vals,
+                              weights=weights)  # creates amplitude000
+    except:
+        pass
 
     # copy source and antenna tables into the new h5parm
     source_soltab = {'POINTING':
@@ -676,9 +762,9 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
     source_soltab = g.getSolset('sol000').getSou().items()  # dict to list
 
     try:  #  may not contain a direction dimension
-        dir = incremental_phase.dir[:]
+        dir_ = incremental_phase.dir[:]
     except:
-        dir = initial_dir  # if none, take it from the other h5
+        dir_ = initial_dir  # if none, take it from the other h5
     incremental_time = incremental_phase.time[:]
     incremental_freq = incremental_phase.freq[:]
     incremental_ant = incremental_phase.ant[:]
@@ -832,14 +918,14 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
     solset = h.getSolset('sol000')
     c = solset.makeSoltab('phase',
                           axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                          axesVals=[new_times, freq, all_antennas, pol, dir],
+                          axesVals=[new_times, freq, all_antennas, pol, dir_],
                           vals=vals,
                           weights=weights)  # creates phase000
 
     if amplitude_h5parm != '':
         d = solset.makeSoltab('amplitude',
                               axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                              axesVals=[new_times, freq, all_antennas, pol, dir],
+                              axesVals=[new_times, freq, all_antennas, pol, dir_],
                               vals=amp_vals,
                               weights=amp_weights)  # creates amplitude000
 
