@@ -423,9 +423,59 @@ def dir2phasesol(mtf, ms='', directions=[]):
     source_soltab = {'POINTING':
                      np.array([directions.ra.rad, directions.dec.rad],
                               dtype='float32')}
-    # the X, Y, Z coordinates of the stations sould be in these arrays
-    antenna_soltab = {'ST001': np.array([0, 0, 0], dtype='float32'),
-                      'RS106HBA': np.array([0, 0, 0], dtype='float32'),
+    # the x, y, z coordinates of the stations should be in these arrays
+    tied = {'ST001': np.array([0, 0, 0], dtype='float32')}
+
+    core = {'CS001HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS001HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS002HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS002HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS003HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS003HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS004HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS004HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS005HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS005HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS006HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS006HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS007HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS007HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS011HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS011HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS013HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS013HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS017HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS017HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS021HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS021HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS024HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS024HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS026HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS026HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS028HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS028HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS030HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS030HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS031HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS031HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS032HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS032HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS101HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS101HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS103HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS103HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS201HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS201HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS301HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS301HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS302HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS302HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS401HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS401HBA1': np.array([0, 0, 0], dtype='float32'),
+            'CS501HBA0': np.array([0, 0, 0], dtype='float32'),
+            'CS501HBA1': np.array([0, 0, 0], dtype='float32')}
+
+    antenna_soltab = {'RS106HBA': np.array([0, 0, 0], dtype='float32'),
                       'RS205HBA': np.array([0, 0, 0], dtype='float32'),
                       'RS208HBA': np.array([0, 0, 0], dtype='float32'),
                       'RS210HBA': np.array([0, 0, 0], dtype='float32'),
@@ -454,6 +504,13 @@ def dir2phasesol(mtf, ms='', directions=[]):
                       'PL611HBA': np.array([0, 0, 0], dtype='float32'),
                       'PL612HBA': np.array([0, 0, 0], dtype='float32'),
                       'IE613HBA': np.array([0, 0, 0], dtype='float32')}
+
+    for a in ant:
+        if a[:2] == 'ST':
+            antenna_soltab.update(tied)  # there is only be one tied station
+        if a[:2] == 'CS':
+            antenna_soltab.update(core)
+            break  # only add the core stations to the antenna table once
 
     source_table = table.obj._f_get_child('source')
     source_table.append(source_soltab.items())  # from dictionary to list
