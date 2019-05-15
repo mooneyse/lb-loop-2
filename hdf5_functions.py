@@ -570,6 +570,11 @@ def add_amplitude_and_phase_solutions(ampltides, amplitude_phases, phases):
 
     amplitude_final, phase_final = [], []
 
+    # convert nan to zero, otherwise nan + X = nan, not X
+    ampltides = np.nan_to_num(ampltides)
+    amplitude_phases = np.nan_to_num(amplitude_phases)
+    phases = np.nan_to_num(phases)
+
     for A, theta_A, theta in zip(ampltides, amplitude_phases, phases):
         complex_amplitude = A * complex(np.cos(theta_A), np.sin(theta_A))
         complex_phase = complex(np.cos(theta), np.sin(theta))  # A is unity
@@ -715,9 +720,9 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
                 val2 = incremental_val_new[:, :, ant2, :, :]
                 wgt2 = incremental_weight_new[:, :, ant2, :, :]
 
-        # and add them
-        val_new = np.expand_dims(val1 + val2, axis=2)
-        wgt_new = np.expand_dims((wgt1 + wgt2) / 2, axis=2)
+        # and add them, converting nan to zero
+        val_new = np.expand_dims(np.nan_to_num(val1) + np.nan_to_num(val2), axis=2)
+        wgt_new = np.expand_dims((np.nan_to_num(wgt1) + np.nan_to_num(wgt2)) / 2, axis=2)
 
         summed_values.append(val_new)
         summed_weights.append(wgt_new)
@@ -793,8 +798,10 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
             # and add them
             new_amp_val_x, new_ph_val_x = add_amplitude_and_phase_solutions(amp_val_x, amp_ph_val_x, ph_val_x)
             new_amp_val_y, new_ph_val_y = add_amplitude_and_phase_solutions(amp_val_y, amp_ph_val_y, ph_val_y)
-            new_amp_wgt_x, new_ph_wgt_x = (amp_wgt_x + ph_wgt_x) / 2, (amp_ph_wgt_x + ph_wgt_x) / 2
-            new_amp_wgt_y, new_ph_wgt_y = (amp_wgt_y + ph_wgt_y) / 2, (amp_ph_wgt_y + ph_wgt_y) / 2
+            new_amp_wgt_x = (np.nan_to_num(amp_wgt_x) + np.nan_to_num(ph_wgt_x)) / 2
+            new_ph_wgt_x = (np.nan_to_num(amp_ph_wgt_x) + np.nan_to_num(ph_wgt_x)) / 2
+            new_amp_wgt_y = (np.nan_to_num(amp_wgt_y) + np.nan_to_num(ph_wgt_y)) / 2
+            new_ph_wgt_y = (np.nan_to_num(amp_ph_wgt_y) + np.nan_to_num(ph_wgt_y)) / 2
 
             empty_amp_val[:, 0, ant, 0, 0] = new_amp_val_x
             empty_amp_val[:, 0, ant, 1, 0] = new_amp_val_y
