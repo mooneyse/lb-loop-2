@@ -367,6 +367,20 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     for mtf_station in mtf_stations:  # for each station
         for key in sorted(mtf_directions.keys()):  # shortest separation first
+            # TODO if there are multiple h5parms for one direction (which will
+            #      be the case after the ms has been through loop 3 and the
+            #      update_list function) then the best solutions will be at the
+            #      bottom; however, here they will still both have the same
+            #      direction and could be good solutions, getting a 1 in the
+            #      mtf, but one solution table is better than another in reality
+            #      and we need a way to distinguish this - it could involve
+            #      changing the mtf to write the XX-YY statistic if the value is
+            #      above the threshold, and zero otherwise, and checking to see
+            #      which hdf5 has a higher value if it is the case that both
+            #      directions are the same (or better, if the separation is
+            #      equal, to cover this happening by chance with another hdf5
+            #      with an equal separation but in a different direction)
+
             h5parm = mtf_directions[key]
 
             # this try/except block is necessary because otherwise this function
