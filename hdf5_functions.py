@@ -25,8 +25,8 @@ __author__ = 'Sean Mooney'
 __date__ = '01 May 2019'
 
 def make_blank_mtf(mtf):
-    '''Create an empty master text file containing all of the LOFAR remote and
-    international stations, and ST001.
+    '''Create an empty master text file containing all of the LOFAR core,
+    remote, and international stations, and ST001.
 
     Args:
     mtf (str): The master text file to be created.
@@ -109,7 +109,7 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
     Args:
     h5parm (str): LOFAR HDF5 parameter file.
     mtf (str): Master text file.
-    threshold (float; default = 0.25): threshold to determine the goodness of
+    threshold (float; default=0.25): threshold to determine the goodness of
         the coherence metric.
 
     Returns:
@@ -317,8 +317,9 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     Args:
     mtf (str): Master text file with list of h5parms.
-    ms (str): Measurement set to be self-calibrated.
-    directions (list; default = []): RA, Dec of one source in radians.
+    ms (str; default=''): Measurement set to be self-calibrated.
+    directions (list; default=[]): Right ascension and declination of one
+        source in radians.
 
     Returns:
     The new h5parm to be applied to the measurement set. (str)'''
@@ -406,7 +407,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
     frequencies = []
 
     # looping through the h5parms that will be used in the new h5parm to find
-    # the shortest time interval of all h5parms being copied
+    # the shortest time interval of all h5parms being copied, and the longest
+    # time span
     for my_line in range(len(working_data)):  # one line per station
         my_station = working_data[my_line][0]
         my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
@@ -426,8 +428,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
                         np.min(time_intervals))
     new_time = np.linspace(np.min(time_mins), np.max(time_maxs), num_of_steps)
 
-    # looping through the h5parms to get the solutions for the good stations
-    # needed to build the new h5parm
+    # looping through the h5parms again to get the solutions for the good
+    # stations needed to build the new h5parm
     for my_line in range(len(working_data)):  # one line per station
         my_station = working_data[my_line][0]
         my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
@@ -593,7 +595,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     for a in ant:
         if a[:2] == 'ST':
-            antenna_soltab.update(tied)  # there is only be one tied station
+            antenna_soltab.update(tied)  # there will only be the tied station
         if a[:2] == 'CS':
             antenna_soltab.update(core)
             break  # only add the core stations to the antenna table once
@@ -733,7 +735,7 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
     new_h5parm (str): The initial h5parm (i.e. from dir2phasesol).
     loop3_h5parm (str): The final h5parm from loop 3.
     mtf (str): Master text file.
-    threshold (float; default = 0.25): Threshold determining goodness passed to
+    threshold (float; default=0.25): Threshold determining goodness passed to
         evaluate_solutions.
     amplitude_h5parm (str): HDF5 file containing amplitude (and corresponding
         phase) solutions.
