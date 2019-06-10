@@ -1050,17 +1050,16 @@ def main():
 
     # TODO the directions could be read from the ms in this case
 
-    # TODO the below lines work when multiple directions are given but fails
-    #      otherwise
     # new_h5parms = dir2phasesol_wrapper(mtf=mtf,
     #                                    ms=ms,
     #                                    directions=directions,
     #                                    cores=cores)
+
+    new_h5parm = dir2phasesol(mtf=mtf, ms=ms, directions=directions)
+
     # for new_h5parm in new_h5parms:
     #     apply_h5parm(h5parm=new_h5parm, ms=ms)  # outputs an ms per direction
 
-    new_h5parm = dir2phasesol(mtf=mtf, ms=ms, directions=directions)
-    apply_h5parm(h5parm=new_h5parm, ms=ms)
 
     # # loop 3
     # run_loop_3 = 'python /data020/scratch/sean/run1/git/long_baseline_pipeline/bin/loop3B_v1.py ' + ms
