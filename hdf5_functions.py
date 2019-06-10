@@ -100,7 +100,8 @@ def coherence_metric(xx, yy):
     print(type(xx), type(yy))
     asdf = abs(np.unwrap(xx - yy))
     print(type(asdf))
-    print(asdf)
+    print(asdf.shape)
+    print(np.gradient(asdf))
     return np.nanmean(np.gradient(asdf) ** 2)
 
 
