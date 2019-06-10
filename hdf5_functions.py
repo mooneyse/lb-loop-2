@@ -132,7 +132,10 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
     for station in stations:
         xx = temporary['XX_' + station]
         yy = temporary['YY_' + station]
-        print('TESTING', xx)
+        # TODO the first error arises here, because the h5parm has three
+        #      axes and it was assumed that it would have only one, so for now
+        #      as a HACK to get things moving, we'll take just the first axis
+        print(xx.shape, 'TESTING!!!!')
         evaluations[station] = coherence_metric(xx, yy)  # 0 = best
 
     with open(mtf) as f:
