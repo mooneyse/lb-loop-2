@@ -522,7 +522,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
         vals, weights, time, freq, ant = build_soltab(soltab='tec', working_data=working_data)
         c = solset.makeSoltab('tec',
                               axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                              axesVals=[time, freq, ant, pol, dir_],
+                              axesVals=[time, frequencies, ant, pol, dir_],
                               vals=vals,
                               weights=weights)  # creates tec000
     except:
