@@ -20,6 +20,7 @@ import csv
 import datetime
 import os
 import subprocess
+import uuid
 
 __author__ = 'Sean Mooney'
 __date__ = '01 May 2019'
@@ -637,14 +638,14 @@ def dir2phasesol(mtf, ms='', directions=[]):
     return new_h5parm
 
 
-def apply_h5parm(h5parm, ms, column_out='CORRECTED_DATA'):
+def apply_h5parm(h5parm, ms, column_out='DATA'):
     '''Creates an NDPPP parset. Applies the output of make_h5parm to the
     measurement set.
 
     Args:
     new_h5parm (str): The output of dir2phasesol.
     ms (str): The measurement set for self-calibration.
-    column_out (str; default = 'CORRECTED_DATA'): The column NDPPP writes to.
+    column_out (str; default = 'DATA'): The column NDPPP writes to.
 
     Returns:
     None.'''
@@ -658,7 +659,7 @@ def apply_h5parm(h5parm, ms, column_out='CORRECTED_DATA'):
         f.write('# created by apply_h5parm at {}\n'.format(now))
         f.write('msin                = {}\n'.format(ms))
         f.write('msin.datacolumn     = {}\n'.format(column_in))
-        f.write('msout               = {}\n'.format(ms))
+        f.write('msout               = {}-{}\n'.format(uuid.uuid4(), ms))
         f.write('msout.datacolumn    = {}\n'.format(column_out))
         f.write('steps               = [applycal]\n')
         f.write('applycal.type       = applycal\n')
@@ -1049,14 +1050,18 @@ def main():
 
     # TODO the directions could be read from the ms in this case
 
-    new_h5parms = dir2phasesol_wrapper(mtf=mtf,
-                                       ms=ms,
-                                       directions=directions,
-                                       cores=cores)
-
+    # TODO the below lines work when multiple directions are given but fails
+    #      otherwise
+    # new_h5parms = dir2phasesol_wrapper(mtf=mtf,
+    #                                    ms=ms,
+    #                                    directions=directions,
+    #                                    cores=cores)
     # for new_h5parm in new_h5parms:
     #     apply_h5parm(h5parm=new_h5parm, ms=ms)  # outputs an ms per direction
-    #
+
+    new_h5parm = dir2phasesol(mtf=mtf, ms=ms, directions=directions)
+    apply_h5parm(h5parm=new_h5parm, ms=ms)
+
     # # loop 3
     # run_loop_3 = 'python /data020/scratch/sean/run1/git/long_baseline_pipeline/bin/loop3B_v1.py ' + ms
     # os.system(run_loop_3)
