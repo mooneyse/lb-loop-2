@@ -652,7 +652,7 @@ def apply_h5parm(h5parm, ms, column_out='CORRECTED_DATA'):
         f.write('applycal.correction = phase000\n')
     f.close()
 
-    ndppp_output = subprocess.check_output(['NDPPP', '--help'])  # NOTE update
+    ndppp_output = subprocess.check_output(['NDPPP', parset])
     os.remove(parset)
 
 
@@ -978,17 +978,24 @@ def main():
                         help='master text file')
 
     parser.add_argument('-p',
-                        '--h5parm',
+                        '--h5parm0',
                         required=False,
                         type=str,
-                        default='/data020/scratch/sean/letsgetloopy/test.h5',
-                        help='hdf5 file')
+                        default='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_02_c0.h5',
+                        help='one hdf5 file')
+
+    parser.add_argument('-P',
+                        '--h5parm1',
+                        required=False,
+                        type=str,
+                        default='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_00_c0.h5',
+                        help='another hdf5 file')
 
     parser.add_argument('-f',
                         '--ms',
                         required=False,
                         type=str,
-                        default='/data020/scratch/sean/letsgetloopy/L693725_SB256_uv.ndppp_prep_target',
+                        default='/data020/scratch/sean/letsgetloopy/SILTJ135044.06+544752.7_L693725_phasecal.MS',
                         help='measurement set')
 
     parser.add_argument('-t',
@@ -1008,13 +1015,14 @@ def main():
     parser.add_argument('-d',
                         '--directions',
                         type=float,
-                        default=[0.226893, 0.9512044, 0.244346, 0.9686577],
+                        default=[-2.7043, 0.958154], # 0.226893, 0.9512044, 0.244346, 0.9686577
                         nargs='+',
                         help='source positions (radians; RA DEC RA DEC...)')
 
     args = parser.parse_args()
     mtf = args.mtf
-    h5parm = args.h5parm
+    h5parm0 = args.h5parm0
+    h5parm1 = args.h5parm1
     ms = args.ms
     threshold = args.threshold
     cores = args.cores
@@ -1022,23 +1030,26 @@ def main():
 
     make_blank_mtf(mtf=mtf)
 
-    evaluate_solutions(h5parm=h5parm, mtf=mtf)
+    evaluate_solutions(h5parm=h5parm0, mtf=mtf)
+    evaluate_solutions(h5parm=h5parm1, mtf=mtf)
+
+    # TODO the directions could be read from the ms in this case
 
     new_h5parms = dir2phasesol_wrapper(mtf=mtf,
                                        ms=ms,
                                        directions=directions,
                                        cores=cores)
 
-    for new_h5parm in new_h5parms:
-        apply_h5parm(h5parm=new_h5parm, ms=ms)  # outputs a ms per direction
-
-    # loop 3 goes here, simulated output
-    loop3_phases = '/data020/scratch/sean/letsgetloopy/phases.h5'
-    loop3_amplitudes = '/data020/scratch/sean/letsgetloopy/amplitudes.h5'
-
-    # new_h5parms used as a test
-    update_list(initial_h5parm=h5parm, incremental_h5parm=loop3_phases,
-                mtf=mtf, threshold=threshold, amplitude_h5parm=loop3_amplitudes)
+    # for new_h5parm in new_h5parms:
+    #     apply_h5parm(h5parm=new_h5parm, ms=ms)  # outputs an ms per direction
+    #
+    # # loop 3
+    # run_loop_3 = 'python /data020/scratch/sean/run1/git/long_baseline_pipeline/bin/loop3B_v1.py ' + ms
+    # os.system(run_loop_3)
+    #
+    # # new_h5parms used as a test
+    # update_list(initial_h5parm=h5parm, incremental_h5parm=loop3_phases,
+    #             mtf=mtf, threshold=threshold, amplitude_h5parm=loop3_amplitudes)
 
 
 if __name__ == '__main__':
