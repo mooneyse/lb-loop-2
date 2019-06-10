@@ -513,7 +513,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     print('value shape:', vals.shape, weights.shape, freq, frequencies)
     c = solset.makeSoltab('phase',
                           axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                          axesVals=[new_time, freq, ant, pol, dir_],
+                          axesVals=[new_time, frequencies, ant, pol, dir_],
                           vals=vals,
                           weights=weights)  # creates phase000
 
