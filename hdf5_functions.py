@@ -657,12 +657,13 @@ def apply_h5parm(h5parm, ms, column_out='DATA'):
     parset = os.path.dirname(h5parm) + '/applyh5parm.parset'
     column_in = 'DATA'
     now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    msout =  ms + '-' + str(uuid.uuid4()) + '.MS'
 
     with open(parset, 'w') as f:  # create the parset
         f.write('# created by apply_h5parm at {}\n'.format(now))
         f.write('msin                = {}\n'.format(ms))
         f.write('msin.datacolumn     = {}\n'.format(column_in))
-        f.write('msout               = {}-{}.MS\n'.format(ms, uuid.uuid4()))
+        f.write('msout               = {}\n'.format(msout))
         f.write('msout.datacolumn    = {}\n'.format(column_out))
         f.write('steps               = [applycal]\n')
         f.write('applycal.type       = applycal\n')
@@ -672,6 +673,7 @@ def apply_h5parm(h5parm, ms, column_out='DATA'):
 
     ndppp_output = subprocess.check_output(['NDPPP', parset])
     os.remove(parset)
+    return msout
 
 
 def add_amplitude_and_phase_solutions(ampltides, amplitude_phases, phases):
@@ -1052,23 +1054,19 @@ def main():
     evaluate_solutions(h5parm=h5parm1, mtf=mtf)
 
     # TODO the directions could be read from the ms in this case
-
     new_h5parms = dir2phasesol_wrapper(mtf=mtf,
                                        ms=ms,
                                        directions=directions,
                                        cores=cores)
 
-    # new_h5parm = dir2phasesol(mtf=mtf, ms=ms, directions=directions)
-
+    msouts = []
     for new_h5parm in new_h5parms:
-        apply_h5parm(h5parm=new_h5parm, ms=ms)  # outputs an ms per direction
+        msouts.append(apply_h5parm(h5parm=new_h5parm, ms=ms))  # outputs an ms per direction
 
+    for msout in msouts:  # loop 3
+        run_loop_3 = 'python /data020/scratch/sean/run1/git/long_baseline_pipeline/bin/loop3B_v1.py ' + msout
+        os.system(run_loop_3)
 
-    # # loop 3
-    # run_loop_3 = 'python /data020/scratch/sean/run1/git/long_baseline_pipeline/bin/loop3B_v1.py ' + ms
-    # os.system(run_loop_3)
-    #
-    # # new_h5parms used as a test
     # update_list(initial_h5parm=h5parm, incremental_h5parm=loop3_phases,
     #             mtf=mtf, threshold=threshold, amplitude_h5parm=loop3_amplitudes)
 
