@@ -96,13 +96,8 @@ def coherence_metric(xx, yy):
     except:
         return np.nan  # if the values are all nan, they cannot be interpolated
                        # so return a coherence value of nan also
-    print('TESTING IS HAPPENING...')
-    print(type(xx), type(yy))
-    asdf = abs(np.unwrap(xx - yy))
-    print(type(asdf))
-    print(asdf.shape)
-    print(np.gradient(asdf))
-    return np.nanmean(np.gradient(asdf) ** 2)
+
+    return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
 
 
 def evaluate_solutions(h5parm, mtf, threshold=0.25):
@@ -137,6 +132,7 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
     for station in stations:
         xx = temporary['XX_' + station]
         yy = temporary['YY_' + station]
+        print('TESTING', xx)
         evaluations[station] = coherence_metric(xx, yy)  # 0 = best
 
     with open(mtf) as f:
