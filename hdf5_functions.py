@@ -99,6 +99,8 @@ def coherence_metric(xx, yy):
     print('TESTING IS HAPPENING...')
     print(type(xx), type(yy))
     asdf = abs(np.unwrap(xx - yy))
+    print(type(asdf))
+    print(asdf)
     return np.nanmean(np.gradient(asdf) ** 2)
 
 
