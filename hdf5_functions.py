@@ -500,6 +500,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
         lo.close()
 
     # properties of the new h5parm
+    #
     freq = [np.average(frequencies)]  # all items in the list should be equal
     ant = successful_stations  # antennas that will be in the new h5parm
     pol = ['XX', 'YY']  # as standard
@@ -510,7 +511,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     # write these best phase solutions to the new h5parm
     print('TESTING!!!')
-    print('value shape:', vals.shape, weights.shape, freq, frequencies)
+    print('value shape:', vals.shape, weights.shape)
+    print(new_time.shape, frequencies.shape, ant.shape, pol.shape, dir_.shape)
     c = solset.makeSoltab('phase',
                           axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
                           axesVals=[new_time, frequencies, ant, pol, dir_],
