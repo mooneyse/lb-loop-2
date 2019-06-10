@@ -134,7 +134,18 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
         yy = temporary['YY_' + station]
         # TODO the first error arises here, because the h5parm has three
         #      axes and it was assumed that it would have only one, so for now
-        #      as a HACK to get things moving, we'll take just the first axis
+        #      as a HACK to get things moving, we'll take just the first axis,
+        #      without which we get the following traceback:
+        #      Traceback (most recent call last):
+        #      File "./hdf5_functions.py", line 1057, in <module>
+        #      main()
+        #      File "./hdf5_functions.py", line 1034, in main
+        #      evaluate_solutions(h5parm=h5parm0, mtf=mtf)
+        #      File "./hdf5_functions.py", line 136, in evaluate_solutions
+        #      evaluations[station] = coherence_metric(xx, yy)  # 0 = best
+        #      File "./hdf5_functions.py", line 100, in coherence_metric
+        #      return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
+        #      TypeError: unsupported operand type(s) for ** or pow(): 'list' and 'int'
         print(xx.shape, 'TESTING!!!!')
         evaluations[station] = coherence_metric(xx, yy)  # 0 = best
 
