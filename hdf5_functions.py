@@ -1053,15 +1053,15 @@ def main():
 
     # TODO the directions could be read from the ms in this case
 
-    # new_h5parms = dir2phasesol_wrapper(mtf=mtf,
-    #                                    ms=ms,
-    #                                    directions=directions,
-    #                                    cores=cores)
+    new_h5parms = dir2phasesol_wrapper(mtf=mtf,
+                                       ms=ms,
+                                       directions=directions,
+                                       cores=cores)
 
-    new_h5parm = dir2phasesol(mtf=mtf, ms=ms, directions=directions)
+    # new_h5parm = dir2phasesol(mtf=mtf, ms=ms, directions=directions)
 
-    # for new_h5parm in new_h5parms:
-    #     apply_h5parm(h5parm=new_h5parm, ms=ms)  # outputs an ms per direction
+    for new_h5parm in new_h5parms:
+        apply_h5parm(h5parm=new_h5parm, ms=ms)  # outputs an ms per direction
 
 
     # # loop 3
