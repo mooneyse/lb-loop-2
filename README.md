@@ -2,7 +2,7 @@
 
 ## Issues that have arisen while testing loop 2
 
-* There are three frequency axes in the h5parms from loop 3 now.
+* There are three frequency axes in the h5parms from loop 3 now. I hardcoded them to kick on through but this will have to be addressed.
 * When running loop 3, I encounter the following error:
 ```
     File "/data020/scratch/sean/run1/git/long_baseline_pipeline/bin/loop3B_v1.py", line 736, in main
