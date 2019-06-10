@@ -1063,9 +1063,10 @@ def main():
     for new_h5parm in new_h5parms:
         msouts.append(apply_h5parm(h5parm=new_h5parm, ms=ms))  # outputs an ms per direction
 
-    # for msout in msouts:  # loop 3
-    #     run_loop_3 = 'python /data020/scratch/sean/run1/git/long_baseline_pipeline/bin/loop3B_v1.py ' + msout
-    #     os.system(run_loop_3)
+    # TODO will this work if loop 2 is run from the directory with the ms?
+    for msout in msouts:  # loop 3
+        run_loop_3 = 'python /data020/scratch/sean/run1/git/long_baseline_pipeline/bin/loop3B_v1.py ' + msout
+        os.system(run_loop_3)
 
     # update_list(initial_h5parm=h5parm, incremental_h5parm=loop3_phases,
     #             mtf=mtf, threshold=threshold, amplitude_h5parm=loop3_amplitudes)
