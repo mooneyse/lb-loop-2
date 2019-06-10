@@ -513,7 +513,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     print('TESTING!!!')
     print('value shape:', vals.shape, weights.shape)
     print(type(new_time), type(frequencies), type(ant), type(pol), type(dir_))
-    print(new_time.shape, frequencies.shape, ant.shape, pol.shape, dir_.shape)
+    print(new_time.shape, len(frequencies), len(ant), len(pol), len(dir_))
     c = solset.makeSoltab('phase',
                           axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
                           axesVals=[new_time, frequencies, ant, pol, dir_],
