@@ -1,4 +1,4 @@
-# Scripts which feed into the LOFAR long-baseline pipeline development.
+# Script feeding into the LOFAR long-baseline pipeline
 
 ## Issues that have arisen while testing loop 2
 
