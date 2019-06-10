@@ -514,7 +514,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     # write these best phase solutions to the new h5parm
     c = solset.makeSoltab('phase',
                           axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                          axesVals=[new_time, frequencies, ant, pol, dir_],
+                          axesVals=[new_time, freq, ant, pol, dir_],
                           vals=vals,
                           weights=weights)  # creates phase000
 
@@ -523,7 +523,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
         vals, weights, time, freq, ant = build_soltab(soltab='tec', working_data=working_data)
         c = solset.makeSoltab('tec',
                               axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                              axesVals=[time, frequencies, ant, pol, dir_],
+                              axesVals=[time, freq, ant, pol, dir_],
                               vals=vals,
                               weights=weights)  # creates tec000
     except:
