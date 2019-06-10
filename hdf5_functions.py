@@ -509,6 +509,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
     weights = np.concatenate(weight, axis=2)
 
     # write these best phase solutions to the new h5parm
+    print('TESTING!!!')
+    print('value shape:', vals.shape, weights.shape)
     c = solset.makeSoltab('phase',
                           axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
                           axesVals=[new_time, freq, ant, pol, dir_],
