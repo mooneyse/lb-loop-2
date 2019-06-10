@@ -96,10 +96,10 @@ def coherence_metric(xx, yy):
     except:
         return np.nan  # if the values are all nan, they cannot be interpolated
                        # so return a coherence value of nan also
-                       
-    xx, yy = np.array(xx), np.array(yy)
-
-    return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
+    print('TESTING IS HAPPENING...')
+    print(type(xx), type(yy))
+    asdf = abs(np.unwrap(xx - yy))
+    return np.nanmean(np.gradient(asdf) ** 2)
 
 
 def evaluate_solutions(h5parm, mtf, threshold=0.25):
