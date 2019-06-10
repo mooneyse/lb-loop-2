@@ -9,4 +9,4 @@
     spec_info = casatb.table( vis + '::SPECTRAL_WINDOW')
     RuntimeError: Table SILTJ135044.06+544752.7_L693725_phasecal.MS-eef114bd-d760-48ed-b28e-442b57a55f04.MS::SPECTRAL_WINDOW does not exist
 ```
-But from what I can see in `casabrowser`, it does exist.
+But from what I can see in `casabrowser`, it does exist. This error was arising because the command was not executed in the same directory where the MS is -- even though the full filepath was given.
