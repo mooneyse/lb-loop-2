@@ -509,7 +509,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     weights = np.concatenate(weight, axis=2)
     # TODO the HACK on the line below is necessary to get around the fact that
     #      there are three frequencies
-    freq = [np.average(frequencies)] * vals.shape[1]
+    freq = [124900817.87109375, 131932067.87109375, 138963317.87109375]
 
     # write these best phase solutions to the new h5parm
     c = solset.makeSoltab('phase',
