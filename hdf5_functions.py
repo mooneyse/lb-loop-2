@@ -146,7 +146,7 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
         #      File "./hdf5_functions.py", line 100, in coherence_metric
         #      return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
         #      TypeError: unsupported operand type(s) for ** or pow(): 'list' and 'int'
-        print(xx.shape, 'TESTING!!!!')
+        print(xx[:, 0].shape, 'TESTING!!!!')
         evaluations[station] = coherence_metric(xx, yy)  # 0 = best
 
     with open(mtf) as f:
