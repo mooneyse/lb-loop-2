@@ -662,7 +662,7 @@ def apply_h5parm(h5parm, ms, column_out='DATA'):
         f.write('# created by apply_h5parm at {}\n'.format(now))
         f.write('msin                = {}\n'.format(ms))
         f.write('msin.datacolumn     = {}\n'.format(column_in))
-        f.write('msout               = {}-{}\n'.format(uuid.uuid4(), ms))
+        f.write('msout               = {}-{}.MS\n'.format(ms, uuid.uuid4()))
         f.write('msout.datacolumn    = {}\n'.format(column_out))
         f.write('steps               = [applycal]\n')
         f.write('applycal.type       = applycal\n')
