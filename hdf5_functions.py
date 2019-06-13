@@ -1048,17 +1048,17 @@ def main():
     cores = args.cores
     directions = args.directions
 
-    make_blank_mtf(mtf=mtf)
+    # make_blank_mtf(mtf=mtf)
 
-    evaluate_solutions(h5parm=h5parm0, mtf=mtf)
-    evaluate_solutions(h5parm=h5parm1, mtf=mtf)
+    # evaluate_solutions(h5parm=h5parm0, mtf=mtf)
+    # evaluate_solutions(h5parm=h5parm1, mtf=mtf)
 
     # TODO the directions could be read from the ms in this case
-    # new_h5parms = dir2phasesol_wrapper(mtf=mtf,
-    #                                    ms=ms,
-    #                                    directions=directions,
-    #                                    cores=cores)
-    #
+    new_h5parms = dir2phasesol_wrapper(mtf=mtf,
+                                       ms=ms,
+                                       directions=directions,
+                                       cores=cores)
+
     # msouts = []
     # for new_h5parm in new_h5parms:
     #     msouts.append(apply_h5parm(h5parm=new_h5parm, ms=ms))  # outputs an ms per direction
