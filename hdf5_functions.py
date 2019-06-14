@@ -1061,8 +1061,8 @@ def main():
 
     make_blank_mtf(mtf=mtf)
 
-    evaluate_solutions(h5parm=h5parm0, mtf=mtf)
-    evaluate_solutions(h5parm=h5parm1, mtf=mtf)
+    # evaluate_solutions(h5parm=h5parm0, mtf=mtf)
+    # evaluate_solutions(h5parm=h5parm1, mtf=mtf)
 
     # TODO the directions could be read from the ms in this case
     new_h5parms = dir2phasesol_wrapper(mtf=mtf,
