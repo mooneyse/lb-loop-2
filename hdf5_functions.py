@@ -488,17 +488,15 @@ def dir2phasesol(mtf, ms='', directions=[]):
                 w = reordered_weights[:, :, s, :, :]  # same order as v
                 v_expanded = np.expand_dims(v, axis=2)
                 w_expanded = np.expand_dims(w, axis=2)
-                v_interpolated = v_expanded
-                w_interpolated = w_expanded
-                # v_interpolated = interpolate_time(the_array=v_expanded,
-                #                                   the_times=phase.time[:],
-                #                                   new_times=new_time)
-                # w_interpolated = interpolate_time(the_array=w_expanded,
-                #                                   the_times=phase.time[:],
-                #                                   new_times=new_time)
+                v_interpolated = interpolate_time(the_array=v_expanded,
+                                                  the_times=phase.time[:],
+                                                  new_times=new_time)
+                w_interpolated = interpolate_time(the_array=w_expanded,
+                                                  the_times=phase.time[:],
+                                                  new_times=new_time)
                 val.append(v_interpolated)
                 weight.append(w_interpolated)
-
+                print('HERE WE GO', my_station.strip(), v_interpolated)
         lo.close()
 
     # properties of the new h5parm
