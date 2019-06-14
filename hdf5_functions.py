@@ -1074,7 +1074,8 @@ def main():
     for new_h5parm in new_h5parms:
         msouts.append(apply_h5parm(h5parm=new_h5parm, ms=ms))  # outputs an ms per direction
 
-    # TODO this does not work so running it manually
+    # TODO this does not work because loop 3 has to be run from the directory
+    #      that the ms is in, so running it manually
     # from loop3B_v1 import main as loop3
     # for msout in msouts:
     #     loop3(msout)
