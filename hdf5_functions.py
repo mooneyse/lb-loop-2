@@ -502,17 +502,13 @@ def dir2phasesol(mtf, ms='', directions=[]):
         lo.close()
 
     # properties of the new h5parm
-    freq = [np.average(frequencies)]  # all items in the list should be equal
+    freq = np.average(frequencies, axis=0)  # all items in the list should be equal
     ant = stations_in_correct_order  # antennas that will be in the new h5parm
     pol = ['XX', 'YY']  # as standard
     dir_ = [str(directions.ra.rad) + ', ' + str(directions.dec.rad)]  # given
 
     vals = np.concatenate(val, axis=2)
-    print('val shape', vals.shape, vals[0,0,23,0,0], ant[23])
     weights = np.concatenate(weight, axis=2)
-    # TODO the HACK on the line below is necessary to get around the fact that
-    #      there are three frequencies
-    freq = [124900817.87109375, 131932067.87109375, 138963317.87109375]
 
     # write these best phase solutions to the new h5parm
     c = solset.makeSoltab('phase',
