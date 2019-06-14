@@ -398,8 +398,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
             h5parm = mtf_directions[key]
 
-            # this try/except block is necessary because otherwise this function
-            # crashes when the master text file only has one h5parm in it
+            # this try/except block is necessary because otherwise this crashes
+            # when the master text file only has one h5parm in it
             try:
                 row = list(h5parms).index(h5parm)  # row in mtf
                 value = data[mtf_station][row]  # boolean for h5parm and station
@@ -488,12 +488,14 @@ def dir2phasesol(mtf, ms='', directions=[]):
                 w = reordered_weights[:, :, s, :, :]  # same order as v
                 v_expanded = np.expand_dims(v, axis=2)
                 w_expanded = np.expand_dims(w, axis=2)
-                v_interpolated = interpolate_time(the_array=v_expanded,
-                                                  the_times=phase.time[:],
-                                                  new_times=new_time)
-                w_interpolated = interpolate_time(the_array=w_expanded,
-                                                  the_times=phase.time[:],
-                                                  new_times=new_time)
+                v_interpolated = v_expanded
+                w_interpolated = w_expanded
+                # v_interpolated = interpolate_time(the_array=v_expanded,
+                #                                   the_times=phase.time[:],
+                #                                   new_times=new_time)
+                # w_interpolated = interpolate_time(the_array=w_expanded,
+                #                                   the_times=phase.time[:],
+                #                                   new_times=new_time)
                 val.append(v_interpolated)
                 weight.append(w_interpolated)
 
