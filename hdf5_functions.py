@@ -1072,7 +1072,7 @@ def main():
 
     msouts = []
     for new_h5parm in new_h5parms:
-        msouts.append(apply_h5parm(h5parm=new_h5parm, ms=ms))  # outputs an ms per direction
+        msouts.append(apply_h5parm(h5parm=new_h5parm, ms='/data020/scratch/sean/letsgetloopy/' + ms))  # outputs an ms per direction
 
     from loop3B_v1 import main as loop3
     for msout in msouts:  # loop 3
