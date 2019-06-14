@@ -459,6 +459,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     # looping through the h5parms again to get the solutions for the good
     # stations needed to build the new h5parm
+    stations_in_correct_order = []
     for my_line in range(len(working_data)):  # one line per station
         my_station = working_data[my_line][0]
         my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
@@ -481,7 +482,6 @@ def dir2phasesol(mtf, ms='', directions=[]):
         reordered_weights = reorderAxes(weights, axes_names,
                                         ['time', 'freq', 'ant', 'pol', 'dir'])
 
-        stations_in_correct_order = []
         for s in range(len(phase.ant[:])):  # stations
             if phase.ant[s] == my_station.strip():
                 stations_in_correct_order.append(phase.ant[s])
