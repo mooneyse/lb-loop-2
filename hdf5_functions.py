@@ -496,7 +496,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
                                                   new_times=new_time)
                 val.append(v_interpolated)
                 weight.append(w_interpolated)
-                print('HERE WE GO', my_station.strip(), v_interpolated.shape
+                print('HERE WE GO', my_station.strip(), v_interpolated.shape)
         lo.close()
 
     # properties of the new h5parm
