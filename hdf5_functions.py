@@ -1046,7 +1046,7 @@ def main():
     parser.add_argument('-d',
                         '--directions',
                         type=float,
-                        default=[-2.7043, 0.958154], # 0.226893, 0.9512044, 0.244346, 0.9686577
+                        default=[-2.7043, 0.958154],
                         nargs='+',
                         help='source positions (radians; RA DEC RA DEC...)')
 
@@ -1074,12 +1074,13 @@ def main():
     for new_h5parm in new_h5parms:
         msouts.append(apply_h5parm(h5parm=new_h5parm, ms=ms))  # outputs an ms per direction
 
-    from loop3B_v1 import main as loop3
-    for msout in msouts:  # loop 3
-        loop3('/data020/scratch/sean/letsgetloopy/' + msout)
+    # TODO this does not work
+    # from loop3B_v1 import main as loop3
+    # for msout in msouts:
+    #     loop3(msout)
 
-    update_list(initial_h5parm=h5parm, incremental_h5parm=loop3_phases,
-                mtf=mtf, threshold=threshold, amplitude_h5parm=loop3_amplitudes)
+    # update_list(initial_h5parm=h5parm, incremental_h5parm=loop3_phases,
+    #             mtf=mtf, threshold=threshold, amplitude_h5parm=loop3_amplitudes)
 
 
 if __name__ == '__main__':
