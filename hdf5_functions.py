@@ -481,8 +481,10 @@ def dir2phasesol(mtf, ms='', directions=[]):
         reordered_weights = reorderAxes(weights, axes_names,
                                         ['time', 'freq', 'ant', 'pol', 'dir'])
 
+        stations_in_correct_order = []
         for s in range(len(phase.ant[:])):  # stations
             if phase.ant[s] == my_station.strip():
+                stations_in_correct_order.append(phase.ant[s])
                 # copy values and weights
                 v = reordered_values[:, :, s, :, :]  # time, freq, ant, pol, dir
                 w = reordered_weights[:, :, s, :, :]  # same order as v
@@ -501,7 +503,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     # properties of the new h5parm
     freq = [np.average(frequencies)]  # all items in the list should be equal
-    ant = successful_stations  # antennas that will be in the new h5parm
+    ant = stations_in_correct_order  # antennas that will be in the new h5parm
     pol = ['XX', 'YY']  # as standard
     dir_ = [str(directions.ra.rad) + ', ' + str(directions.dec.rad)]  # given
 
