@@ -625,6 +625,12 @@ def dir2phasesol(mtf, ms='', directions=[]):
                       'PL612HBA': np.array([3551481.817, 1334203.573, 5110157.41], dtype='float32'),
                       'IE613HBA': np.array([3801692.0, -528983.94, 5076958.0], dtype='float32')}
 
+    # delete a key, value pair from the antenna table if it does not exist in
+    # the antenna axis
+    for key in antenna_soltab:
+        if key not in ant:
+            del antenna_soltab[key]
+
     for a in ant:
         if a[:2] == 'ST':
             antenna_soltab.update(tied)  # there will only be the tied station
@@ -1060,13 +1066,13 @@ def main():
                                        cores=cores)
 
     msouts = []
-    for new_h5parm in new_h5parms:
-        msouts.append(apply_h5parm(h5parm=new_h5parm, ms=ms))  # outputs an ms per direction
+    # for new_h5parm in new_h5parms:
+    #     msouts.append(apply_h5parm(h5parm=new_h5parm, ms=ms))  # outputs an ms per direction
 
     # TODO will this work if loop 2 is run from the directory with the ms?
     # for msout in msouts:  # loop 3
-        run_loop_3 = 'python /data020/scratch/sean/run1/git/long_baseline_pipeline/bin/loop3B_v1.py ' + msout
-        os.system(run_loop_3)
+        # run_loop_3 = 'python /data020/scratch/sean/run1/git/long_baseline_pipeline/bin/loop3B_v1.py ' + msout
+        # os.system(run_loop_3)
 
     # update_list(initial_h5parm=h5parm, incremental_h5parm=loop3_phases,
     #             mtf=mtf, threshold=threshold, amplitude_h5parm=loop3_amplitudes)
