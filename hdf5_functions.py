@@ -456,10 +456,10 @@ def dir2phasesol(mtf, ms='', directions=[]):
     num_of_steps = 1 + ((np.max(time_maxs) - np.min(time_mins)) /
                         np.min(time_intervals))
     new_time = np.linspace(np.min(time_mins), np.max(time_maxs), num_of_steps)
+    stations_in_correct_order = []
 
     # looping through the h5parms again to get the solutions for the good
     # stations needed to build the new h5parm
-    stations_in_correct_order = []
     for my_line in range(len(working_data)):  # one line per station
         my_station = working_data[my_line][0]
         my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
