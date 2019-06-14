@@ -506,7 +506,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     dir_ = [str(directions.ra.rad) + ', ' + str(directions.dec.rad)]  # given
 
     vals = np.concatenate(val, axis=2)
-    print('val shape', vals.shape)
+    print('val shape', vals.shape, vals[0,0,0,0,0], vals[0,0,1,0,0])
     weights = np.concatenate(weight, axis=2)
     # TODO the HACK on the line below is necessary to get around the fact that
     #      there are three frequencies
