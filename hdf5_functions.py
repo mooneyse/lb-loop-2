@@ -627,9 +627,13 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     # delete a key, value pair from the antenna table if it does not exist in
     # the antenna axis
+    keys_to_remove = []
     for key in antenna_soltab:
         if key not in ant:
-            del antenna_soltab[key]
+            keys_to_remove.append(key)
+
+    for k in keys_to_remove:
+        antenna_soltab.pop(k, None)
 
     for a in ant:
         if a[:2] == 'ST':
