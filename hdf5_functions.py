@@ -512,7 +512,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     # TODO the HACK on the line below is necessary to get around the fact that
     #      there are three frequencies
     print(freq)
-    freq = [124900817.87109375, 131932067.87109375, 138963317.87109375]
+    # freq = [124900817.87109375, 131932067.87109375, 138963317.87109375]
 
     # write these best phase solutions to the new h5parm
     c = solset.makeSoltab('phase',
@@ -1063,8 +1063,8 @@ def main():
 
     make_blank_mtf(mtf=mtf)
 
-    # evaluate_solutions(h5parm=h5parm0, mtf=mtf)
-    # evaluate_solutions(h5parm=h5parm1, mtf=mtf)
+    evaluate_solutions(h5parm=h5parm0, mtf=mtf)
+    evaluate_solutions(h5parm=h5parm1, mtf=mtf)
 
     # TODO the directions could be read from the ms in this case
     new_h5parms = dir2phasesol_wrapper(mtf=mtf,
