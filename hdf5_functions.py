@@ -496,7 +496,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
                                                   new_times=new_time)
                 val.append(v_interpolated)
                 weight.append(w_interpolated)
-                print('HERE WE GO', my_station.strip(), v_interpolated.shape)
+
         lo.close()
 
     # properties of the new h5parm
@@ -506,7 +506,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     dir_ = [str(directions.ra.rad) + ', ' + str(directions.dec.rad)]  # given
 
     vals = np.concatenate(val, axis=2)
-    print('val shape', vals.shape, vals[0,0,0,0,0], vals[0,0,1,0,0])
+    print('val shape', vals.shape, vals[0,0,23,0,0], ant[23]])
     weights = np.concatenate(weight, axis=2)
     # TODO the HACK on the line below is necessary to get around the fact that
     #      there are three frequencies
