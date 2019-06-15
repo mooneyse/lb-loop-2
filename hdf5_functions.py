@@ -668,7 +668,7 @@ def apply_h5parm(h5parm, ms, column_out='DATA'):
     parset = os.path.dirname(h5parm) + '/applyh5parm.parset'
     column_in = 'DATA'
     now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    msout =  ms + '-' + str(uuid.uuid4()) + '.MS'
+    msout =  ms + '-' + str(uuid.uuid4())[:6] + '.MS'
 
     with open(parset, 'w') as f:  # create the parset
         f.write('# created by apply_h5parm at {}\n'.format(now))
