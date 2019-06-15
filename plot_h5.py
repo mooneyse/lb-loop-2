@@ -46,58 +46,19 @@ def get_values(h5, station='ST001', polarisation='XX'):
     return values, time
 
 
-def plot_values(values1, times1, values2, times2, values3, times3, station='ST001', polarisation='XX'):
-
-    stations = ['RS106HBA', 'RS205HBA', 'RS208HBA', 'RS210HBA', 'RS305HBA', 'RS306HBA', 'RS307HBA',
-                'RS310HBA', 'RS406HBA', 'RS407HBA', 'RS409HBA', 'RS503HBA', 'RS508HBA', 'RS509HBA',
-                'DE601HBA', 'DE602HBA', 'DE603HBA', 'DE604HBA', 'DE605HBA', 'FR606HBA', 'SE607HBA',
-                'UK608HBA', 'DE609HBA', 'PL610HBA', 'PL611HBA', 'PL612HBA', 'IE613HBA', 'ST001']
-
-    fig = plt.figure()
-    for i in len(stations):
-        plt.subplot(4, 7, i)
-        plt.plot(times1, values1, 'r-', lw=2)
-        plt.plot(times2, values2, 'g-', lw=2)
-        plt.plot(times3, values3, 'b-', lw=2)
-        plt.xlim(min([min(times1), min(times2)]), max([max(times1), max(times2)]))
-        plt.ylim(-np.pi, np.pi)
-        plt.tight_layout()
-
-    plt.show()
-    # plt.title('{}, {} (coherence: {:.3f})'.format(station, polarisation, coherence_metric(values1, values2)))
-    # plt.xlabel('Time')
-    # plt.ylabel('Phase')
-    # plt.legend()
-
-
-def interpolate_nan(x_):
-    x_ = np.array(x_)
-    nans, x = np.isnan(x_), lambda z: z.nonzero()[0]
-    x_[nans] = np.interp(x(nans), x(~nans), x_[~nans])
-    return x_
-
-
-def coherence_metric(xx, yy):
-    xx, yy = interpolate_nan(xx), interpolate_nan(yy)
-    return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
-
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('h5a', type=str)
     parser.add_argument('h5b', type=str)
     parser.add_argument('h5c', type=str)
-    parser.add_argument('-s', '--station', required=False, type=str, default='ST001')
     parser.add_argument('-p', '--polarisation', required=False, type=str, default='XX')
 
     args = parser.parse_args()
     h5a = args.h5a
     h5b = args.h5b
     h5c = args.h5c
-    station = args.station
     polarisation = args.polarisation
-
-    # plot_values(values1, times1, values2, times2, values3, times3, station=station, polarisation=polarisation)
 
     stations = ['RS106HBA', 'RS205HBA', 'RS208HBA', 'RS210HBA', 'RS305HBA', 'RS306HBA', 'RS307HBA',
                 'RS310HBA', 'RS406HBA', 'RS407HBA', 'RS409HBA', 'RS503HBA', 'RS508HBA', 'RS509HBA',
