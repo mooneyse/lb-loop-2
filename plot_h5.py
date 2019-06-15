@@ -65,18 +65,23 @@ def main():
                 'DE601HBA', 'DE602HBA', 'DE603HBA', 'DE604HBA', 'DE605HBA', 'FR606HBA', 'SE607HBA',
                 'UK608HBA', 'DE609HBA', 'PL610HBA', 'PL611HBA', 'PL612HBA', 'IE613HBA', 'ST001']
 
-    fig = plt.figure()
+    fig = plt.figure(figsize=(17, 8.5))
     for i in range(len(stations)):
         values1, times1 = get_values(h5a, station=stations[i], polarisation=polarisation)
         values2, times2 = get_values(h5b, station=stations[i], polarisation=polarisation)
         values3, times3 = get_values(h5c, station=stations[i], polarisation=polarisation)
         plt.subplot(4, 7, i + 1)
-        plt.plot(times1, values1, color='grey', ls='-', marker=None, lw=1)
-        plt.plot(times2, values2, 'r-', lw=1)
-        plt.plot(times3, values3, 'b-', lw=1, alpha=0.5)
+        plt.plot(times1, values1, 'k-', lw=1, alpha=0.33)
+        plt.plot(times2, values2, 'r-', lw=1, alpha=0.33)
+        plt.plot(times3, values3, 'b-', lw=1, alpha=0.33)
+        plt.xticks([])
+        plt.yticks([])
+        plt.xlabel('Time')
+        plt.ylabel('Phase')
         plt.xlim(min([min(times1), min(times2), min(times3)]), max([max(times1), max(times2), max(times3)]))
         plt.ylim(-np.pi, np.pi)
         plt.title(stations[i])
+    fig.tight_layout()
 
     plt.show()
 
