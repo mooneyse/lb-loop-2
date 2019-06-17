@@ -46,7 +46,6 @@ def get_values(h5, station='ST001', polarisation='XX'):
     return values, time
 
 
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('h5a', type=str)
