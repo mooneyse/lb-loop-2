@@ -385,7 +385,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
             #      directions are the same (or better, if the separation is
             #      equal, to cover this happening by chance with another hdf5
             #      with an equal separation but in a different direction)
-
+            #      https://github.com/mooneyse/lb-loop-2/issues/3#issue-456883249
             h5parm = mtf_directions[key]
 
             # this try/except block is necessary because otherwise this crashes
@@ -499,8 +499,6 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     vals = np.concatenate(val, axis=2)
     weights = np.concatenate(weight, axis=2)
-    # TODO the HACK on the line below is necessary to get around the fact that
-    #      there are three frequencies
 
     # write these best phase solutions to the new h5parm
     c = solset.makeSoltab('phase',
@@ -1055,6 +1053,7 @@ def main():
     evaluate_solutions(h5parm=h5parm1, mtf=mtf)
 
     # TODO the directions could be read from the ms in this case
+    #      see https://github.com/mooneyse/lb-loop-2/issues/7#issue-456896239
     new_h5parms = dir2phasesol_wrapper(mtf=mtf,
                                        ms=ms,
                                        directions=directions,
@@ -1066,6 +1065,7 @@ def main():
 
     # TODO this does not work because loop 3 has to be run from the directory
     #      that the ms is in, so running it manually
+    #      see https://github.com/mooneyse/lb-loop-2/issues/2#issue-456880154
     # from loop3B_v1 import main as loop3
     # for msout in msouts:
     #     loop3(msout)
