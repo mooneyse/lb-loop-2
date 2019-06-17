@@ -22,3 +22,4 @@ $ lb-loop-2/hdf5_functions.py \
 * Then run loop 3 on this new MS (`python2 lb-loop-2/loop3B_v1.py [file.ms]`).
 * When loop 3 is done, edit `main()` in `hdf5_fuctions.py` to run the `update_list` function, passing it the HDF5 file originally applied to the MS, the HDF5 file outputted by loop 3, and the master text file. This function combines these incremental solutions, evaluates them, and writes the output to the master text file.
 * For a list of issues with loop 2, see the [Issues on GitHub](https://github.com/mooneyse/lb-loop-2/issues).
+* The `plot_h5.py` script is something I was using to compare HDF5 solutions after running loop 2. It is not part of the loop 2 code.
