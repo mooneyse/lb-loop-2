@@ -1014,7 +1014,7 @@ def main():
                         '--ms',
                         required=False,
                         type=str,
-                        default='/data020/scratch/sean/letsgetloopy/SILTJ135044.06+544752.7_L693725_phasecal.MS',
+                        default='/data020/scratch/sean/letsgetloopy/SILTJ135044.06+544752.7_L693725_phasecal.apply_tec',
                         help='measurement set')
 
     parser.add_argument('-t',
