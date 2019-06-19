@@ -1071,6 +1071,7 @@ def main():
     #     loop3(msout)
     h5parm='/data020/scratch/sean/letsgetloopy/SILTJ135044.06+544752.7_L693725_phasecal_205.055023463_54.8981803236.h5'
     loop3_phases='/data020/scratch/sean/letsgetloopy/SILTJ135044.06+544752.7_L693725_phasecal.apply_tec-624312.MS_01_c2.h5'
+    loop3_amplitudes=''
     update_list(initial_h5parm=h5parm, incremental_h5parm=loop3_phases,
                 mtf=mtf, threshold=threshold, amplitude_h5parm=loop3_amplitudes)
 
