@@ -944,7 +944,8 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         all_antennas = newest_ant
         a.close()
 
-    freq = np.array([np.mean([initial_freq, incremental_freq])])
+    # freq = np.array([np.mean([initial_freq, incremental_freq])])
+    freq = np.average([initial_freq, incremental_freq], axis=0)  # NOTE added to test
     pol = np.array(['XX', 'YY'])
 
     combined_h5parm = (os.path.splitext(initial_h5parm)[0] + '-' +
