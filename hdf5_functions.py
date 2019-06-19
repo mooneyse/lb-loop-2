@@ -957,7 +957,7 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
     print('TESTING -----------------------------------------------------------')
     print('val shape', vals.shape, 'weight shape', weights.shape)
     print('time, freq, ant, pol, dir')
-    print(new_times.shape, freq.shape, all_antennas.shape, pol.shape, dir_.shape)
+    print(np.array(new_times).shape, np.array(freq).shape, np.array(all_antennas).shape, np.array(pol).shape, np.array(dir_).shape)
     c = solset.makeSoltab('phase',
                           axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
                           axesVals=[new_times, freq, all_antennas, pol, dir_],
