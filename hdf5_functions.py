@@ -137,6 +137,8 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
         #      only one, so for now to get things moving, we take just the first
         #      first axis; see
         #      https://github.com/mooneyse/lb-loop-2/issues/1#issue-456875708
+        print('TESTING--------------------------------------------------------')
+        print('xx.shape', xx.shape)
         evaluations[station] = coherence_metric(xx[:, 0], yy[:, 0])  # 0 = best
 
     with open(mtf) as f:
@@ -408,8 +410,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     # create a new h5parm
     ms = os.path.splitext(os.path.normpath(ms))[0]
-    new_h5parm = '{}_{}_{}.h5'.format(ms, directions.ra.deg,
-                                      directions.dec.deg)
+    new_h5parm = '{}_{}_{}.h5'.format(ms, np.round(directions.ra.deg, 3),
+                                      np.round(directions.dec.deg, 3))
     h = lh5.h5parm(new_h5parm, readonly=False)
     table = h.makeSolset()  # creates sol000
     solset = h.getSolset('sol000')  # on the new h5parm
@@ -947,8 +949,7 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
     freq = np.average([initial_freq, incremental_freq], axis=0)  # handles multiple frequencies
     pol = np.array(['XX', 'YY'])
 
-    combined_h5parm = (os.path.splitext(initial_h5parm)[0] + '-' +
-                       os.path.basename(incremental_h5parm))
+    combined_h5parm = (os.path.splitext(initial_h5parm)[0] + '_combined.h5')
 
     # write these best phase solutions to the combined_h5parm
     h = lh5.h5parm(combined_h5parm, readonly=False)
@@ -1050,10 +1051,10 @@ def main():
     cores = args.cores
     directions = args.directions
 
-    # make_blank_mtf(mtf=mtf)
-    #
-    # evaluate_solutions(h5parm=h5parm0, mtf=mtf)
-    # evaluate_solutions(h5parm=h5parm1, mtf=mtf)
+    make_blank_mtf(mtf=mtf)
+
+    evaluate_solutions(h5parm=h5parm0, mtf=mtf)
+    evaluate_solutions(h5parm=h5parm1, mtf=mtf)
 
     # TODO the directions could be read from the ms in this case
     #      see https://github.com/mooneyse/lb-loop-2/issues/7#issue-456896239
@@ -1066,17 +1067,15 @@ def main():
     # for new_h5parm in new_h5parms:
     #     msouts.append(apply_h5parm(h5parm=new_h5parm, ms=ms))  # outputs an ms per direction
 
-    # TODO this does not work because loop 3 has to be run from the directory
-    #      that the ms is in, so running it manually
+    # TODO loop 3 has to be run from the directory the ms is in, so running it
+    #      manually (it fails from within this script)
     #      see https://github.com/mooneyse/lb-loop-2/issues/2#issue-456880154
-    # from loop3B_v1 import main as loop3
+    # print('Now run loop 3:')
     # for msout in msouts:
-    #     loop3(msout)
-    h5parm='/data020/scratch/sean/letsgetloopy/SILTJ135044.06+544752.7_L693725_phasecal_205.055023463_54.8981803236.h5'
-    loop3_phases='/data020/scratch/sean/letsgetloopy/SILTJ135044.06+544752.7_L693725_phasecal.apply_tec-624312.MS_01_c2.h5'
-    loop3_amplitudes=''
-    update_list(initial_h5parm=h5parm, incremental_h5parm=loop3_phases,
-                mtf=mtf, threshold=threshold, amplitude_h5parm=loop3_amplitudes)
+    #     print('python2 /data020/scratch/sean/letsgetloopy/lb-loop-2/loop3B_v1.py', msout)
+
+    # update_list(initial_h5parm=h5parm, incremental_h5parm=loop3_phases,
+    #             mtf=mtf, threshold=threshold, amplitude_h5parm=loop3_amplitudes)
 
 
 if __name__ == '__main__':
