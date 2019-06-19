@@ -944,8 +944,7 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         all_antennas = newest_ant
         a.close()
 
-    # freq = np.array([np.mean([initial_freq, incremental_freq])])
-    freq = np.average([initial_freq, incremental_freq], axis=0)  # NOTE added to test
+    freq = np.average([initial_freq, incremental_freq], axis=0)  # handles multiple frequencies
     pol = np.array(['XX', 'YY'])
 
     combined_h5parm = (os.path.splitext(initial_h5parm)[0] + '-' +
@@ -955,10 +954,6 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
     h = lh5.h5parm(combined_h5parm, readonly=False)
     table = h.makeSolset()  # creates sol000
     solset = h.getSolset('sol000')
-    print('TESTING -----------------------------------------------------------')
-    print('val shape', vals.shape, 'weight shape', weights.shape)
-    print('time, freq, ant, pol, dir')
-    print(np.array(new_times).shape, np.array(freq).shape, np.array(all_antennas).shape, np.array(pol).shape, np.array(dir_).shape)
     c = solset.makeSoltab('phase',
                           axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
                           axesVals=[new_times, freq, all_antennas, pol, dir_],
