@@ -101,7 +101,7 @@ def coherence_metric(xx, yy):
     return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
 
 
-def evaluate_solutions(h5parm, mtf, threshold=0.25):
+def evaluate_solutions(h5parm, mtf, threshold=0.25, verbose=False):
     '''Get the direction from the h5parm. Evaluate the phase solutions in the
     h5parm for each station using the coherence metric. Determine the validity
     of each coherence metric that was calculated. Append the right ascension,
@@ -138,8 +138,20 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25):
         #      first axis; see
         #      https://github.com/mooneyse/lb-loop-2/issues/1#issue-456875708
         print('TESTING--------------------------------------------------------')
-        print('xx.shape', xx.shape)
-        evaluations[station] = coherence_metric(xx[:, 0], yy[:, 0])  # 0 = best
+        try:  # if there are multiple frequency axes
+            cohs = []
+            num_solns, num_freqs = xx.shape  # this unpack will fail if there is only one frequency axis
+            for i in range(num_freqs):
+                cohs.append(coherence_metric(xx[:, i], yy[:, i]))
+
+            coh = np.mean(cohs)
+            print('{} {} coherence: {} ({} frequency axes)'.format(h5parm, station, coh, num_freqs)) if verbose else None
+            evaluations[station] = coh  # 0 = best
+
+        except:  # if there is one frequency axis only
+            coh = coherence_metric(xx, yy)
+            print('{} {} coherence: {}'.format(h5parm, station, coh)) if verbose else None
+            evaluations[station] = coh  # 0 = best
 
     with open(mtf) as f:
         mtf_stations = list(csv.reader(f))[0][3:]  # get stations from the mtf
