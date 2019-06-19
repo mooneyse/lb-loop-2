@@ -744,9 +744,12 @@ def sort_axes(soltab):
 
     axes_names = soltab.getAxesNames()
     if 'dir' not in axes_names:  # add the direction dimension
-            axes_names = ['dir'] + axes_names
-            values = np.expand_dims(soltab.val, 0)
-            weights = np.expand_dims(soltab.weight, 0)
+        axes_names = ['dir'] + axes_names
+        values = np.expand_dims(soltab.val, 0)
+        weights = np.expand_dims(soltab.weight, 0)
+    else:
+        values = soltab.val
+        weights = soltab.weight
 
     reordered_values = reorderAxes(values, axes_names,
                                    ['time', 'freq', 'ant','pol', 'dir'])
