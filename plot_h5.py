@@ -9,6 +9,7 @@ import sys
 import losoto.h5parm as lh5
 from losoto.lib_operations import reorderAxes
 import matplotlib.pyplot as plt
+from scipy.interpolate import interp1d
 
 __author__ = 'Sean Mooney'
 __date__ = '01 June 2019'
@@ -69,20 +70,27 @@ def main():
         values1, times1 = get_values(h5a, station=stations[i], polarisation=polarisation)
         values2, times2 = get_values(h5b, station=stations[i], polarisation=polarisation)
         # values3, times3 = get_values(h5c, station=stations[i], polarisation=polarisation)
+        times1, values1 = times1[50:], values1[50:]
+        values1, values2 = np.array(values1), np.array(values2)  # values2 is shorter
+        f = interp1d(times2, values2)  # interpolate solutions as axes do not match
+        times2new = times1
+        values2new = f(times2new)
+
         plt.subplot(4, 7, i + 1)
-        plt.plot(times1, values1, 'k-', lw=1, alpha=1)
+        plt.plot(times1, values1, 'b-', lw=1, alpha=1)
         plt.plot(times2, values2, 'r-', lw=1, alpha=1)
-        # plt.plot(times3, values3, 'b-', lw=1, alpha=0.33)
+        plt.plot(times2new, values1 + values2new, 'k-', lw=1, alpha=1)
+
         plt.xticks([])
         plt.yticks([])
         plt.xlabel('Time')
         plt.ylabel('Phase')
-        plt.xlim(min([min(times1), min(times2)]), max([max(times1), max(times2)]))
+        plt.xlim(min(times1), max(times1))
         # plt.xlim(min([min(times1), min(times2), min(times3)]), max([max(times1), max(times2), max(times3)]))
         plt.ylim(-np.pi, np.pi)
         plt.title(stations[i])
-    fig.tight_layout()
 
+    fig.tight_layout()
     plt.show()
 
 
