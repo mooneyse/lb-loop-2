@@ -101,7 +101,7 @@ def coherence_metric(xx, yy):
     return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
 
 
-def evaluate_solutions(h5parm, mtf, threshold=0.25, verbose=True):
+def evaluate_solutions(h5parm, mtf, threshold=0.25, verbose=False):
     '''Get the direction from the h5parm. Evaluate the phase solutions in the
     h5parm for each station using the coherence metric. Determine the validity
     of each coherence metric that was calculated. Append the right ascension,
@@ -133,11 +133,7 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25, verbose=True):
     for station in stations:
         xx = temporary['XX_' + station]
         yy = temporary['YY_' + station]
-        # TODO the h5parm has three axes and it was assumed that it would have
-        #      only one, so for now to get things moving, we take just the first
-        #      first axis; see
-        #      https://github.com/mooneyse/lb-loop-2/issues/1#issue-456875708
-        print('TESTING--------------------------------------------------------')
+        # try/except block facilitates one or many frequency axes in the hdf5
         try:  # if there are multiple frequency axes
             cohs = []
             num_solns, num_freqs = xx.shape  # this unpack will fail if there is only one frequency axis
@@ -1064,9 +1060,9 @@ def main():
     directions = args.directions
 
     make_blank_mtf(mtf=mtf)
-
-    evaluate_solutions(h5parm=h5parm0, mtf=mtf)
-    evaluate_solutions(h5parm=h5parm1, mtf=mtf)
+    h5parm0 = '/data020/scratch/sean/letsgetloopy/SILTJ135044.06+544752.7_L693725_phasecal_205.055023463_54.8981803236-SILTJ135044.06+544752.7_L693725_phasecal.apply_tec-624312.MS_01_c2.h5'
+    evaluate_solutions(h5parm=h5parm0, mtf=mtf, verbose=True)
+    # evaluate_solutions(h5parm=h5parm1, mtf=mtf)
 
     # TODO the directions could be read from the ms in this case
     #      see https://github.com/mooneyse/lb-loop-2/issues/7#issue-456896239
