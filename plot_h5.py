@@ -51,13 +51,13 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('h5a', type=str)
     parser.add_argument('h5b', type=str)
-    # parser.add_argument('h5c', type=str)
+    parser.add_argument('h5c', type=str)
     parser.add_argument('-p', '--polarisation', required=False, type=str, default='XX')
 
     args = parser.parse_args()
     h5a = args.h5a
     h5b = args.h5b
-    # h5c = args.h5c
+    h5c = args.h5c
     polarisation = args.polarisation
 
     stations = ['RS106HBA', 'RS205HBA', 'RS208HBA', 'RS210HBA', 'RS305HBA', 'RS306HBA', 'RS307HBA',
@@ -69,24 +69,26 @@ def main():
     for i in range(len(stations)):
         values1, times1 = get_values(h5a, station=stations[i], polarisation=polarisation)
         values2, times2 = get_values(h5b, station=stations[i], polarisation=polarisation)
-        # values3, times3 = get_values(h5c, station=stations[i], polarisation=polarisation)
-        times1, values1 = times1[50:], values1[50:]
-        values1, values2 = np.array(values1), np.array(values2)  # values2 is shorter
-        f = interp1d(times2, values2)  # interpolate solutions as axes do not match
-        times2new = times1
-        values2new = f(times2new)
+        values3, times3 = get_values(h5c, station=stations[i], polarisation=polarisation)
+
+        # times1, values1 = times1[50:], values1[50:]
+        # values1, values2 = np.array(values1), np.array(values2)  # values2 is shorter
+        # f = interp1d(times2, values2)  # interpolate solutions as axes do not match
+        # times2new = times1
+        # values2new = f(times2new)
 
         plt.subplot(4, 7, i + 1)
         plt.plot(times1, values1, 'b-', lw=1, alpha=1)
         plt.plot(times2, values2, 'r-', lw=1, alpha=1)
-        plt.plot(times2new, values1 + values2new, 'k-', lw=1, alpha=1)
+        plt.plot(times3, values3, 'k-', lw=1, alpha=1)
+        # plt.plot(times2new, values1 + values2new, 'k-', lw=1, alpha=1)
 
         plt.xticks([])
         plt.yticks([])
         plt.xlabel('Time')
         plt.ylabel('Phase')
-        plt.xlim(min(times1), max(times1))
-        # plt.xlim(min([min(times1), min(times2), min(times3)]), max([max(times1), max(times2), max(times3)]))
+        # plt.xlim(min(times1), max(times1))
+        plt.xlim(min([min(times1), min(times2), min(times3)]), max([max(times1), max(times2), max(times3)]))
         plt.ylim(-np.pi, np.pi)
         plt.title(stations[i])
 
