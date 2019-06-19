@@ -1060,28 +1060,29 @@ def main():
     directions = args.directions
 
     make_blank_mtf(mtf=mtf)
-    h5parm0 = '/data020/scratch/sean/letsgetloopy/SILTJ135044.06+544752.7_L693725_phasecal_205.055023463_54.8981803236-SILTJ135044.06+544752.7_L693725_phasecal.apply_tec-624312.MS_01_c2.h5'
+
     evaluate_solutions(h5parm=h5parm0, mtf=mtf, verbose=True)
-    # evaluate_solutions(h5parm=h5parm1, mtf=mtf)
+    evaluate_solutions(h5parm=h5parm1, mtf=mtf)
 
     # TODO the directions could be read from the ms in this case
     #      see https://github.com/mooneyse/lb-loop-2/issues/7#issue-456896239
-    # new_h5parms = dir2phasesol_wrapper(mtf=mtf,
-    #                                    ms=ms,
-    #                                    directions=directions,
-    #                                    cores=cores)
-    #
-    # msouts = []
-    # for new_h5parm in new_h5parms:
-    #     msouts.append(apply_h5parm(h5parm=new_h5parm, ms=ms))  # outputs an ms per direction
+    new_h5parms = dir2phasesol_wrapper(mtf=mtf,
+                                       ms=ms,
+                                       directions=directions,
+                                       cores=cores)
+
+    msouts = []
+    for new_h5parm in new_h5parms:
+        msouts.append(apply_h5parm(h5parm=new_h5parm, ms=ms))  # outputs an ms per direction
 
     # TODO loop 3 has to be run from the directory the ms is in, so running it
     #      manually (it fails from within this script)
     #      see https://github.com/mooneyse/lb-loop-2/issues/2#issue-456880154
-    # print('Now run loop 3:')
-    # for msout in msouts:
-    #     print('python2 /data020/scratch/sean/letsgetloopy/lb-loop-2/loop3B_v1.py', msout)
+    print('Now run loop 3:')
+    for msout in msouts:
+        print('python2 /data020/scratch/sean/letsgetloopy/lb-loop-2/loop3B_v1.py', msout)
 
+    print('Then run update_list.')
     # update_list(initial_h5parm=h5parm, incremental_h5parm=loop3_phases,
     #             mtf=mtf, threshold=threshold, amplitude_h5parm=loop3_amplitudes)
 
