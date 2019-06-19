@@ -954,6 +954,10 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
     h = lh5.h5parm(combined_h5parm, readonly=False)
     table = h.makeSolset()  # creates sol000
     solset = h.getSolset('sol000')
+    print('TESTING -----------------------------------------------------------')
+    print('val shape', vals.shape, 'weight shape', weights.shape)
+    print('time, freq, ant, pol, dir')
+    print(new_times.shape, freq.shape, all_antennas.shape, pol.shape, dir_.shape)
     c = solset.makeSoltab('phase',
                           axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
                           axesVals=[new_times, freq, all_antennas, pol, dir_],
