@@ -40,7 +40,7 @@ def dir_from_ms(ms):
     list
         Pointing centre from the measurement set.'''
 
-    return np.squeeze(tb.table(ms + '::POINTING')[0]['DIRECTION'].tolist()
+    return np.squeeze(tb.table(ms + '::POINTING')[0]['DIRECTION'].tolist())
 
 
 def combine_h5s(phase_h5, amplitude_h5):
