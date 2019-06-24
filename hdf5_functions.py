@@ -1099,7 +1099,8 @@ def main():
     cores = args.cores
     directions = args.directions
 
-    combined_h5 = combine_h5s(phase_h5=, amplitude_h5=)
+    combined_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/lb-loop-2/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_02_c0.h5',
+                              amplitude_h5='/data020/scratch/sean/letsgetloopy/lb-loop-2/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_A_03_c0.h5')
     print(combined_h5)
     '''
     make_blank_mtf(mtf=mtf)
