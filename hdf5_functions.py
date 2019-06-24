@@ -55,32 +55,51 @@ def combine_h5s(phase_h5, amplitude_h5):
         Name of the new HDF5 file containing both phase and amplitude/phase
         solutions. '''
 
-    new_h5 = phase_h5[:-3] + '_phase_and_amp.h5'  # lazy method
-
+    # get data from the h5parms
     p = lh5.h5parm(phase_h5)
-    p_solset = p.getSolset('sol000')
-    p_soltab = p_solset.getSoltab('phase000')
+    p_soltab = p.getSolset('sol000').getSoltab('phase000')
 
     a = lh5.h5parm(amplitude_h5)
-    a_solset = a.getSolset('sol000')
-    a_soltab_A = a_solset.getSoltab('amplitude000')
-    a_soltab_theta = a_solset.getSoltab('phase000')
+    a_soltab_A = a.getSolset('sol000').getSoltab('amplitude000')
+    a_soltab_theta = a.getSolset('sol000').getSoltab('phase000')
 
-    # phase_soltab = lh5.openSoltab(phase_h5, address='sol000/phase000')
-    # amplitude_A_soltab = lh5.openSoltab(amplitude_h5, address='sol000/amplitude000')
-    # amplitude_theta_soltab = lh5.openSoltab(amplitude_h5, address='sol000/phase000')
+    # reorder axes
+    desired_axesNames = ['time', 'freq', 'ant', 'pol']  # NOTE no 'dir' axis
+    p_val_reordered = reorderAxes(p_soltab.val, p_soltab.getAxesNames(), desired_axesNames)
+    p_weight_reordered = reorderAxes(p_soltab.weight, p_soltab.getAxesNames(), desired_axesNames)
 
+    a_A_val_reordered = reorderAxes(a_soltab_A.val, a_soltab_A.getAxesNames(), desired_axesNames)
+    a_A_weight_reordered = reorderAxes(a_soltab_A.weight, a_soltab_A.getAxesNames(), desired_axesNames)
+
+    a_theta_val_reordered = reorderAxes(a_soltab_theta.val, a_soltab_theta.getAxesNames(), desired_axesNames)
+    a_theta_weight_reordered = reorderAxes(a_soltab_theta.weight, a_soltab_theta.getAxesNames(), desired_axesNames)
+
+    # make new solution tables in the new h5parm
+    new_h5 = phase_h5[:-3] + '_combo.h5'  # lazy method
     n = lh5.h5parm(new_h5, readonly=False)
-    n_phase_solset = h.makeSolset(solsetName='sol000')
-    n_amplitude_solset = h.makeSolset(solsetName='sol001')
 
-    # c = phase_solset.makeSoltab('phase',
-    #                             axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-    #                             axesVals=[new_time, freq, ant, pol, dir_],
-    #                             vals=vals,
-    #                             weights=weights)
+    n_phase_solset = n.makeSolset(solsetName='sol000')
+    n_phase = n_phase_solset.makeSoltab('phase',
+                                        axesNames=desired_axesNames,
+                                        axesVals=[p_soltab.time, p_soltab.freq, p_soltab.ant, p_soltab.pol],
+                                        vals=p_val_reordered,
+                                        weights=p_weight_reordered)
 
-    p.close()  # tidying up
+    n_amplitude_solset = n.makeSolset(solsetName='sol001')
+    n_amplitude_A = n_amplitude_solset.makeSoltab('amplitude',
+                                                  axesNames=desired_axesNames,
+                                                  axesVals=[a_soltab_A.time, a_soltab_A.freq, a_soltab_A.ant, a_soltab_A.pol],
+                                                  vals=a_A_val_reordered,
+                                                  weights=a_A_weight_reordered)
+
+    n_amplitude_theta = n_amplitude_solset.makeSoltab('phase',
+                                                      axesNames=desired_axesNames,
+                                                      axesVals=[a_soltab_theta.time, a_soltab_theta.freq, a_soltab_theta.ant, a_soltab_theta.pol],
+                                                      vals=a_theta_val_reordered,
+                                                      weights=a_theta_weight_reordered)
+
+    # tidy up
+    p.close()
     a.close()
     n.close()
 
