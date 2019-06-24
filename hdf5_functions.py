@@ -91,7 +91,7 @@ def combine_h5s(phase_h5='', amplitude_h5='', loop3_dir=''):
         solutions. '''
 
     if loop3_dir:
-        loop3_files = [f for f in os.listdir(loop3_dir) if os.path.isfile(os.path.join(loop3_dir, f))]
+        loop3_files = [loop3_dir + '/' + f for f in os.listdir(loop3_dir) if os.path.isfile(os.path.join(loop3_dir, f))]
         only_h5s = [f for f in loop3_files if f.endswith('.h5')]
         amplitude_h5s = fnmatch.filter(only_h5s, '*_A_*.h5')
         for h5 in amplitude_h5s:
