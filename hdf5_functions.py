@@ -15,6 +15,7 @@ import losoto.h5parm as lh5  # on CEP3, "module load losoto"
 import astropy.units as u
 import pyrap.tables as pt
 import numpy as np
+import casacore.tables as tb
 import argparse
 import csv
 import datetime
@@ -25,13 +26,32 @@ import uuid
 __author__ = 'Sean Mooney'
 __date__ = '01 May 2019'
 
+def dir_from_ms(ms):
+    ''' Gets the pointing centre (right ascension and declination) from the
+    measurement set.
+
+    Parameters
+    ----------
+    ms : string
+        File path of the measurement set.
+
+    Returns
+    -------
+    list
+        Pointing centre from the measurement set.'''
+
+    return np.squeeze(tb.table(ms + '::POINTING')[0]['DIRECTION'].tolist()
+
+
 def combine_h5s(phase_h5, amplitude_h5):
     ''' A function that takes a HDF5 with phase000 and a HDF5 with amplitude000
     and phase000 for a particular direction and combines them into one HDF5.
     This is necessary for the way loop 2 works. The dir2phasesol function
     includes amplitude (and also TEC) but it reads the files from working_data
     which is the list of HDF5s that have the desired phase solutions. So this
-    function allows the amplitudes to be brought into the fold.
+    function allows the amplitudes to be brought into the fold. I only copy
+    across the solution tables; the source and antenna tables should come along
+    too.
 
     The next steps for expanding this function would be to take a list of HDF5
     files which can include TEC too (and anything else) and combines them. Then
@@ -1116,30 +1136,38 @@ def main():
     parser.add_argument('-d',
                         '--directions',
                         type=float,
-                        default=[-2.7043, 0.958154],
+                        default=[],
                         nargs='+',
                         help='source positions (radians; RA DEC RA DEC...)')
 
     args = parser.parse_args()
     mtf = args.mtf
-    h5parm0 = args.h5parm0
-    h5parm1 = args.h5parm1
+    h5parm0 = args.h5parm0  # NB ignoring this argument for now
+    h5parm1 = args.h5parm1  # NB ignoring this argument for now
     ms = args.ms
     threshold = args.threshold
     cores = args.cores
     directions = args.directions
 
-    combined_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_02_c0.h5',
-                              amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_A_03_c0.h5')
-    print(combined_h5)
-    '''
-    make_blank_mtf(mtf=mtf)
-
-    evaluate_solutions(h5parm=h5parm0, mtf=mtf, verbose=True)
-    evaluate_solutions(h5parm=h5parm1, mtf=mtf)
+    # combined_132737_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_02_c0.h5',
+    #                                  amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_A_03_c0.h5')
+    #
+    # combined_133749_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_00_c0.h5',
+    #                                  amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_A_04_c0.h5')
+    #
+    # make_blank_mtf(mtf=mtf)
+    #
+    # evaluate_solutions(h5parm=h5parm0, mtf=mtf, verbose=True)
+    # evaluate_solutions(h5parm=h5parm1, mtf=mtf)
 
     # TODO the directions could be read from the ms in this case
     #      see https://github.com/mooneyse/lb-loop-2/issues/7#issue-456896239
+
+    print(-2.7043, 0.958154)
+    if not directions:
+        directions = dir_from_ms(ms)
+        print(directions)
+    '''
     new_h5parms = dir2phasesol_wrapper(mtf=mtf,
                                        ms=ms,
                                        directions=directions,
