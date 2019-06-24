@@ -59,12 +59,12 @@ def combine_h5s(phase_h5, amplitude_h5):
 
     p = lh5.h5parm(phase_h5)
     p_solset = p.getSolset('sol000')
-    p_soltab = p_solset('phase000')
+    p_soltab = p_solset.getSoltab('phase000')
 
     a = lh5.h5parm(amplitude_h5)
     a_solset = a.getSolset('sol000')
-    a_soltab_A = a_solset('amplitude000')
-    a_soltab_theta = a_solset('phase000')
+    a_soltab_A = a_solset.getSoltab('amplitude000')
+    a_soltab_theta = a_solset.getSoltab('phase000')
 
     # phase_soltab = lh5.openSoltab(phase_h5, address='sol000/phase000')
     # amplitude_A_soltab = lh5.openSoltab(amplitude_h5, address='sol000/amplitude000')
