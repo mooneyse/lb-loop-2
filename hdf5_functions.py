@@ -23,9 +23,9 @@ import subprocess
 import uuid
 
 __author__ = 'Sean Mooney'
-__date__ = '01 May 2019'
+__date__ = '01 June 2019'
 
-def dir_from_ms(ms):
+def dir_from_ms(ms, verbose=False):
     ''' Gets the pointing centre (right ascension and declination) from the
     measurement set.
 
@@ -39,9 +39,10 @@ def dir_from_ms(ms):
     list
         Pointing centre from the measurement set.'''
 
-    # previously using this casacore one liner 
+    # previously using this casacore one liner
     # np.squeeze(tb.table(ms + '::POINTING')[0]['DIRECTION'].tolist())
 
+    print('Getting directions from {}.'.format(ms))
     t  = pt.table(ms, readonly=True, ack=False)
     field = pt.table(t.getkeyword('FIELD'), readonly=True, ack=False)
     directions = field.getcell('PHASE_DIR', 0)[0].tolist()  # radians
@@ -1106,19 +1107,19 @@ def main():
                         default='/data020/scratch/sean/letsgetloopy/mtf.txt',
                         help='master text file')
 
-    parser.add_argument('-p',
-                        '--h5parm0',
-                        required=False,
-                        type=str,
-                        default='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_02_c0.h5',
-                        help='one hdf5 file')
+    # parser.add_argument('-p',
+    #                     '--h5parm0',
+    #                     required=False,
+    #                     type=str,
+    #                     default='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_02_c0.h5',
+    #                     help='one hdf5 file')
 
-    parser.add_argument('-P',
-                        '--h5parm1',
-                        required=False,
-                        type=str,
-                        default='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_00_c0.h5',
-                        help='another hdf5 file')
+    # parser.add_argument('-P',
+    #                     '--h5parm1',
+    #                     required=False,
+    #                     type=str,
+    #                     default='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_00_c0.h5',
+    #                     help='another hdf5 file')
 
     parser.add_argument('-f',
                         '--ms',
@@ -1150,31 +1151,27 @@ def main():
 
     args = parser.parse_args()
     mtf = args.mtf
-    h5parm0 = args.h5parm0  # NB ignoring this argument for now
-    h5parm1 = args.h5parm1  # NB ignoring this argument for now
+    # h5parm0 = args.h5parm0  NB ignoring this argument for now
+    # h5parm1 = args.h5parm1  NB ignoring this argument for now
     ms = args.ms
     threshold = args.threshold
     cores = args.cores
-    directions = args.directions
+    directions = [-2.7043, 0.958154]  # args.directions NB testing only
 
-    # combined_132737_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_02_c0.h5',
-    #                                  amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_A_03_c0.h5')
-    #
-    # combined_133749_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_00_c0.h5',
-    #                                  amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_A_04_c0.h5')
-    #
-    # make_blank_mtf(mtf=mtf)
-    #
-    # evaluate_solutions(h5parm=h5parm0, mtf=mtf, verbose=True)
-    # evaluate_solutions(h5parm=h5parm1, mtf=mtf)
+    combined_132737_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_02_c0.h5',
+                                     amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_A_03_c0.h5')
 
-    # TODO the directions could be read from the ms in this case
-    #      see https://github.com/mooneyse/lb-loop-2/issues/7#issue-456896239
+    combined_133749_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_00_c0.h5',
+                                     amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_A_04_c0.h5')
 
-    print(-2.7043, 0.958154)
+    make_blank_mtf(mtf=mtf)
+
+    evaluate_solutions(h5parm=combined_132737_h5, mtf=mtf, verbose=True)
+    evaluate_solutions(h5parm=combined_133749_h5, mtf=mtf)
+
     if not directions:
         directions = dir_from_ms(ms)
-        print(directions)
+
     '''
     new_h5parms = dir2phasesol_wrapper(mtf=mtf,
                                        ms=ms,
