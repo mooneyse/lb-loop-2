@@ -1157,7 +1157,7 @@ def main():
     threshold = args.threshold
     cores = args.cores
     directions = [-2.7043, 0.958154]  # args.directions NB testing only
-
+    # WHY IS DIRECTIONS DIFFERENT FROM THE MS?
     combined_132737_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_02_c0.h5',
                                      amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_A_03_c0.h5')
 
