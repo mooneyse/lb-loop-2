@@ -52,7 +52,7 @@ def dir_from_ms(ms, verbose=False):
     return directions
 
 
-def combine_h5s(phase_h5, amplitude_h5):
+def combine_h5s(phase_h5='', amplitude_h5='', loop3_dir=''):
     ''' A function that takes a HDF5 with phase000 and a HDF5 with amplitude000
     and phase000 for a particular direction and combines them into one HDF5.
     This is necessary for the way loop 2 works. The dir2phasesol function
@@ -72,17 +72,34 @@ def combine_h5s(phase_h5, amplitude_h5):
 
     Parameters
     ----------
-    phase_h5 : string
+    phase_h5 : string (default = '')
         Name of the HDF5 file with the phase solutions.
-    amplitude_h5 : string
+    amplitude_h5 : string (default = '')
         Name of the HDF5 file with the amplitude (and corresponding phase)
         solutions.
+    loop3_dir : string (default = '')
+        Instead of a phase_h5 and an amplitude_h5, the directory of the loop 3
+        run can be given, and the function will use the phase and amplitude
+        HDF5 files relating to the furthest progress. This loop 3 directory
+        will take priority if it is given with phase_h5 and amplitude_h5.
 
     Returns
     -------
     string
         Name of the new HDF5 file containing both phase and amplitude/phase
         solutions. '''
+
+    if loop3_dir:
+        loop3_files = [f for f in os.listdir(loop3_dir) if os.path.isfile(os.path.join(loop3_dir, f))]
+        only_h5s = [f for f in loop3_files if f.endswith('.h5')]
+        amplitude_h5s = fnmatch.filter(only_h5s, '*_A_*.h5')
+        for h5 in amplitude_h5s:
+            while h5 in only_h5s: only_h5s.remove(h5)
+        phase_h5s = only_h5s
+        amplitude_h5s.sort()
+        phase_h5s.sort()
+        amplitude_h5 =  amplitude_h5s[-1]
+        phase_h5 = phase_h5s[-1]
 
     # get data from the h5parms
     p = lh5.h5parm(phase_h5)
@@ -265,12 +282,12 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25, verbose=False):
                 cohs.append(coherence_metric(xx[:, i], yy[:, i]))
 
             coh = np.mean(cohs)
-            print('{} {} coherence: {} ({} frequency axes)'.format(h5parm, station, coh, num_freqs)) if verbose else None
+            print('{} {} coherence: {:.3f} ({} frequency axes)'.format(h5parm, station, coh, num_freqs)) if verbose else None
             evaluations[station] = coh  # 0 = best
 
         except:  # if there is one frequency axis only
             coh = coherence_metric(xx, yy)
-            print('{} {} coherence: {}'.format(h5parm, station, coh)) if verbose else None
+            print('{} {} coherence: {:.3f}'.format(h5parm, station, coh)) if verbose else None
             evaluations[station] = coh  # 0 = best
 
     with open(mtf) as f:
@@ -1170,9 +1187,11 @@ def main():
     ms = args.ms
     threshold = args.threshold
     cores = args.cores
-    directions = [-2.7043, 0.958154]  # args.directions NB testing only
-    # WHY IS DIRECTIONS DIFFERENT FROM THE MS?
-    # NEED TO POPULATE SOURCE, ANTENNA TABLES
+    directions = args.directions
+
+    asdf = combine_h5s(loop3_dir='/data020/scratch/sean/letsgetloopy/loop3_SILTJ135044.06+544752.7_L693725_phasecal.apply_tec-624312')
+    evaluate_solutions(asdf)
+
     combined_132737_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_02_c0.h5',
                                      amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_A_03_c0.h5')
 
