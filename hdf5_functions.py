@@ -25,6 +25,57 @@ import uuid
 __author__ = 'Sean Mooney'
 __date__ = '01 May 2019'
 
+def combine_h5s(phase_h5, amplitude_h5):
+    ''' A function that takes a HDF5 with phase000 and a HDF5 with amplitude000
+    and phase000 for a particular direction and combines them into one HDF5.
+    This is necessary for the way loop 2 works. The dir2phasesol function
+    includes amplitude (and also TEC) but it reads the files from working_data
+    which is the list of HDF5s that have the desired phase solutions. So this
+    function allows the amplitudes to be brought into the fold.
+
+    The next steps for expanding this function would be to take a list of HDF5
+    files which can include TEC too (and anything else) and combines them. Then
+    the thing to have would be for this to search the loop 3 output and take
+    the latest phase and amplitude HDF5s and combine them (given just the
+    directory), with any specified TEC. Finally, add a flag to say whether to
+    take the solutions from loop 3 or the diagonal solutions from an initial
+    calibrator.
+
+    Parameters
+    ----------
+    phase_h5 : string
+        Name of the HDF5 file with the phase solutions.
+    amplitude_h5 : string
+        Name of the HDF5 file with the amplitude (and corresponding phase)
+        solutions.
+
+    Returns
+    -------
+    string
+        Name of the new HDF5 file containing both phase and amplitude/phase
+        solutions. '''
+
+    new_h5 = phase_h5[:-3] + 'and_amp.h5'  # lazy method
+
+    phase_soltab = lh5.openSoltab(phase_h5, address='sol000/phase000')
+    amplitude_A_soltab = lh5.openSoltab(amplitude_h5, address='sol000/amplitude000')
+    amplitude_theta_soltab = lh5.openSoltab(amplitude_h5, address='sol000/phase000')
+
+    h = lh5.h5parm(new_h5, readonly=False)
+    phase_solset = h.makeSolset(solsetName='sol000', addTables=False)
+    amplitude_solset = h.makeSolset(solsetName='sol001', addTables=False)
+
+    # c = phase_solset.makeSoltab('phase',
+    #                             axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+    #                             axesVals=[new_time, freq, ant, pol, dir_],
+    #                             vals=vals,
+    #                             weights=weights)
+
+    h.close()
+
+    return new_h5
+
+
 def make_blank_mtf(mtf):
     '''Create an empty master text file containing all of the LOFAR core,
     remote, and international stations, and ST001.
@@ -1048,6 +1099,9 @@ def main():
     cores = args.cores
     directions = args.directions
 
+    combined_h5 = combine_h5s(phase_h5=, amplitude_h5=)
+    print(combined_h5)
+    '''
     make_blank_mtf(mtf=mtf)
 
     evaluate_solutions(h5parm=h5parm0, mtf=mtf, verbose=True)
@@ -1074,7 +1128,7 @@ def main():
     print('Then run update_list.')
     # update_list(initial_h5parm=h5parm, incremental_h5parm=loop3_phases,
     #             mtf=mtf, threshold=threshold, amplitude_h5parm=loop3_amplitudes)
-
+    '''
 
 if __name__ == '__main__':
     main()
