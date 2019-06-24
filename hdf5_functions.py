@@ -1190,9 +1190,6 @@ def main():
     cores = args.cores
     directions = args.directions
 
-    asdf = combine_h5s(loop3_dir='/data020/scratch/sean/letsgetloopy/loop3_SILTJ135044.06+544752.7_L693725_phasecal.apply_tec-624312')
-    evaluate_solutions(asdf)
-
     combined_132737_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_02_c0.h5',
                                      amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_A_03_c0.h5')
 
@@ -1207,7 +1204,7 @@ def main():
     if not directions:
         directions = dir_from_ms(ms)
 
-    '''
+
     new_h5parms = dir2phasesol_wrapper(mtf=mtf,
                                        ms=ms,
                                        directions=directions,
@@ -1227,7 +1224,7 @@ def main():
     print('Then run update_list.')
     # update_list(initial_h5parm=h5parm, incremental_h5parm=loop3_phases,
     #             mtf=mtf, threshold=threshold, amplitude_h5parm=loop3_amplitudes)
-    '''
+    
 
 if __name__ == '__main__':
     main()
