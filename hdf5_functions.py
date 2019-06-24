@@ -15,7 +15,6 @@ import losoto.h5parm as lh5  # on CEP3, "module load losoto"
 import astropy.units as u
 import pyrap.tables as pt
 import numpy as np
-import casacore.tables as tb
 import argparse
 import csv
 import datetime
@@ -40,7 +39,13 @@ def dir_from_ms(ms):
     list
         Pointing centre from the measurement set.'''
 
-    return np.squeeze(tb.table(ms + '::POINTING')[0]['DIRECTION'].tolist())
+    t  = pt.table(ms, readonly=True, ack=False)
+    field = pt.table(t.getkeyword('FIELD'), readonly=True, ack=False)
+    directions = field.getcell('PHASE_DIR', 0)[0].tolist()  # radians
+    field.close()
+    t.close()
+    # return np.squeeze(tb.table(ms + '::POINTING')[0]['DIRECTION'].tolist())
+    return directions
 
 
 def combine_h5s(phase_h5, amplitude_h5):
