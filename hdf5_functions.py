@@ -87,10 +87,14 @@ def combine_h5s(phase_h5, amplitude_h5):
     # get data from the h5parms
     p = lh5.h5parm(phase_h5)
     p_soltab = p.getSolset('sol000').getSoltab('phase000')
+    p_source = p.getSolset('sol000').getSou().items()
+    p_antenna = p.getSolset('sol000').getAnt().items()
 
     a = lh5.h5parm(amplitude_h5)
     a_soltab_A = a.getSolset('sol000').getSoltab('amplitude000')
     a_soltab_theta = a.getSolset('sol000').getSoltab('phase000')
+    a_source = a.getSolset('sol000').getSou().items()
+    a_antenna = a.getSolset('sol000').getAnt().items()
 
     # reorder axes
     desired_axesNames = ['time', 'freq', 'ant', 'pol']  # NOTE no 'dir' axis
@@ -108,6 +112,11 @@ def combine_h5s(phase_h5, amplitude_h5):
     n = lh5.h5parm(new_h5, readonly=False)
 
     n_phase_solset = n.makeSolset(solsetName='sol000')
+    source_table = n_phase_solset.obj._f_get_child('source')
+    source_table.append(p_source)  # populate source and antenna tables
+    antenna_table = n_phase_solset.obj._f_get_child('antenna')
+    antenna_table.append(p_antenna)
+
     n_phase = n_phase_solset.makeSoltab('phase',
                                         axesNames=desired_axesNames,
                                         axesVals=[p_soltab.time, p_soltab.freq, p_soltab.ant, p_soltab.pol],
@@ -115,6 +124,11 @@ def combine_h5s(phase_h5, amplitude_h5):
                                         weights=p_weight_reordered)
 
     n_amplitude_solset = n.makeSolset(solsetName='sol001')
+    source_table = n_amplitude_solset.obj._f_get_child('source')
+    source_table.append(a_source)  # populate source and antenna tables
+    antenna_table = n_amplitude_solset.obj._f_get_child('antenna')
+    antenna_table.append(a_antenna)
+
     n_amplitude_A = n_amplitude_solset.makeSoltab('amplitude',
                                                   axesNames=desired_axesNames,
                                                   axesVals=[a_soltab_A.time, a_soltab_A.freq, a_soltab_A.ant, a_soltab_A.pol],
@@ -1158,6 +1172,7 @@ def main():
     cores = args.cores
     directions = [-2.7043, 0.958154]  # args.directions NB testing only
     # WHY IS DIRECTIONS DIFFERENT FROM THE MS?
+    # NEED TO POPULATE SOURCE, ANTENNA TABLES
     combined_132737_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_02_c0.h5',
                                      amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_A_03_c0.h5')
 
