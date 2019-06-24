@@ -55,15 +55,24 @@ def combine_h5s(phase_h5, amplitude_h5):
         Name of the new HDF5 file containing both phase and amplitude/phase
         solutions. '''
 
-    new_h5 = phase_h5[:-3] + 'and_amp.h5'  # lazy method
+    new_h5 = phase_h5[:-3] + '_phase_and_amp.h5'  # lazy method
 
-    phase_soltab = lh5.openSoltab(phase_h5, address='sol000/phase000')
-    amplitude_A_soltab = lh5.openSoltab(amplitude_h5, address='sol000/amplitude000')
-    amplitude_theta_soltab = lh5.openSoltab(amplitude_h5, address='sol000/phase000')
+    p = lh5.h5parm(phase_h5)
+    p_solset = p.getSolset('sol000')
+    p_soltab = p_solset('phase000')
 
-    h = lh5.h5parm(new_h5, readonly=False)
-    phase_solset = h.makeSolset(solsetName='sol000', addTables=False)
-    amplitude_solset = h.makeSolset(solsetName='sol001', addTables=False)
+    a = lh5.h5parm(amplitude_h5)
+    a_solset = a.getSolset('sol000')
+    a_soltab_A = a_solset('amplitude000')
+    a_soltab_theta = a_solset('phase000')
+
+    # phase_soltab = lh5.openSoltab(phase_h5, address='sol000/phase000')
+    # amplitude_A_soltab = lh5.openSoltab(amplitude_h5, address='sol000/amplitude000')
+    # amplitude_theta_soltab = lh5.openSoltab(amplitude_h5, address='sol000/phase000')
+
+    n = lh5.h5parm(new_h5, readonly=False)
+    n_phase_solset = h.makeSolset(solsetName='sol000')
+    n_amplitude_solset = h.makeSolset(solsetName='sol001')
 
     # c = phase_solset.makeSoltab('phase',
     #                             axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
@@ -71,6 +80,8 @@ def combine_h5s(phase_h5, amplitude_h5):
     #                             vals=vals,
     #                             weights=weights)
 
+    p.close()
+    a.close()
     h.close()
 
     return new_h5
