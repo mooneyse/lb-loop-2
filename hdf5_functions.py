@@ -80,9 +80,9 @@ def combine_h5s(phase_h5, amplitude_h5):
     #                             vals=vals,
     #                             weights=weights)
 
-    p.close()
+    p.close()  # tidying up
     a.close()
-    h.close()
+    n.close()
 
     return new_h5
 
