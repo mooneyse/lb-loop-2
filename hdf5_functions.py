@@ -443,6 +443,7 @@ def build_soltab(soltab, working_data, solset):
         time_maxs.append(np.max(tab.time[:]))
         time_intervals.append((np.max(tab.time[:]) - np.min(tab.time[:])) / (len(tab.time[:]) - 1))
         frequencies.append(tab.freq[:])
+        print(tab.freq[:], 'herererere')    # NB NB NB NB NB
         lo.close()
 
     # the time ranges from the lowest to the highest on the smallest interval
@@ -502,7 +503,7 @@ def build_soltab(soltab, working_data, solset):
 
     vals = np.concatenate(val, axis=2)
     weights = np.concatenate(weight, axis=2)
-    print('HERE!!!!!!!!!!!!!!!!!!!',vals.shape, weights.shape)
+
     return vals, weights, new_time, [np.average(frequencies, axis=0)]
 
 
