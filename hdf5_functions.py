@@ -692,7 +692,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     weights = np.concatenate(weight, axis=2)
 
     # write these best phase solutions to the new h5parm
-    print('Building phase soltuions.')
+    print('Putting phase soltuions in sol000 in {}.'.format(new_h5parm))
     c = solset.makeSoltab('phase',
                           axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
                           axesVals=[new_time, freq, ant, pol, dir_],
@@ -809,7 +809,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     try:  # bring across amplitude solutions if there are any
         vals, weights, time, freq = build_soltab(soltab='amplitude', working_data=working_data, solset='sol001')
-        print('Building amplitude solutions.')
+        print('Putting amplitude soltuions in sol001 in {}.'.format(new_h5parm))
         amp_solset = h.makeSolset('sol001')
         c = amp_solset.makeSoltab('amplitude',
                                   axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
@@ -1271,35 +1271,35 @@ def main():
     cores = args.cores
     directions = args.directions
 
-    # combined_132737_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_02_c0.h5',
-    #                                  amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_A_03_c0.h5')
-    #
-    # combined_133749_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_00_c0.h5',
-    #                                  amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_A_04_c0.h5')
-    #
-    # make_blank_mtf(mtf=mtf)
-    #
-    # evaluate_solutions(h5parm=combined_132737_h5, mtf=mtf)
-    # evaluate_solutions(h5parm=combined_133749_h5, mtf=mtf)
-    directions=dir_from_ms(ms)
-    print(dir2phasesol(mtf=mtf, ms=ms, directions=directions))  # these should have sol001 with amplitudes/phases!
-    # new_h5parms = dir2phasesol_wrapper(mtf=mtf,
-    #                                    ms=ms,
-    #                                    directions=directions,
-    #                                    cores=cores)
-    #
-    # msouts = []
-    # for new_h5parm in new_h5parms:
-    #     msouts.append(apply_h5parm(h5parm=new_h5parm, ms=ms))  # outputs an ms per direction
-    #
+    combined_132737_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_02_c0.h5',
+                                     amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_A_03_c0.h5')
+
+    combined_133749_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_00_c0.h5',
+                                     amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_A_04_c0.h5')
+
+    make_blank_mtf(mtf=mtf)
+
+    evaluate_solutions(h5parm=combined_132737_h5, mtf=mtf)
+    evaluate_solutions(h5parm=combined_133749_h5, mtf=mtf)
+    # directions=dir_from_ms(ms)
+    # print(dir2phasesol(mtf=mtf, ms=ms, directions=directions))  # these should have sol001 with amplitudes/phases!
+    new_h5parms = dir2phasesol_wrapper(mtf=mtf,
+                                       ms=ms,
+                                       directions=directions,
+                                       cores=cores)
+
+    msouts = []
+    for new_h5parm in new_h5parms:
+        msouts.append(apply_h5parm(h5parm=new_h5parm, ms=ms))  # outputs an ms per direction
+
     # TODO loop 3 has to be run from the directory the ms is in, so running it
     #      manually (it fails from within this script)
     #      see https://github.com/mooneyse/lb-loop-2/issues/2#issue-456880154
-    # print('Now run loop 3:')
-    # for msout in msouts:
-    #     print('python2 /data020/scratch/sean/letsgetloopy/lb-loop-2/loop3B_v1.py', msout)
-    #
-    # print('Then run combine_h5s and update_list.')
+    print('Now run loop 3:')
+    for msout in msouts:
+        print('    $ python2 /data020/scratch/sean/letsgetloopy/lb-loop-2/loop3B_v1.py', msout)
+
+    print('Then run combine_h5s and update_list.')
     # loop3_h5s = combine_h5s(loop3_dir='?')
     # update_list(initial_h5parm=h5parm, incremental_h5parm=loop3_phases,
     #             mtf=mtf, threshold=threshold, amplitude_h5parm=loop3_amplitudes)
