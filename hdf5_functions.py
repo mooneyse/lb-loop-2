@@ -916,7 +916,7 @@ def apply_h5parm(h5parm, ms, column_out='DATA', solutions=['phase']):
     f.close()
     ndppp_output = subprocess.check_output(['NDPPP', parset])
     os.remove(parset)
-    
+
     return msout
 
 
@@ -1287,8 +1287,8 @@ def main():
 
     args = parser.parse_args()
     mtf = args.mtf
-    # h5parm0 = args.h5parm0  NB ignoring this argument for now
-    # h5parm1 = args.h5parm1  NB ignoring this argument for now
+    # h5parm0 = args.h5parm0
+    # h5parm1 = args.h5parm1
     ms = args.ms
     threshold = args.threshold
     cores = args.cores
