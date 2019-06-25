@@ -330,6 +330,9 @@ def dir2phasesol_wrapper(mtf, ms, directions=[], cores=4):
     The names of the newly created h5parms in the directions specified. (list)
     '''
 
+    if not directions:
+        directions = dir_from_ms(ms)
+
     mtf_list, ms_list = [], []
     for i in range(int(len(directions) / 2)):
         mtf_list.append(mtf)
@@ -397,28 +400,42 @@ def dir2phasesol_multiprocessing(args):
     return dir2phasesol(mtf=mtf, ms=ms, directions=directions)
 
 
-def build_soltab(soltab, working_data):
-    '''Creates a solution table from many h5parms using data from the temporary
-    working file.
+def build_soltab(soltab, working_data, solset):
+    ''' Creates a solution table from many h5parms using data from the
+    temporary working file.
 
-    Args:
-    soltab (str): The name of the solution table to copy solutions from.
-    working_data (NumPy array): Data providing the list of good and bad
-        stations, which was taken from the temporary working file, and the
-        goodness relates to the coherence metric on the phase solutions.
+    Parameters
+    ----------
+    soltab : string
+        The name of the solution table to copy solutions from.
+    working_data : NumPy array
+        Data providing the list of good and bad stations, which was taken from
+        the temporary working file, and the goodness relates to the coherence
+        metric on the phase solutions.
+    solset : string
+        The solution set in the HDF5 files given in the working_data that have
+        the relevant solution tables. The stardard I am going with is to have
+        phase000 in sol000, amplitude000/phase000 in sol001, and tec000 in
+        sol002.
 
-    Returns:
-    Values to populate the solution table (NumPy array).
-    Weights to populate the solution table (NumPy array).
-    Time axis to populate the solution table (NumPy array).
-    Frequency axis to populate the solution table (NumPy array).
-    Antenna axis to populate the solution table (NumPy array).'''
+    Returns
+    -------
+    NumPy array
+        Values to populate the solution table.
+    NumPy array
+        Weights to populate the solution table.
+    NumPy array
+        Time axis to populate the solution table.
+    NumPy array
+        Frequency axis to populate the solution table.
+    NumPy array
+        Antenna axis to populate the solution table. '''
 
     for my_line in range(len(working_data)):  # one line per station
         my_station = working_data[my_line][0]
         my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
         lo = lh5.h5parm(my_h5parm, readonly=False)
-        tab = lo.getSolset('sol000').getSoltab(soltab + '000')
+        tab = lo.getSolset(solset).getSoltab(soltab + '000')
         time_mins.append(np.min(tab.time[:]))
         time_maxs.append(np.max(tab.time[:]))
         time_intervals.append((np.max(tab.time[:]) - np.min(tab.time[:])) / (len(tab.time[:]) - 1))
@@ -434,7 +451,7 @@ def build_soltab(soltab, working_data):
         my_station = working_data[my_line][0]
         my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
         lo = lh5.h5parm(my_h5parm, readonly=False)
-        tab = lo.getSolset('sol000').getSoltab(soltab + '000')
+        tab = lo.getSolset(solset).getSoltab(soltab + '000')
         axes_names = tab.getAxesNames()
         values = tab.val
         weights = tab.weight
@@ -444,20 +461,39 @@ def build_soltab(soltab, working_data):
             values = np.expand_dims(tab.val, 0)
             weights = np.expand_dims(tab.weight, 0)
 
-        reordered_values = reorderAxes(values, axes_names, ['time', 'freq', 'ant', 'pol', 'dir'])
-        reordered_weights = reorderAxes(weights, axes_names, ['time', 'freq', 'ant', 'pol', 'dir'])
+        if soltab is 'tec':  # tec will not have a polarisation axis
+            reordered_values = reorderAxes(values, axes_names, ['time', 'freq', 'ant', 'dir'])
+            reordered_weights = reorderAxes(weights, axes_names, ['time', 'freq', 'ant', 'dir'])
 
-        for s in range(len(tab.ant[:])):  # stations
-            if tab.ant[s] == my_station.strip():
-                v = reordered_values[:, :, s, :, :]  # time, freq, ant, pol, dir
-                w = reordered_weights[:, :, s, :, :]
-                v_expanded = np.expand_dims(v, axis=2)
-                w_expanded = np.expand_dims(w, axis=2)
-                v_interpolated = interpolate_time(the_array=v_expanded, the_times=tab.time[:], new_times=new_time)
-                w_interpolated = interpolate_time(the_array=w_expanded, the_times=tab.time[:], new_times=new_time)
-                val.append(v_interpolated)
-                weight.append(w_interpolated)
-        lo.close()
+            for s in range(len(tab.ant[:])):  # stations
+                if tab.ant[s] == my_station.strip():
+                    v = reordered_values[:, :, s, :]  # time, freq, ant, dir
+                    w = reordered_weights[:, :, s, :]
+                    v_expanded = np.expand_dims(v, axis=2)
+                    w_expanded = np.expand_dims(w, axis=2)
+                    print('Need to make interpolate_time handle TEC (no pol axis)')
+                    sys.exit()  # BUG fix interpolate_time for TEC
+                    v_interpolated = interpolate_time(the_array=v_expanded, the_times=tab.time[:], new_times=new_time)
+                    w_interpolated = interpolate_time(the_array=w_expanded, the_times=tab.time[:], new_times=new_time)
+                    val.append(v_interpolated)
+                    weight.append(w_interpolated)
+            lo.close()
+
+        else:
+            reordered_values = reorderAxes(values, axes_names, ['time', 'freq', 'ant', 'pol', 'dir'])
+            reordered_weights = reorderAxes(weights, axes_names, ['time', 'freq', 'ant', 'pol', 'dir'])
+
+            for s in range(len(tab.ant[:])):  # stations
+                if tab.ant[s] == my_station.strip():
+                    v = reordered_values[:, :, s, :, :]  # time, freq, ant, pol, dir
+                    w = reordered_weights[:, :, s, :, :]
+                    v_expanded = np.expand_dims(v, axis=2)
+                    w_expanded = np.expand_dims(w, axis=2)
+                    v_interpolated = interpolate_time(the_array=v_expanded, the_times=tab.time[:], new_times=new_time)
+                    w_interpolated = interpolate_time(the_array=w_expanded, the_times=tab.time[:], new_times=new_time)
+                    val.append(v_interpolated)
+                    weight.append(w_interpolated)
+            lo.close()
 
     vals = np.concatenate(val, axis=2)
     weights = np.concatenate(weight, axis=2)
@@ -575,6 +611,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
         # use the station to get the relevant data to be copied from the h5parm
         lo = lh5.h5parm(my_h5parm, readonly=False)  # NB change this to True
+        # NB combine_h5s puts phase in sol000 and amplitude in sol001
         phase = lo.getSolset('sol000').getSoltab('phase000')
         time = phase.time[:]
         time_mins.append(np.min(time))
@@ -642,32 +679,12 @@ def dir2phasesol(mtf, ms='', directions=[]):
     weights = np.concatenate(weight, axis=2)
 
     # write these best phase solutions to the new h5parm
+    print('Building phase soltuions.')
     c = solset.makeSoltab('phase',
                           axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
                           axesVals=[new_time, freq, ant, pol, dir_],
                           vals=vals,
                           weights=weights)  # creates phase000
-
-    # WARNING the tec and amplitude soltab functionality has not been tested
-    try:
-        vals, weights, time, freq, ant = build_soltab(soltab='tec', working_data=working_data)
-        c = solset.makeSoltab('tec',
-                              axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                              axesVals=[time, freq, ant, pol, dir_],
-                              vals=vals,
-                              weights=weights)  # creates tec000
-    except:
-        pass
-
-    try:
-        vals, weights, time, freq = build_soltab(soltab='amplitude', working_data=working_data)
-        c = solset.makeSoltab('amplitude',
-                              axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                              axesVals=[time, freq, ant, pol, dir_],
-                              vals=vals,
-                              weights=weights)  # creates amplitude000
-    except:
-        pass
 
     # copy source and antenna tables into the new h5parm
     source_soltab = {'POINTING':
@@ -733,11 +750,11 @@ def dir2phasesol(mtf, ms='', directions=[]):
                       'RS306HBA': np.array([3829771.249, 452761.702000, 5063243.181], dtype='float32'),
                       'RS307HBA': np.array([3837964.52, 449627.261000, 5057357.585], dtype='float32'),
                       'RS310HBA': np.array([3845376.29, 413616.564000, 5054796.341], dtype='float32'),
-                      'RS404HBA': np.array([0.0, 0.0, 0.0], dtype='float32'),
+                      'RS404HBA': np.array([0.0, 0.0, 0.0], dtype='float32'),  # not operational yet
                       'RS406HBA': np.array([3818424.939, 452020.269000, 5071817.644], dtype='float32'),
                       'RS407HBA': np.array([3811649.455, 453459.894000, 5076728.952], dtype='float32'),
                       'RS409HBA': np.array([3824812.621, 426130.330000, 5069251.754], dtype='float32'),
-                      'RS410HBA': np.array([0.0, 0.0, 0.0], dtype='float32'),
+                      'RS410HBA': np.array([0.0, 0.0, 0.0], dtype='float32'),  # not operational yet
                       'RS503HBA': np.array([3824138.566, 459476.972, 5066858.578], dtype='float32'),
                       'RS508HBA': np.array([3797136.484, 463114.447, 5086651.286], dtype='float32'),
                       'RS509HBA': np.array([3783537.525, 450130.064, 5097866.146], dtype='float32'),
@@ -776,6 +793,58 @@ def dir2phasesol(mtf, ms='', directions=[]):
     source_table.append(source_soltab.items())  # from dictionary to list
     antenna_table = table.obj._f_get_child('antenna')
     antenna_table.append(antenna_soltab.items())  # from dictionary to list
+
+    try:  # bring across amplitude solutions if there are any
+        vals, weights, time, freq = build_soltab(soltab='amplitude', working_data=working_data, solset='sol001')
+        print('Building amplitude solutions.')
+        amp_solset = h.makeSolset('sol001')
+        c = amp_solset.makeSoltab('amplitude',
+                                  axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+                                  axesVals=[time, freq, ant, pol, dir_],
+                                  vals=vals,
+                                  weights=weights)  # creates amplitude000
+        # amplitude solutions have a phase component too
+        vals, weights, time, freq = build_soltab(soltab='phase', working_data=working_data, solset='sol001')
+        d = amp_solset.makeSoltab('phase',
+                                  axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+                                  axesVals=[time, freq, ant, pol, dir_],
+                                  vals=vals,
+                                  weights=weights)  # creates phase000
+
+        # make source and antenna tables
+        amp_source = amp_solset.obj._f_get_child('source')
+        amp_source.append(source_soltab.items())  # from dictionary to list
+        amp_antenna = amp_solset.obj._f_get_child('antenna')
+        amp_antenna.append(antenna_soltab.items())  # from dictionary to list
+
+    except:
+        print('No amplitude solutions found.')
+        pass
+
+    try:  # bring across tec solutions if there are any
+        vals, weights, time, freq, ant = build_soltab(soltab='tec', working_data=working_data, solset='sol002')
+        print('Building TEC solutions.')
+        tec_solset = h.makeSolset('sol002')
+        c = tec_solset.makeSoltab('tec',
+                                  axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+                                  axesVals=[time, freq, ant, pol, dir_],
+                                  vals=vals,
+                                  weights=weights)  # creates tec000
+
+        # make source and antenna tables
+        # TODO I am using the source and antenna tables from phase, and the
+        #      source table should be fine but the antenna table could in
+        #      in theory be different (the same goes for the amplitude
+        #      solutions above)
+        tec_source = tec_solset.obj._f_get_child('source')
+        tec_source.append(source_soltab.items())  # from dictionary to list
+        tec_antenna = tec_solset.obj._f_get_child('antenna')
+        tec_antenna.append(antenna_soltab.items())  # from dictionary to list
+
+    except:
+        print('No TEC solutions found.')
+        pass
+
     h.close()  # close the new h5parm
     os.remove(working_file)
     return new_h5parm
@@ -1198,12 +1267,8 @@ def main():
 
     make_blank_mtf(mtf=mtf)
 
-    evaluate_solutions(h5parm=combined_132737_h5, mtf=mtf, verbose=True)
+    evaluate_solutions(h5parm=combined_132737_h5, mtf=mtf)
     evaluate_solutions(h5parm=combined_133749_h5, mtf=mtf)
-
-    if not directions:
-        directions = dir_from_ms(ms)
-
 
     new_h5parms = dir2phasesol_wrapper(mtf=mtf,
                                        ms=ms,
@@ -1221,10 +1286,11 @@ def main():
     for msout in msouts:
         print('python2 /data020/scratch/sean/letsgetloopy/lb-loop-2/loop3B_v1.py', msout)
 
-    print('Then run update_list.')
+    print('Then run combine_h5s and update_list.')
+    # loop3_h5s = combine_h5s(loop3_dir='?')
     # update_list(initial_h5parm=h5parm, incremental_h5parm=loop3_phases,
     #             mtf=mtf, threshold=threshold, amplitude_h5parm=loop3_amplitudes)
-    
+
 
 if __name__ == '__main__':
     main()
