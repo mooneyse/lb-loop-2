@@ -886,26 +886,29 @@ def apply_h5parm(h5parm, ms, column_out='DATA', solutions=['phase']):
     msout =  ms + '-' + str(uuid.uuid4())[:6] + '.MS'
 
     with open(parset, 'w') as f:  # create the parset
-        f.write('# created by apply_h5parm at {}\n'.format(now))
-        f.write('msin                 = {}\n'.format(ms))
-        f.write('msin.datacolumn      = {}\n'.format(column_in))
-        f.write('msout                = {}\n'.format(msout))
-        f.write('msout.datacolumn     = {}\n'.format(column_out))
+        f.write('# created by apply_h5parm at {}\n\n'.format(now))
+        f.write('msin                         = {}\n'.format(ms))
+        f.write('msin.datacolumn              = {}\n'.format(column_in))
+        f.write('msout                        = {}\n'.format(msout))
+        f.write('msout.datacolumn             = {}\n'.format(column_out))
+
         if 'amplitude' in solutions:
             print('Applying phase and amplitude/phase solutions.')
-            f.write('steps                = [applycal, applycal2]\n')
+            f.write('steps                        = [applycalPhase, applycalAmplitude]\n\n')
         else:
-            f.write('steps                = [applycal]\n')
-        f.write('applycal.type        = applycal\n')
-        f.write('applycal.parmdb      = {}\n'.format(h5parm))
-        f.write('applycal.solset      = sol000\n')
-        f.write('applycal.correction  = phase000\n')
+            f.write('steps                        = [applycalPhase, applycalAmplitude]\n\n')
+
+        f.write('applycalPhase.type           = applycal\n')
+        f.write('applycalPhase.parmdb         = {}\n'.format(h5parm))
+        f.write('applycal.solset              = sol000\n')
+        f.write('applycal.correction          = phase000\n\n')
+
         if 'amplitude' in solutions:
-            f.write('applycal2.type       = applycal\n')
-            f.write('applycal2.parmdb     = {}\n'.format(h5parm))
-            f.write('applycal2.solset     = sol001\n')
-            f.write('applycal2.correction = fulljones\n')
-            f.write('applycal2.soltab     = [amplitude, phase]\n')
+            f.write('applycalAmplitude.type       = applycal\n')
+            f.write('applycalAmplitude.parmdb     = {}\n'.format(h5parm))
+            f.write('applycalAmplitude.solset     = sol001\n')
+            f.write('applycalAmplitude.correction = amplitude000  # phase000\n')
+
     f.close()
 
     ndppp_output = subprocess.check_output(['NDPPP', parset])
