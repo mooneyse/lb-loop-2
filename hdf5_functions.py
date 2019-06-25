@@ -43,7 +43,8 @@ def dir_from_ms(ms, verbose=False):
     # previously using this casacore one liner
     # np.squeeze(tb.table(ms + '::POINTING')[0]['DIRECTION'].tolist())
 
-    print('Getting directions from {}.'.format(ms))
+    if verbose:
+        print('Getting direction from {}.'.format(ms))
     t  = pt.table(ms, readonly=True, ack=False)
     field = pt.table(t.getkeyword('FIELD'), readonly=True, ack=False)
     directions = field.getcell('PHASE_DIR', 0)[0].tolist()  # radians
@@ -1276,8 +1277,8 @@ def main():
                                        cores=cores)
     print(new_h5parms)  # these should have sol001 with amplitudes/phases!
     msouts = []
-    for new_h5parm in new_h5parms:
-        msouts.append(apply_h5parm(h5parm=new_h5parm, ms=ms))  # outputs an ms per direction
+    # for new_h5parm in new_h5parms:
+    #     msouts.append(apply_h5parm(h5parm=new_h5parm, ms=ms))  # outputs an ms per direction
 
     # TODO loop 3 has to be run from the directory the ms is in, so running it
     #      manually (it fails from within this script)
