@@ -682,6 +682,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     dir_ = [str(directions.ra.rad) + ', ' + str(directions.dec.rad)]  # given
 
     vals = np.concatenate(val, axis=2)
+    print(vals.shape)  # NB NB NB NB NB 
     weights = np.concatenate(weight, axis=2)
 
     # write these best phase solutions to the new h5parm
