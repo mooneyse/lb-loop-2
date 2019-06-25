@@ -914,10 +914,9 @@ def apply_h5parm(h5parm, ms, column_out='DATA', solutions=['phase']):
             f.write('applyAmplitude_P.correction = phase000\n')
 
     f.close()
-
-    sys.exit()  # NB NB NB
     ndppp_output = subprocess.check_output(['NDPPP', parset])
     os.remove(parset)
+    
     return msout
 
 
