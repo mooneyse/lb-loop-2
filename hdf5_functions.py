@@ -450,6 +450,7 @@ def build_soltab(soltab, working_data, solset):
     new_time = np.linspace(np.min(time_mins), np.max(time_maxs), num_of_steps)
 
     # looping through the h5parms to get the solutions for the good stations
+    val, weight = [], []
     for my_line in range(len(working_data)):  # one line per station
         my_station = working_data[my_line][0]
         my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
@@ -486,7 +487,6 @@ def build_soltab(soltab, working_data, solset):
         else:
             reordered_values = reorderAxes(values, axes_names, ['time', 'freq', 'ant', 'pol', 'dir'])
             reordered_weights = reorderAxes(weights, axes_names, ['time', 'freq', 'ant', 'pol', 'dir'])
-            val, weight = [], []
 
             for s in range(len(tab.ant[:])):  # stations
                 if tab.ant[s] == my_station.strip():
@@ -502,8 +502,8 @@ def build_soltab(soltab, working_data, solset):
 
     vals = np.concatenate(val, axis=2)
     weights = np.concatenate(weight, axis=2)
-
-    return np.array(vals), np.array(weights), new_time, [np.average(frequencies, axis=0)]
+    print('HERE!!!!!!!!!!!!!!!!!!!',vals.shape, weights.shape)
+    return vals, weights, new_time, [np.average(frequencies, axis=0)]
 
 
 def dir2phasesol(mtf, ms='', directions=[]):
