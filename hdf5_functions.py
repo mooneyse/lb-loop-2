@@ -689,7 +689,6 @@ def dir2phasesol(mtf, ms='', directions=[]):
     dir_ = [str(directions.ra.rad) + ', ' + str(directions.dec.rad)]  # given
 
     vals = np.concatenate(val, axis=2)
-    print(vals.shape)
     weights = np.concatenate(weight, axis=2)
 
     # write these best phase solutions to the new h5parm
@@ -826,6 +825,9 @@ def dir2phasesol(mtf, ms='', directions=[]):
                                   weights=weights)  # creates phase000
 
         # make source and antenna tables
+        # using the source and antenna tables from phase as they should be the
+        # same (where a station is included is based on the phase coherences
+        # per station)
         amp_source = amp_solset.obj._f_get_child('source')
         amp_source.append(source_soltab.items())  # from dictionary to list
         amp_antenna = amp_solset.obj._f_get_child('antenna')
@@ -846,10 +848,6 @@ def dir2phasesol(mtf, ms='', directions=[]):
     #                               weights=weights)  # creates tec000
     #
     #     # make source and antenna tables
-    #     # TODO I am using the source and antenna tables from phase, and the
-    #     #      source table should be fine but the antenna table could in
-    #     #      in theory be different (the same goes for the amplitude
-    #     #      solutions above)
     #     tec_source = tec_solset.obj._f_get_child('source')
     #     tec_source.append(source_soltab.items())  # from dictionary to list
     #     tec_antenna = tec_solset.obj._f_get_child('antenna')
