@@ -102,6 +102,7 @@ def combine_h5s(phase_h5='', amplitude_h5='', loop3_dir=''):
         phase_h5s.sort()
         amplitude_h5 =  amplitude_h5s[-1]
         phase_h5 = phase_h5s[-1]
+        print('Using {} and {}.'.format(phase_h5, amplitude_h5))
 
     # get data from the h5parms
     p = lh5.h5parm(phase_h5)
@@ -897,14 +898,14 @@ def apply_h5parm(h5parm, ms, column_out='DATA', solutions=['phase']):
             f.write('steps                = [applycal]\n')
         f.write('applycal.type        = applycal\n')
         f.write('applycal.parmdb      = {}\n'.format(h5parm))
-        f.write('applycal.solset      = sol000')
-        f.write('applycal.correction  = phase000')
+        f.write('applycal.solset      = sol000\n')
+        f.write('applycal.correction  = phase000\n')
         if 'amplitude' in solutions:
             f.write('applycal2.type       = applycal\n')
             f.write('applycal2.parmdb     = {}\n'.format(h5parm))
-            f.write('applycal2.solset     = sol001')
-            f.write('applycal2.correction = fulljones')
-            f.write('applycal2.soltab     = [amplitude, phase]')
+            f.write('applycal2.solset     = sol001\n')
+            f.write('applycal2.correction = fulljones\n')
+            f.write('applycal2.soltab     = [amplitude, phase]\n')
     f.close()
 
     ndppp_output = subprocess.check_output(['NDPPP', parset])
