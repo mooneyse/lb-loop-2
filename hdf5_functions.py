@@ -503,7 +503,7 @@ def build_soltab(soltab, working_data, solset):
     vals = np.concatenate(val, axis=2)
     weights = np.concatenate(weight, axis=2)
 
-    return vals, weights, new_time, [np.average(frequencies)]
+    return vals, weights, new_time, [np.average(frequencies, axis=0)]
 
 
 def dir2phasesol(mtf, ms='', directions=[]):
