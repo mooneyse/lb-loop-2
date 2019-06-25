@@ -503,7 +503,14 @@ def build_soltab(soltab, working_data, solset):
     vals = np.concatenate(val, axis=2)
     weights = np.concatenate(weight, axis=2)
 
-    return vals, weights, new_time, np.average(frequencies, axis=0)
+    # if there is only one frequency, avearging will return a float, where we
+    # want it as a list, but if there are >1 frequency it is fine
+    if isinstance(np.average(frequencies, axis=0), float:
+        my_freqs = [np.average(frequencies, axis=0)]
+    else:
+        my_freqs = np.average(frequencies, axis=0)
+
+    return vals, weights, new_time, my_freqs
 
 
 def dir2phasesol(mtf, ms='', directions=[]):
@@ -801,34 +808,32 @@ def dir2phasesol(mtf, ms='', directions=[]):
     antenna_table = table.obj._f_get_child('antenna')
     antenna_table.append(antenna_soltab.items())  # from dictionary to list
 
-    # try:  # bring across amplitude solutions if there are any
-    vals, weights, time, freq = build_soltab(soltab='amplitude', working_data=working_data, solset='sol001')
-    print('Building amplitude solutions.')
-    amp_solset = h.makeSolset('sol001')
-    print('VALS', np.array(vals).shape, 'WEIGHTS', np.array(weights).shape)
-    print(len(time), len(freq), len(ant), len(pol), len(dir_))
-    c = amp_solset.makeSoltab('amplitude',
-                              axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                              axesVals=[time, freq, ant, pol, dir_],
-                              vals=vals,
-                              weights=weights)  # creates amplitude000
-    # amplitude solutions have a phase component too
-    vals, weights, time, freq = build_soltab(soltab='phase', working_data=working_data, solset='sol001')
-    d = amp_solset.makeSoltab('phase',
-                              axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                              axesVals=[time, freq, ant, pol, dir_],
-                              vals=vals,
-                              weights=weights)  # creates phase000
+    try:  # bring across amplitude solutions if there are any
+        vals, weights, time, freq = build_soltab(soltab='amplitude', working_data=working_data, solset='sol001')
+        print('Building amplitude solutions.')
+        amp_solset = h.makeSolset('sol001')
+        c = amp_solset.makeSoltab('amplitude',
+                                  axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+                                  axesVals=[time, freq, ant, pol, dir_],
+                                  vals=vals,
+                                  weights=weights)  # creates amplitude000
+        # amplitude solutions have a phase component too
+        vals, weights, time, freq = build_soltab(soltab='phase', working_data=working_data, solset='sol001')
+        d = amp_solset.makeSoltab('phase',
+                                  axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+                                  axesVals=[time, freq, ant, pol, dir_],
+                                  vals=vals,
+                                  weights=weights)  # creates phase000
 
-    # make source and antenna tables
-    amp_source = amp_solset.obj._f_get_child('source')
-    amp_source.append(source_soltab.items())  # from dictionary to list
-    amp_antenna = amp_solset.obj._f_get_child('antenna')
-    amp_antenna.append(antenna_soltab.items())  # from dictionary to list
+        # make source and antenna tables
+        amp_source = amp_solset.obj._f_get_child('source')
+        amp_source.append(source_soltab.items())  # from dictionary to list
+        amp_antenna = amp_solset.obj._f_get_child('antenna')
+        amp_antenna.append(antenna_soltab.items())  # from dictionary to list
 
-    # except:
-    #     print('No amplitude solutions found.')
-    #     pass
+    except:
+        print('No amplitude solutions found.')
+        pass
 
     # try:  # bring across tec solutions if there are any
     #     vals, weights, time, freq, ant = build_soltab(soltab='tec', working_data=working_data, solset='sol002')
