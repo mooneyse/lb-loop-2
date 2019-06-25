@@ -1274,7 +1274,7 @@ def main():
                                        ms=ms,
                                        directions=directions,
                                        cores=cores)
-
+    print(new_h5parms)  # these should have sol001 with amplitudes/phases!
     msouts = []
     for new_h5parm in new_h5parms:
         msouts.append(apply_h5parm(h5parm=new_h5parm, ms=ms))  # outputs an ms per direction
