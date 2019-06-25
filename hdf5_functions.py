@@ -467,6 +467,7 @@ def build_soltab(soltab, working_data, solset):
         if soltab is 'tec':  # tec will not have a polarisation axis
             reordered_values = reorderAxes(values, axes_names, ['time', 'freq', 'ant', 'dir'])
             reordered_weights = reorderAxes(weights, axes_names, ['time', 'freq', 'ant', 'dir'])
+            val, weight = [], []
 
             for s in range(len(tab.ant[:])):  # stations
                 if tab.ant[s] == my_station.strip():
@@ -485,6 +486,7 @@ def build_soltab(soltab, working_data, solset):
         else:
             reordered_values = reorderAxes(values, axes_names, ['time', 'freq', 'ant', 'pol', 'dir'])
             reordered_weights = reorderAxes(weights, axes_names, ['time', 'freq', 'ant', 'pol', 'dir'])
+            val, weight = [], []
 
             for s in range(len(tab.ant[:])):  # stations
                 if tab.ant[s] == my_station.strip():
@@ -1263,16 +1265,16 @@ def main():
     cores = args.cores
     directions = args.directions
 
-    combined_132737_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_02_c0.h5',
-                                     amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_A_03_c0.h5')
-
-    combined_133749_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_00_c0.h5',
-                                     amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_A_04_c0.h5')
-
-    make_blank_mtf(mtf=mtf)
-
-    evaluate_solutions(h5parm=combined_132737_h5, mtf=mtf)
-    evaluate_solutions(h5parm=combined_133749_h5, mtf=mtf)
+    # combined_132737_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_02_c0.h5',
+    #                                  amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_A_03_c0.h5')
+    #
+    # combined_133749_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_00_c0.h5',
+    #                                  amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_A_04_c0.h5')
+    #
+    # make_blank_mtf(mtf=mtf)
+    #
+    # evaluate_solutions(h5parm=combined_132737_h5, mtf=mtf)
+    # evaluate_solutions(h5parm=combined_133749_h5, mtf=mtf)
     directions=dir_from_ms(ms)
     print(dir2phasesol(mtf=mtf, ms=ms, directions=directions))  # these should have sol001 with amplitudes/phases!
     # new_h5parms = dir2phasesol_wrapper(mtf=mtf,
