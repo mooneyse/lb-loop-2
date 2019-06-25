@@ -887,27 +887,31 @@ def apply_h5parm(h5parm, ms, column_out='DATA', solutions=['phase']):
 
     with open(parset, 'w') as f:  # create the parset
         f.write('# created by apply_h5parm at {}\n\n'.format(now))
-        f.write('msin                         = {}\n'.format(ms))
-        f.write('msin.datacolumn              = {}\n'.format(column_in))
-        f.write('msout                        = {}\n'.format(msout))
-        f.write('msout.datacolumn             = {}\n'.format(column_out))
+        f.write('msin                        = {}\n'.format(ms))
+        f.write('msin.datacolumn             = {}\n'.format(column_in))
+        f.write('msout                       = {}\n'.format(msout))
+        f.write('msout.datacolumn            = {}\n'.format(column_out))
 
         if 'amplitude' in solutions:
             print('Applying phase and amplitude/phase solutions.')
-            f.write('steps                        = [applycalPhase, applycalAmplitude]\n\n')
+            f.write('steps                       = [applyPhase, applyAmplitude_A, applyAmplitude_P]\n\n')
         else:
-            f.write('steps                        = [applycalPhase, applycalAmplitude]\n\n')
+            f.write('steps                       = [applyPhase]\n\n')
 
-        f.write('applycalPhase.type           = applycal\n')
-        f.write('applycalPhase.parmdb         = {}\n'.format(h5parm))
-        f.write('applycal.solset              = sol000\n')
-        f.write('applycal.correction          = phase000\n\n')
+        f.write('applyPhase.type             = applycal\n')
+        f.write('applyPhase.parmdb           = {}\n'.format(h5parm))
+        f.write('applyPhase.solset           = sol000\n')
+        f.write('applyPhase.correction       = phase000\n\n')
 
         if 'amplitude' in solutions:
-            f.write('applycalAmplitude.type       = applycal\n')
-            f.write('applycalAmplitude.parmdb     = {}\n'.format(h5parm))
-            f.write('applycalAmplitude.solset     = sol001\n')
-            f.write('applycalAmplitude.correction = amplitude000  # phase000\n')
+            f.write('applyAmplitude_A.type       = applycal\n')
+            f.write('applyAmplitude_A.parmdb     = {}\n'.format(h5parm))
+            f.write('applyAmplitude_A.solset     = sol001\n')
+            f.write('applyAmplitude_A.correction = amplitude000\n\n')
+            f.write('applyAmplitude_P.type       = applycal\n')
+            f.write('applyAmplitude_P.parmdb     = {}\n'.format(h5parm))
+            f.write('applyAmplitude_P.solset     = sol001\n')
+            f.write('applyAmplitude_P.correction = phase000\n')
 
     f.close()
 
@@ -1301,8 +1305,7 @@ def main():
 
     evaluate_solutions(h5parm=combined_132737_h5, mtf=mtf)
     evaluate_solutions(h5parm=combined_133749_h5, mtf=mtf)
-    # directions=dir_from_ms(ms)
-    # print(dir2phasesol(mtf=mtf, ms=ms, directions=directions))  # these should have sol001 with amplitudes/phases!
+
     new_h5parms = dir2phasesol_wrapper(mtf=mtf,
                                        ms=ms,
                                        directions=directions,
