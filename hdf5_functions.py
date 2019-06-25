@@ -912,6 +912,7 @@ def apply_h5parm(h5parm, ms, column_out='DATA', solutions=['phase']):
     f.close()
 
     ndppp_output = subprocess.check_output(['NDPPP', parset])
+    sys.exit()  # NB NB NB
     os.remove(parset)
     return msout
 
