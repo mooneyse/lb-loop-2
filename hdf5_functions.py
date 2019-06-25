@@ -503,7 +503,7 @@ def build_soltab(soltab, working_data, solset):
     vals = np.concatenate(val, axis=2)
     weights = np.concatenate(weight, axis=2)
 
-    return vals, weights, new_time, [np.average(frequencies)], successful_stations
+    return vals, weights, new_time, [np.average(frequencies)]
 
 
 def dir2phasesol(mtf, ms='', directions=[]):
@@ -583,8 +583,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
             if value == 1 and mtf_station not in successful_stations:
                 w = '{}\t{}\t{}\t{}\t{}'.format(mtf_station.ljust(8),
-                round(key.deg, 6), int(value),
-                row, h5parm)
+                                                round(key.deg, 6), int(value),
+                                                row, h5parm)
                 f.write('{}\n'.format(w))
                 successful_stations.append(mtf_station)
     f.close()
