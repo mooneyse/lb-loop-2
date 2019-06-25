@@ -862,7 +862,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     return new_h5parm
 
 
-def apply_h5parm(h5parm, ms, column_out='DATA'):
+def apply_h5parm(h5parm, ms, column_out='DATA', solutions=['phase']):
     '''Creates an NDPPP parset. Applies the output of make_h5parm to the
     measurement set.
 
@@ -870,6 +870,10 @@ def apply_h5parm(h5parm, ms, column_out='DATA'):
     new_h5parm (str): The output of dir2phasesol.
     ms (str): The measurement set for self-calibration.
     column_out (str; default = 'DATA'): The column NDPPP writes to.
+    solutions (str; default = 'phase'): Which solutions to apply. For both
+        phase and amplitude, pass ['phase', 'amplitude'] (where it assumes
+        phase solutions are in sol000 and amplitude/phase solutions are in
+        sol000).
 
     Returns:
     None.'''
@@ -882,14 +886,25 @@ def apply_h5parm(h5parm, ms, column_out='DATA'):
 
     with open(parset, 'w') as f:  # create the parset
         f.write('# created by apply_h5parm at {}\n'.format(now))
-        f.write('msin                = {}\n'.format(ms))
-        f.write('msin.datacolumn     = {}\n'.format(column_in))
-        f.write('msout               = {}\n'.format(msout))
-        f.write('msout.datacolumn    = {}\n'.format(column_out))
-        f.write('steps               = [applycal]\n')
-        f.write('applycal.type       = applycal\n')
-        f.write('applycal.parmdb     = {}\n'.format(h5parm))
-        f.write('applycal.correction = phase000\n')
+        f.write('msin                 = {}\n'.format(ms))
+        f.write('msin.datacolumn      = {}\n'.format(column_in))
+        f.write('msout                = {}\n'.format(msout))
+        f.write('msout.datacolumn     = {}\n'.format(column_out))
+        if 'amplitude' in solutions:
+            print('Applying phase and amplitude/phase solutions.')
+            f.write('steps                = [applycal, applycal2]\n')
+        else:
+            f.write('steps                = [applycal]\n')
+        f.write('applycal.type        = applycal\n')
+        f.write('applycal.parmdb      = {}\n'.format(h5parm))
+        f.write('applycal.solset      = sol000')
+        f.write('applycal.correction  = phase000')
+        if 'amplitude' in solutions:
+            f.write('applycal2.type       = applycal\n')
+            f.write('applycal2.parmdb     = {}\n'.format(h5parm))
+            f.write('applycal2.solset     = sol001')
+            f.write('applycal2.correction = fulljones')
+            f.write('applycal2.soltab     = [amplitude, phase]')
     f.close()
 
     ndppp_output = subprocess.check_output(['NDPPP', parset])
@@ -1290,7 +1305,7 @@ def main():
 
     msouts = []
     for new_h5parm in new_h5parms:
-        msouts.append(apply_h5parm(h5parm=new_h5parm, ms=ms))  # outputs an ms per direction
+        msouts.append(apply_h5parm(h5parm=new_h5parm, ms=ms, solutions=['phase', 'amplitude']))  # outputs an ms per direction
 
     # TODO loop 3 has to be run from the directory the ms is in, so running it
     #      manually (it fails from within this script)
