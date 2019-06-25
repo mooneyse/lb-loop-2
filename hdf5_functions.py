@@ -805,7 +805,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     vals, weights, time, freq = build_soltab(soltab='amplitude', working_data=working_data, solset='sol001')
     print('Building amplitude solutions.')
     amp_solset = h.makeSolset('sol001')
-    print('VALS', np.array(vals).shape, 'WEIGHTS', np.array(weight).shape)
+    print('VALS', np.array(vals).shape, 'WEIGHTS', np.array(weights).shape)
     print(len(time), len(freq), len(ant), len(pol), len(dir_))
     c = amp_solset.makeSoltab('amplitude',
                               axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
@@ -830,29 +830,29 @@ def dir2phasesol(mtf, ms='', directions=[]):
     #     print('No amplitude solutions found.')
     #     pass
 
-    try:  # bring across tec solutions if there are any
-        vals, weights, time, freq, ant = build_soltab(soltab='tec', working_data=working_data, solset='sol002')
-        print('Building TEC solutions.')
-        tec_solset = h.makeSolset('sol002')
-        c = tec_solset.makeSoltab('tec',
-                                  axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                                  axesVals=[time, freq, ant, pol, dir_],
-                                  vals=vals,
-                                  weights=weights)  # creates tec000
-
-        # make source and antenna tables
-        # TODO I am using the source and antenna tables from phase, and the
-        #      source table should be fine but the antenna table could in
-        #      in theory be different (the same goes for the amplitude
-        #      solutions above)
-        tec_source = tec_solset.obj._f_get_child('source')
-        tec_source.append(source_soltab.items())  # from dictionary to list
-        tec_antenna = tec_solset.obj._f_get_child('antenna')
-        tec_antenna.append(antenna_soltab.items())  # from dictionary to list
-
-    except:
-        print('No TEC solutions found.')
-        pass
+    # try:  # bring across tec solutions if there are any
+    #     vals, weights, time, freq, ant = build_soltab(soltab='tec', working_data=working_data, solset='sol002')
+    #     print('Building TEC solutions.')
+    #     tec_solset = h.makeSolset('sol002')
+    #     c = tec_solset.makeSoltab('tec',
+    #                               axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+    #                               axesVals=[time, freq, ant, pol, dir_],
+    #                               vals=vals,
+    #                               weights=weights)  # creates tec000
+    #
+    #     # make source and antenna tables
+    #     # TODO I am using the source and antenna tables from phase, and the
+    #     #      source table should be fine but the antenna table could in
+    #     #      in theory be different (the same goes for the amplitude
+    #     #      solutions above)
+    #     tec_source = tec_solset.obj._f_get_child('source')
+    #     tec_source.append(source_soltab.items())  # from dictionary to list
+    #     tec_antenna = tec_solset.obj._f_get_child('antenna')
+    #     tec_antenna.append(antenna_soltab.items())  # from dictionary to list
+    #
+    # except:
+    #     print('No TEC solutions found.')
+    #     pass
 
     h.close()  # close the new h5parm
     os.remove(working_file)
