@@ -432,6 +432,8 @@ def build_soltab(soltab, working_data, solset):
     NumPy array
         Antenna axis to populate the solution table. '''
 
+    time_mins, time_maxs, time_intervals, frequencies = [], [], [], []
+
     for my_line in range(len(working_data)):  # one line per station
         my_station = working_data[my_line][0]
         my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
