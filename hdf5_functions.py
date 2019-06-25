@@ -505,7 +505,7 @@ def build_soltab(soltab, working_data, solset):
 
     # if there is only one frequency, avearging will return a float, where we
     # want it as a list, but if there are >1 frequency it is fine
-    if isinstance(np.average(frequencies, axis=0), float:
+    if isinstance(np.average(frequencies, axis=0)), float:
         my_freqs = [np.average(frequencies, axis=0)]
     else:
         my_freqs = np.average(frequencies, axis=0)
