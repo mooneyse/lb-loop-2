@@ -511,7 +511,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     Args:
     mtf (str): Master text file with list of h5parms.
-    ms (str; default=''): Measurement set to be self-calibrated.
+    ms (str; default=''): Measurement set to be self-calibrated, used for
+        getting a sensible name for the new HDF5.
     directions (list; default=[]): Right ascension and declination of one
         source in radians.
 
@@ -795,32 +796,32 @@ def dir2phasesol(mtf, ms='', directions=[]):
     antenna_table = table.obj._f_get_child('antenna')
     antenna_table.append(antenna_soltab.items())  # from dictionary to list
 
-    try:  # bring across amplitude solutions if there are any
-        vals, weights, time, freq = build_soltab(soltab='amplitude', working_data=working_data, solset='sol001')
-        print('Building amplitude solutions.')
-        amp_solset = h.makeSolset('sol001')
-        c = amp_solset.makeSoltab('amplitude',
-                                  axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                                  axesVals=[time, freq, ant, pol, dir_],
-                                  vals=vals,
-                                  weights=weights)  # creates amplitude000
-        # amplitude solutions have a phase component too
-        vals, weights, time, freq = build_soltab(soltab='phase', working_data=working_data, solset='sol001')
-        d = amp_solset.makeSoltab('phase',
-                                  axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                                  axesVals=[time, freq, ant, pol, dir_],
-                                  vals=vals,
-                                  weights=weights)  # creates phase000
+    # try:  # bring across amplitude solutions if there are any
+    vals, weights, time, freq = build_soltab(soltab='amplitude', working_data=working_data, solset='sol001')
+    print('Building amplitude solutions.')
+    amp_solset = h.makeSolset('sol001')
+    c = amp_solset.makeSoltab('amplitude',
+                              axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+                              axesVals=[time, freq, ant, pol, dir_],
+                              vals=vals,
+                              weights=weights)  # creates amplitude000
+    # amplitude solutions have a phase component too
+    vals, weights, time, freq = build_soltab(soltab='phase', working_data=working_data, solset='sol001')
+    d = amp_solset.makeSoltab('phase',
+                              axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+                              axesVals=[time, freq, ant, pol, dir_],
+                              vals=vals,
+                              weights=weights)  # creates phase000
 
-        # make source and antenna tables
-        amp_source = amp_solset.obj._f_get_child('source')
-        amp_source.append(source_soltab.items())  # from dictionary to list
-        amp_antenna = amp_solset.obj._f_get_child('antenna')
-        amp_antenna.append(antenna_soltab.items())  # from dictionary to list
+    # make source and antenna tables
+    amp_source = amp_solset.obj._f_get_child('source')
+    amp_source.append(source_soltab.items())  # from dictionary to list
+    amp_antenna = amp_solset.obj._f_get_child('antenna')
+    amp_antenna.append(antenna_soltab.items())  # from dictionary to list
 
-    except:
-        print('No amplitude solutions found.')
-        pass
+    # except:
+    #     print('No amplitude solutions found.')
+    #     pass
 
     try:  # bring across tec solutions if there are any
         vals, weights, time, freq, ant = build_soltab(soltab='tec', working_data=working_data, solset='sol002')
@@ -1271,23 +1272,24 @@ def main():
     evaluate_solutions(h5parm=combined_132737_h5, mtf=mtf)
     evaluate_solutions(h5parm=combined_133749_h5, mtf=mtf)
 
-    new_h5parms = dir2phasesol_wrapper(mtf=mtf,
-                                       ms=ms,
-                                       directions=directions,
-                                       cores=cores)
-    print(new_h5parms)  # these should have sol001 with amplitudes/phases!
-    msouts = []
+    print(dir2phasesol(mtf=mtf, ms=ms, directions=directions))  # these should have sol001 with amplitudes/phases!
+    # new_h5parms = dir2phasesol_wrapper(mtf=mtf,
+    #                                    ms=ms,
+    #                                    directions=directions,
+    #                                    cores=cores)
+    #
+    # msouts = []
     # for new_h5parm in new_h5parms:
     #     msouts.append(apply_h5parm(h5parm=new_h5parm, ms=ms))  # outputs an ms per direction
-
+    #
     # TODO loop 3 has to be run from the directory the ms is in, so running it
     #      manually (it fails from within this script)
     #      see https://github.com/mooneyse/lb-loop-2/issues/2#issue-456880154
-    print('Now run loop 3:')
-    for msout in msouts:
-        print('python2 /data020/scratch/sean/letsgetloopy/lb-loop-2/loop3B_v1.py', msout)
-
-    print('Then run combine_h5s and update_list.')
+    # print('Now run loop 3:')
+    # for msout in msouts:
+    #     print('python2 /data020/scratch/sean/letsgetloopy/lb-loop-2/loop3B_v1.py', msout)
+    #
+    # print('Then run combine_h5s and update_list.')
     # loop3_h5s = combine_h5s(loop3_dir='?')
     # update_list(initial_h5parm=h5parm, incremental_h5parm=loop3_phases,
     #             mtf=mtf, threshold=threshold, amplitude_h5parm=loop3_amplitudes)
