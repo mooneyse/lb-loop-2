@@ -515,7 +515,6 @@ def build_soltab(soltab, working_data, solset):
         if soltab is 'tec':  # tec will not have a polarisation axis
             reordered_values = reorderAxes(values, axes_names, ['time', 'freq', 'ant', 'dir'])
             reordered_weights = reorderAxes(weights, axes_names, ['time', 'freq', 'ant', 'dir'])
-            val, weight = [], []
 
             for s in range(len(tab.ant[:])):  # stations
                 if tab.ant[s] == my_station.strip():
@@ -546,8 +545,6 @@ def build_soltab(soltab, working_data, solset):
             lo.close()
 
     vals = np.concatenate(val, axis=2)
-    print(vals.shape,'fffff')
-    print(val.shape,'fffff')
     weights = np.concatenate(weight, axis=2)
 
     # if there is only one frequency, avearging will return a float, where we
@@ -1431,11 +1428,11 @@ def main():
 
     evaluate_solutions(h5parm=combined_132737_h5, mtf=mtf)
     evaluate_solutions(h5parm=combined_133749_h5, mtf=mtf)
-    dir2phasesol(mtf=mtf, ms=ms, directions=dir_from_ms(ms))
-    # new_h5parms = dir2phasesol_wrapper(mtf=mtf,
-    #                                    ms=ms,
-    #                                    directions=directions,
-    #                                    cores=cores)
+
+    new_h5parms = dir2phasesol_wrapper(mtf=mtf,
+                                       ms=ms,
+                                       directions=directions,
+                                       cores=cores)
 
     msouts = []
     for new_h5parm in new_h5parms:
