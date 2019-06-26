@@ -55,7 +55,7 @@ def dir_from_ms(ms, verbose=False):
     return directions
 
 
-def combine_h5s(phase_h5='', amplitude_h5='', loop3_dir=''):
+def combine_h5s(phase_h5='', amplitude_h5='', tec_h5='', loop3_dir=''):
     ''' A function that takes a HDF5 with phase000 and a HDF5 with amplitude000
     and phase000 for a particular direction and combines them into one HDF5.
     This is necessary for the way loop 2 works. The dir2phasesol function
@@ -78,8 +78,9 @@ def combine_h5s(phase_h5='', amplitude_h5='', loop3_dir=''):
     phase_h5 : string (default = '')
         Name of the HDF5 file with the phase solutions.
     amplitude_h5 : string (default = '')
-        Name of the HDF5 file with the amplitude (and corresponding phase)
-        solutions.
+        Name of the HDF5 file with the diagonal solutions.
+    tec_h5 : string (default = '')
+        Name of the HDF5 file with the TEC solutions.
     loop3_dir : string (default = '')
         Instead of a phase_h5 and an amplitude_h5, the directory of the loop 3
         run can be given, and the function will use the phase and amplitude
@@ -161,6 +162,25 @@ def combine_h5s(phase_h5='', amplitude_h5='', loop3_dir=''):
                                                       axesVals=[a_soltab_theta.time, a_soltab_theta.freq, a_soltab_theta.ant, a_soltab_theta.pol],
                                                       vals=a_theta_val_reordered,
                                                       weights=a_theta_weight_reordered)
+
+    if tec_h5:  # if a hdf5 with tec solutions is given too, put this in the new hdf5 also
+        t = lh5.h5parm(tec_h5)
+        t_soltab = t.getSolset('sol000').getSoltab('tec000')
+
+        t_val = reorderAxes(t_soltab.val, t_soltab.getAxesNames(), ['time', 'freq', 'ant'])  # NOTE no 'dir' axis
+        t_weight = reorderAxes(t_soltab.weight, t_soltab.getAxesNames(), ['time', 'freq', 'ant'])  # NOTE no 'dir' axis
+
+        t_solset = n.makeSolset(solsetName='sol002')  # in new h5parm
+        t_source = t_solset.obj._f_get_child('source')
+        t_source.append(t.getSolset('sol000').getSou().items())
+        t_antenna = t_solset.obj._f_get_child('antenna')
+        t_antenna.append(t.getSolset('sol000').getAnt().items())
+
+        t_new = t_solset.makeSoltab('tec',
+                                    axesNames=['time', 'freq', 'ant'],
+                                    axesVals=[t_soltab.time, t_soltab.freq, t_soltab.ant],
+                                    vals=t_val,
+                                    weights=t_weight)
 
     # tidy up
     p.close()
@@ -1363,16 +1383,18 @@ def main():
     directions = args.directions
 
     combined_132737_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_02_c0.h5',
-                                     amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_A_03_c0.h5')
+                                     amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_A_03_c0.h5',
+                                     tec_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.MS_tec.h5')
 
     combined_133749_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_00_c0.h5',
-                                     amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_A_04_c0.h5')
+                                     amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_A_04_c0.h5',
+                                     tec_h5='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.MS_tec.h5')
 
     make_blank_mtf(mtf=mtf)
 
     evaluate_solutions(h5parm=combined_132737_h5, mtf=mtf)
     evaluate_solutions(h5parm=combined_133749_h5, mtf=mtf)
-
+    '''
     new_h5parms = dir2phasesol_wrapper(mtf=mtf,
                                        ms=ms,
                                        directions=directions,
@@ -1396,7 +1418,7 @@ def main():
         loop3_h5s = combine_h5s(loop3_dir=loop3_dir)
         update_list(initial_h5parm=initial_h5parm, incremental_h5parm=loop3_h5s,
                     mtf=mtf, threshold=threshold)
-
+    '''
 
 if __name__ == '__main__':
     main()
