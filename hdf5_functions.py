@@ -1253,6 +1253,8 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
             empty_diag_P_val[:, :, ant, 1, 0] = new_P_val_yy
             empty_diag_P_wgt[:, :, ant, 0, 0] = new_P_wgt_xx
             empty_diag_P_wgt[:, :, ant, 1, 0] = new_P_wgt_yy
+            if ant == 0:
+                print(new_A_val_xx[3])
 
         A_vals = empty_diag_A_val
         A_weights = empty_diag_A_wgt
@@ -1260,8 +1262,7 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         P_weights = empty_diag_P_wgt
 
         print('A_vals', A_vals[3,0,0,0,0],new_diag_time[3], new_diag_ant[0])
-        print('init_diag_A_val', init_diag_A_val[3,0,0,0,0])
-        print('increm_diag_A_val', increm_diag_A_val[3,0,0,0,0])
+
         print('init_diag_A_val_interp',init_diag_A_val_interp[3,0,0,0,0])
         print('increm_diag_A_val_interp',increm_diag_A_val_interp[3,0,0,0,0])
 
