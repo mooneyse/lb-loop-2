@@ -906,7 +906,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
     return new_h5parm
 
 
-def residual_tec_solve(ms, column_out='DATA', solint=5.):
+def residual_tec_solve(ms, column_out='DATA', solint=5):
     """Write a parset to solve for the residual TEC in the measurement set
     using Gaincal, then execute the parset using NDPPP. For information on
     NDPPP, see this URL:
