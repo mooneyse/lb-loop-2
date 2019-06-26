@@ -1174,6 +1174,10 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         increm_diag_P_val_interp = interpolate_time(the_array=increm_diag_P_val, the_times=incremental_diagonal_P.time, new_times=new_diag_time)
         increm_diag_P_wgt_interp = interpolate_time(the_array=increm_diag_P_wgt, the_times=incremental_diagonal_P.time, new_times=new_diag_time)
 
+        print('fff')
+        for i in zip(increm_diag_A_val_interp, new_diag_time):
+            print(increm_diag_A_val_interp[i], new_diag_time[i])
+
         # get the frequencies and the list of antennas for the new array
         new_diag_freq = np.mean([initial_diagonal_A.freq, incremental_diagonal_A.freq], axis=0)
         new_diag_ant = sorted(list(set(initial_diagonal_A.ant.tolist() + incremental_diagonal_A.ant.tolist())))
