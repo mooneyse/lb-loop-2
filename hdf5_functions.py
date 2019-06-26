@@ -523,6 +523,7 @@ def build_soltab(soltab, working_data, solset):
                     w = reordered_weights[:, :, s, :]
                     v_expanded = np.expand_dims(v, axis=2)
                     w_expanded = np.expand_dims(w, axis=2)
+                    print('fff',v_expanded.shape)
                     v_interpolated = interpolate_time(the_array=v_expanded, the_times=tab.time[:], new_times=new_time, tec=True)
                     w_interpolated = interpolate_time(the_array=w_expanded, the_times=tab.time[:], new_times=new_time, tec=True)
                     val.append(v_interpolated)
@@ -551,7 +552,7 @@ def build_soltab(soltab, working_data, solset):
     # if there is only one frequency, avearging will return a float, where we
     # want it as a list, but if there are >1 frequency it is fine
     if isinstance(np.average(frequencies, axis=0), float):
-        my_freqs = [np.average(frequencies, axis=0)]
+        my_freqs = [np.average(frequencies)]
     else:
         my_freqs = np.average(frequencies, axis=0)
 
@@ -884,9 +885,6 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     # try:  # bring across tec solutions if there are any
     vals, weights, time, freq = build_soltab(soltab='tec', working_data=working_data, solset='sol002')
-    print('ffff',vals.shape, weights.shape)
-    print(freq)
-    print(time.shape)
     print('Putting TEC soltuions in sol002 in {}.'.format(new_h5parm))
     tec_solset = h.makeSolset('sol002')
     c = tec_solset.makeSoltab('tec',
