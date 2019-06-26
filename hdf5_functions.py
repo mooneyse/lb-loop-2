@@ -1168,15 +1168,10 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         init_diag_A_wgt_interp = interpolate_time(the_array=init_diag_A_wgt, the_times=initial_diagonal_A.time, new_times=new_diag_time)
         init_diag_P_val_interp = interpolate_time(the_array=init_diag_P_val, the_times=initial_diagonal_P.time, new_times=new_diag_time)
         init_diag_P_wgt_interp = interpolate_time(the_array=init_diag_P_wgt, the_times=initial_diagonal_P.time, new_times=new_diag_time)
-        print('fff', increm_diag_A_val.shape, incremental_diagonal_A.time[0], incremental_diagonal_A.time[-1], new_diag_time[0], new_diag_time[-1])
         increm_diag_A_val_interp = interpolate_time(the_array=increm_diag_A_val, the_times=incremental_diagonal_A.time, new_times=new_diag_time)
         increm_diag_A_wgt_interp = interpolate_time(the_array=increm_diag_A_wgt, the_times=incremental_diagonal_A.time, new_times=new_diag_time)
         increm_diag_P_val_interp = interpolate_time(the_array=increm_diag_P_val, the_times=incremental_diagonal_P.time, new_times=new_diag_time)
         increm_diag_P_wgt_interp = interpolate_time(the_array=increm_diag_P_wgt, the_times=incremental_diagonal_P.time, new_times=new_diag_time)
-
-        print('fff')
-        for i,j in zip(increm_diag_A_val_interp[:,0,0,0,0], new_diag_time):
-            print(i,j)
 
         # get the frequencies and the list of antennas for the new array
         new_diag_freq = np.mean([initial_diagonal_A.freq, incremental_diagonal_A.freq], axis=0)
@@ -1264,11 +1259,11 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         P_vals = empty_diag_P_val
         P_weights = empty_diag_P_wgt
 
-        print('A_vals', A_vals[0,0,0,0,0])
-        print('init_diag_A_val', init_diag_A_val[0,0,0,0,0])
-        print('increm_diag_A_val', increm_diag_A_val[0,0,0,0,0])
-        print('init_diag_A_val_interp',init_diag_A_val_interp[0,0,0,0,0])
-        print('increm_diag_A_val_interp',increm_diag_A_val_interp[0,0,0,0,0])
+        print('A_vals', A_vals[3,0,0,0,0],new_diag_time[3], new_diag_ant[0])
+        print('init_diag_A_val', init_diag_A_val[3,0,0,0,0])
+        print('increm_diag_A_val', increm_diag_A_val[3,0,0,0,0])
+        print('init_diag_A_val_interp',init_diag_A_val_interp[3,0,0,0,0])
+        print('increm_diag_A_val_interp',increm_diag_A_val_interp[3,0,0,0,0])
 
         # write these best phase solutions to the combined_h5parm
         solset = h.makeSolset('sol001')  # creates sol001
