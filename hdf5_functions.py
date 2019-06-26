@@ -1429,11 +1429,11 @@ def main():
 
     evaluate_solutions(h5parm=combined_132737_h5, mtf=mtf)
     evaluate_solutions(h5parm=combined_133749_h5, mtf=mtf)
-
-    new_h5parms = dir2phasesol_wrapper(mtf=mtf,
-                                       ms=ms,
-                                       directions=directions,
-                                       cores=cores)
+    dir2phasesol(mtf=mtf, ms=ms, directions=dir_from_ms(ms))
+    # new_h5parms = dir2phasesol_wrapper(mtf=mtf,
+    #                                    ms=ms,
+    #                                    directions=directions,
+    #                                    cores=cores)
 
     msouts = []
     for new_h5parm in new_h5parms:
