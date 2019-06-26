@@ -933,25 +933,45 @@ def add_amplitude_and_phase_solutions(diag_A_1, diag_P_1, diag_A_2, diag_P_2):
     Returns:
     Amplitude solutions (NumPy array), phase solutions (NumPy array)'''
 
-    amplitude_final, phase_final = [], []
-
     # convert nan to zero, otherwise nan + x = nan, not x
     diag_A_1 = np.nan_to_num(diag_A_1)
     diag_P_1 = np.nan_to_num(diag_P_1)
     diag_A_2 = np.nan_to_num(diag_A_2)
     diag_P_2 = np.nan_to_num(diag_P_2)
 
-    print(diag_A_1.shape,'fffffffffffff')
+    if diag_A_1.ndim > 1:  # more than one frequency axis
+        amplitude_final = np.zeroes(diag_A_1.shape)
+        phase_final = np.zeroes(diag_P_1.shape)
 
-    for A1, P1, A2, P2 in zip(diag_A_1, diag_P_1, diag_A_2, diag_P_2):
-        complex_1 = A1 * complex(np.cos(P1), np.sin(P1))
-        complex_2 = A2 * complex(np.cos(P2), np.sin(P2))
-        complex_1_2 = complex_1 + complex_2
+        for i in diag_A_1.shape[1]:
+            amplitude_1_2, phase_1_2 = [], []
 
-        amplitude_final.append(abs(complex_1_2))
-        phase_final.append(np.arctan2(complex.imag, complex.real))
+            for A1, P1, A2, P2 in zip(diag_A_1[:, i], diag_P_1[:, i], diag_A_2[:, i], diag_P_2[:, i]):
+                complex_1 = A1 * complex(np.cos(P1), np.sin(P1))
+                complex_2 = A2 * complex(np.cos(P2), np.sin(P2))
+                complex_1_2 = complex_1 + complex_2
 
-    return np.array(amplitude_final), np.array(phase_final)
+                amplitude_1_2.append(abs(complex_1_2))
+                phase_1_2.append(np.arctan2(complex.imag, complex.real))
+
+            amplitude_final[:, i] = amplitude_1_2
+            phase_final[:, i] = phase_1_2
+
+    else:  # only one frequency axis
+        amplitude_final, phase_final = [], []
+
+        for A1, P1, A2, P2 in zip(diag_A_1, diag_P_1, diag_A_2, diag_P_2):
+            complex_1 = A1 * complex(np.cos(P1), np.sin(P1))
+            complex_2 = A2 * complex(np.cos(P2), np.sin(P2))
+            complex_1_2 = complex_1 + complex_2
+
+            amplitude_final.append(abs(complex_1_2))
+            phase_final.append(np.arctan2(complex.imag, complex.real))
+
+        amplitude_final = np.array(amplitude_final)
+        phase_final = np.array(phase_final)
+
+    return amplitude_final, phase_final
 
 
 def make_new_times(time1, time2):
