@@ -1259,11 +1259,6 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         P_vals = empty_diag_P_val
         P_weights = empty_diag_P_wgt
 
-        print('A_vals', A_vals[3,0,0,0,0],new_diag_time[3], new_diag_ant[0])
-
-        print('init_diag_A_val_interp',init_diag_A_val_interp[3,0,0,0,0])
-        print('increm_diag_A_val_interp',increm_diag_A_val_interp[3,0,0,0,0])
-
         # write these best phase solutions to the combined_h5parm
         solset = h.makeSolset('sol001')  # creates sol001
 
@@ -1404,8 +1399,4 @@ def main():
 
 
 if __name__ == '__main__':
-    # main()
-
-    update_list(initial_h5parm='/data020/scratch/sean/letsgetloopy/SILTJ135044.06+544752.7_L693725_phasecal_207.684_54.798.h5',
-                incremental_h5parm='/data020/scratch/sean/letsgetloopy/loop3_SILTJ135044.06+544752.7_L693725_phasecal.apply_tec-5fa200/SILTJ135044.06+544752.7_L693725_phasecal.apply_tec-5fa200.MS_01_c2_combo.h5',
-                mtf='/data020/scratch/sean/letsgetloopy/mtf.txt')
+    main()
