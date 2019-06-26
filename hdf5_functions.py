@@ -402,7 +402,7 @@ def interpolate_time(the_array, the_times, new_times, tec=False):
             new_values = f(new_times)
 
             # assign the interpolated values to the new array
-            interpolated_array[:, 0, a, 0] = new_values  # new x values
+            interpolated_array[:, 0, a, 0] = new_values  # new values
 
     else:
         # get the original data
@@ -523,7 +523,6 @@ def build_soltab(soltab, working_data, solset):
                     w = reordered_weights[:, :, s, :]
                     v_expanded = np.expand_dims(v, axis=2)
                     w_expanded = np.expand_dims(w, axis=2)
-                    print('fff',v_expanded.shape)
                     v_interpolated = interpolate_time(the_array=v_expanded, the_times=tab.time[:], new_times=new_time, tec=True)
                     w_interpolated = interpolate_time(the_array=w_expanded, the_times=tab.time[:], new_times=new_time, tec=True)
                     val.append(v_interpolated)
@@ -547,6 +546,8 @@ def build_soltab(soltab, working_data, solset):
             lo.close()
 
     vals = np.concatenate(val, axis=2)
+    print(vals.shape,'fffff')
+    print(val.shape,'fffff')
     weights = np.concatenate(weight, axis=2)
 
     # if there is only one frequency, avearging will return a float, where we
