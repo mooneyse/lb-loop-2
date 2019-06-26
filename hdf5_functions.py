@@ -947,8 +947,11 @@ def add_amplitude_and_phase_solutions(diag_A_1, diag_P_1, diag_A_2, diag_P_2):
             amplitude_1_2, phase_1_2 = [], []
 
             for A1, P1, A2, P2 in zip(diag_A_1[:, i], diag_P_1[:, i], diag_A_2[:, i], diag_P_2[:, i]):
+                print(A1,'a1')
+                print(P2, 'p2')
                 complex_1 = A1 * complex(np.cos(P1), np.sin(P1))
                 complex_2 = A2 * complex(np.cos(P2), np.sin(P2))
+                print('com1', complex_1)
                 complex_1_2 = complex_1 + complex_2
 
                 amplitude_1_2.append(abs(complex_1_2))
