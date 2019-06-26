@@ -945,7 +945,7 @@ def residual_tec_solve(ms, column_out='DATA', solint=5.):
         f.write('steps                      = [residual_tec]\n\n')
         f.write('residual_tec.type          = gaincal\n')  # ddecal also an option
         f.write('residual_tec.caltype       = tec\n')
-        f.write('residual_tec.parmdb        = {}}\n'.format(h5parm))
+        f.write('residual_tec.parmdb        = {}\n'.format(h5parm))
         f.write('residual_tec.applysolution = True\n')  # apply on the fly
         f.write('residual_tec.solint        = {}\n'.format(solint))
 
@@ -1507,6 +1507,8 @@ def main():
         loop3_h5s = combine_h5s(loop3_dir=loop3_dir)
         update_list(initial_h5parm=initial_h5parm, incremental_h5parm=loop3_h5s,
                     mtf=mtf, threshold=threshold)
+
+    # TODO plot the amplitude and TEC solutions to make sur they are correct
 
 
 if __name__ == '__main__':
