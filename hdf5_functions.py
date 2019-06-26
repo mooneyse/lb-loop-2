@@ -1168,6 +1168,7 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         init_diag_A_wgt_interp = interpolate_time(the_array=init_diag_A_wgt, the_times=initial_diagonal_A.time, new_times=new_diag_time)
         init_diag_P_val_interp = interpolate_time(the_array=init_diag_P_val, the_times=initial_diagonal_P.time, new_times=new_diag_time)
         init_diag_P_wgt_interp = interpolate_time(the_array=init_diag_P_wgt, the_times=initial_diagonal_P.time, new_times=new_diag_time)
+        print('fff', increm_diag_A_val.shape, incremental_diagonal_A.time[0], incremental_diagonal_A.time[-1], new_diag_time[0], new_diag_time[-1])
         increm_diag_A_val_interp = interpolate_time(the_array=increm_diag_A_val, the_times=incremental_diagonal_A.time, new_times=new_diag_time)
         increm_diag_A_wgt_interp = interpolate_time(the_array=increm_diag_A_wgt, the_times=incremental_diagonal_A.time, new_times=new_diag_time)
         increm_diag_P_val_interp = interpolate_time(the_array=increm_diag_P_val, the_times=incremental_diagonal_P.time, new_times=new_diag_time)
