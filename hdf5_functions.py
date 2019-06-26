@@ -523,8 +523,6 @@ def build_soltab(soltab, working_data, solset):
                     w = reordered_weights[:, :, s, :]
                     v_expanded = np.expand_dims(v, axis=2)
                     w_expanded = np.expand_dims(w, axis=2)
-                    print('Need to make interpolate_time handle TEC (no pol axis)')
-                    sys.exit()  # BUG fix interpolate_time for TEC
                     v_interpolated = interpolate_time(the_array=v_expanded, the_times=tab.time[:], new_times=new_time, tec=True)
                     w_interpolated = interpolate_time(the_array=w_expanded, the_times=tab.time[:], new_times=new_time, tec=True)
                     val.append(v_interpolated)
@@ -886,7 +884,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     try:  # bring across tec solutions if there are any
         vals, weights, time, freq = build_soltab(soltab='tec', working_data=working_data, solset='sol002')
-        print('Building TEC solutions.')
+        print('Putting TEC soltuions in sol002 in {}.'.format(new_h5parm))
         tec_solset = h.makeSolset('sol002')
         c = tec_solset.makeSoltab('tec',
                                   axesNames=['time', 'freq', 'ant', 'dir'],
@@ -967,7 +965,7 @@ def apply_h5parm(h5parm, ms, column_out='DATA', solutions=['phase']):
             f.write('apply_tec.type                      = applycal\n')
             f.write('apply_tec.parmdb                    = {}\n'.format(h5parm))
             f.write('apply_tec.solset                    = sol002\n')
-            f.write('apply_tec.phase.correction          = tec000\n')        
+            f.write('apply_tec.phase.correction          = tec000\n')
 
     f.close()
     ndppp_output = subprocess.check_output(['NDPPP', parset])
