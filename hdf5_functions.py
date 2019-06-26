@@ -1245,17 +1245,14 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
             new_P_wgt_yy = (np.nan_to_num(init_P_wgt_yy) + np.nan_to_num(increm_P_wgt_yy)) / 2
 
             # populate the empty arrays with the new solutions
-            empty_diag_A_val[:, :, ant, 0, 0] = new_A_val_xx
-            empty_diag_A_val[:, :, ant, 1, 0] = new_A_val_yy
-            empty_diag_A_wgt[:, :, ant, 0, 0] = new_A_wgt_xx
-            empty_diag_A_wgt[:, :, ant, 1, 0] = new_A_wgt_yy
-            empty_diag_P_val[:, :, ant, 0, 0] = new_P_val_xx
-            empty_diag_P_val[:, :, ant, 1, 0] = new_P_val_yy
-            empty_diag_P_wgt[:, :, ant, 0, 0] = new_P_wgt_xx
-            empty_diag_P_wgt[:, :, ant, 1, 0] = new_P_wgt_yy
-            print(ant)
-            if ant == 0:
-                print(new_A_val_xx[3])
+            empty_diag_A_val[:, :, n, 0, 0] = new_A_val_xx
+            empty_diag_A_val[:, :, n, 1, 0] = new_A_val_yy
+            empty_diag_A_wgt[:, :, n, 0, 0] = new_A_wgt_xx
+            empty_diag_A_wgt[:, :, n, 1, 0] = new_A_wgt_yy
+            empty_diag_P_val[:, :, n, 0, 0] = new_P_val_xx
+            empty_diag_P_val[:, :, n, 1, 0] = new_P_val_yy
+            empty_diag_P_wgt[:, :, n, 0, 0] = new_P_wgt_xx
+            empty_diag_P_wgt[:, :, n, 1, 0] = new_P_wgt_yy
 
         A_vals = empty_diag_A_val
         A_weights = empty_diag_A_wgt
