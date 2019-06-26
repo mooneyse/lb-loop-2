@@ -882,25 +882,25 @@ def dir2phasesol(mtf, ms='', directions=[]):
         print('No amplitude solutions found.')
         pass
 
-    try:  # bring across tec solutions if there are any
-        vals, weights, time, freq = build_soltab(soltab='tec', working_data=working_data, solset='sol002')
-        print('Putting TEC soltuions in sol002 in {}.'.format(new_h5parm))
-        tec_solset = h.makeSolset('sol002')
-        c = tec_solset.makeSoltab('tec',
-                                  axesNames=['time', 'freq', 'ant', 'dir'],
-                                  axesVals=[time, freq, ant, dir_],
-                                  vals=vals,
-                                  weights=weights)  # creates tec000
+    # try:  # bring across tec solutions if there are any
+    vals, weights, time, freq = build_soltab(soltab='tec', working_data=working_data, solset='sol002')
+    print('Putting TEC soltuions in sol002 in {}.'.format(new_h5parm))
+    tec_solset = h.makeSolset('sol002')
+    c = tec_solset.makeSoltab('tec',
+                              axesNames=['time', 'freq', 'ant', 'dir'],
+                              axesVals=[time, freq, ant, dir_],
+                              vals=vals,
+                              weights=weights)  # creates tec000
 
-        # make source and antenna tables
-        tec_source = tec_solset.obj._f_get_child('source')
-        tec_source.append(source_soltab.items())  # from dictionary to list
-        tec_antenna = tec_solset.obj._f_get_child('antenna')
-        tec_antenna.append(antenna_soltab.items())  # from dictionary to list
+    # make source and antenna tables
+    tec_source = tec_solset.obj._f_get_child('source')
+    tec_source.append(source_soltab.items())  # from dictionary to list
+    tec_antenna = tec_solset.obj._f_get_child('antenna')
+    tec_antenna.append(antenna_soltab.items())  # from dictionary to list
 
-    except:
-        print('No TEC solutions found.')
-        pass
+    # except:
+    #     print('No TEC solutions found.')
+    #     pass
 
     h.close()  # close the new h5parm
     os.remove(working_file)
