@@ -906,27 +906,79 @@ def dir2phasesol(mtf, ms='', directions=[]):
     return new_h5parm
 
 
+def residual_tec_solve(ms, column_out='DATA', solint=5.):
+    """Write a parset to solve for the residual TEC in the measurement set
+    using Gaincal, then execute the parset using NDPPP. For information on
+    NDPPP, see this URL:
+    https://www.astron.nl/lofarwiki/doku.php?id=public:user_software:documentation:ndppp
+
+    Parameters
+    ----------
+    ms : string
+        Filename of the measurement set.
+    column_out : string
+        Name of the column in the measurement set to write the corrected data
+        to.
+    solint : float
+        Solution interval for the TEC solve.
+
+    Returns
+    -------
+    string
+        The name of the measurement set with the TEC solutions applied.
+    string
+        The HDF5 file containing the residual TEC solutions.
+    """
+
+    parset = os.path.dirname(ms + '/') + '_residual_tec_solve.parset'
+    h5parm = parset[:-5] + 'h5'
+    msout = h5parm[:-2] + '_resid_tec.MS'
+    column_in = 'DATA'
+    print('residual_tec_solve running...')
+    with open(parset, 'w') as f:  # create the parset
+        f.write('# created by residual_tec_solve at {}\n\n'.format(now))
+        f.write('msin                       = {}\n'.format(ms))
+        f.write('msin.datacolumn            = {}\n'.format(column_in))
+        f.write('msout                      = {}\n'.format(msout))
+        f.write('msout.datacolumn           = {}\n\n'.format(column_out))
+        f.write('steps                      = [residual_tec]\n\n')
+        f.write('residual_tec.type          = gaincal\n')  # ddecal also an option
+        f.write('residual_tec.caltype       = tec\n')
+        f.write('residual_tec.parmdb        = {}}\n'.format(h5parm))
+        f.write('residual_tec.applysolution = True\n')  # apply on the fly
+        f.write('residual_tec.solint        = {}\n'.format(solint))
+
+    return msout, h5parm
+
+
 def apply_h5parm(h5parm, ms, column_out='DATA', solutions=['phase']):
-    '''Creates an NDPPP parset. Applies the output of make_h5parm to the
+    """Creates an NDPPP parset. Applies the output of make_h5parm to the
     measurement set.
 
-    Args:
-    new_h5parm (str): The output of dir2phasesol.
-    ms (str): The measurement set for self-calibration.
-    column_out (str; default = 'DATA'): The column NDPPP writes to.
-    solutions (str; default = 'phase'): Which solutions to apply. For both
-        phase and amplitude, pass ['phase', 'amplitude'] (where it assumes
-        phase solutions are in sol000 and amplitude/phase solutions are in
-        sol000).
+    Parameters
+    ----------
+    h5parm : string
+        The output of dir2phasesol.
+    ms : string
+        The measurement set for self-calibration.
+    column_out : string (default = 'DATA')
+        The column NDPPP writes to.
+    solutions : string (default = 'phase')
+        Which solutions to apply. For both phase and amplitude, pass ['phase',
+        'amplitude'] (where it assumes phase solutions are in sol000 and the
+        amplitude/phase diagonal solutions are in sol001).
 
-    Returns:
-    None.'''
+    Returns
+    -------
+    string
+        The name of the new measurement set.
+    """
 
     # parset is saved in same directory as the h5parm
     parset = os.path.dirname(h5parm) + '/applyh5parm.parset'
     column_in = 'DATA'
     now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    msout =  ms + '-' + str(uuid.uuid4())[:6] + '.MS'
+    msout =  ms + '-' + str(uuid.uuid4())[:6] + '.MS'  # probably a better way
 
     with open(parset, 'w') as f:  # create the parset
         f.write('# created by apply_h5parm at {}\n\n'.format(now))
@@ -1089,7 +1141,7 @@ def sort_axes(soltab):
 
 
 def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
-                amplitudes_included=True):
+                amplitudes_included=True, tec_included=True):
     '''Combine the phase solutions from the initial h5parm and the final
     h5parm. The initial h5parm contains the initial solutions and the final
     h5parm contains the incremental solutions so they need to be added to form
@@ -1338,6 +1390,10 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         antenna_table = solset.obj._f_get_child('antenna')
         antenna_table.append(antenna_soltab)
 
+    if tec_included:  # include tec solutions if they exist
+    # NOTE will we have incremental tec solutions?
+        print('Solve for residual TEC first!')
+
     f.close()
     g.close()
     h.close()
@@ -1367,18 +1423,12 @@ def main():
                         help='master text file')
 
     # parser.add_argument('-p',
-    #                     '--h5parm0',
+    #                     '--h5parms',
     #                     required=False,
     #                     type=str,
-    #                     default='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_02_c0.h5',
-    #                     help='one hdf5 file')
-
-    # parser.add_argument('-P',
-    #                     '--h5parm1',
-    #                     required=False,
-    #                     type=str,
-    #                     default='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_00_c0.h5',
-    #                     help='another hdf5 file')
+    #                     default=[],
+    #                     nargs='+'
+    #                     help='h5parms to use')
 
     parser.add_argument('-f',
                         '--ms',
@@ -1410,8 +1460,7 @@ def main():
 
     args = parser.parse_args()
     mtf = args.mtf
-    # h5parm0 = args.h5parm0
-    # h5parm1 = args.h5parm1
+    # h5parms = args.h5parms
     ms = args.ms
     threshold = args.threshold
     cores = args.cores
@@ -1437,7 +1486,9 @@ def main():
 
     msouts = []
     for new_h5parm in new_h5parms:
-        msouts.append(apply_h5parm(h5parm=new_h5parm, ms=ms, solutions=['phase', 'amplitude', 'tec']))  # outputs an ms per direction
+        msout = apply_h5parm(h5parm=new_h5parm, ms=ms, solutions=['phase', 'amplitude', 'tec'])  # outputs an ms per direction
+        resid_tec_h5parm, msout_tec = residual_tec_solve(ms=msout)
+        msouts.append(msout_tec)
 
     # TODO loop 3 has to be run from the directory the ms is in, so running it
     #      manually (it fails from within this script)
