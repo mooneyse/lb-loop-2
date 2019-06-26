@@ -1394,7 +1394,9 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         antenna_table.append(antenna_soltab)
 
     if tec_included:  # include tec solutions if they exist
-    # NOTE will we have incremental tec solutions?
+        # initial tec will be coming from initial_h5parm but the incremental_tec
+        # will be from the residual tec solve, not loop 3, so we will have an
+        # additional hdf5 that has to be passed in here
         print('Solve for residual TEC first!')
 
     f.close()
@@ -1490,18 +1492,16 @@ def main():
     msouts = []
     for new_h5parm in new_h5parms:
         msout = apply_h5parm(h5parm=new_h5parm, ms=ms, solutions=['phase', 'amplitude', 'tec'])  # outputs an ms per direction
-        resid_tec_h5parm, msout_tec = residual_tec_solve(ms=msout)
+        msout_tec = msout  # TODO need a skymodel in residual_tec_solve to test this
+        # resid_tec_h5parm, msout_tec = residual_tec_solve(ms=msout)
         msouts.append(msout_tec)
 
-    # TODO loop 3 has to be run from the directory the ms is in, so running it
-    #      manually (it fails from within this script)
-    #      see https://github.com/mooneyse/lb-loop-2/issues/2#issue-456880154
-    print('Now run loop 3:')
+    print('Running loop 3...')  # has to be run from the same directory as the ms
     for msout in msouts:
-        print('    $ python2 /data020/scratch/sean/letsgetloopy/lb-loop-2/loop3B_v1.py', msout)
+        os.system('python2 /data020/scratch/sean/letsgetloopy/lb-loop-2/loop3B_v1.py ' + msout)
 
     print('Then run combine_h5s and update_list.')
-    sys.exit()
+
     for msout, initial_h5parm in zip(msouts, new_h5parms):
         loop3_dir = 'loop3_' + msout[:-3]
         loop3_h5s = combine_h5s(loop3_dir=loop3_dir)
