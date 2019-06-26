@@ -884,6 +884,9 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     # try:  # bring across tec solutions if there are any
     vals, weights, time, freq = build_soltab(soltab='tec', working_data=working_data, solset='sol002')
+    print('ffff',vals.shape, weights.shape)
+    print(freq)
+    print(time.shape)
     print('Putting TEC soltuions in sol002 in {}.'.format(new_h5parm))
     tec_solset = h.makeSolset('sol002')
     c = tec_solset.makeSoltab('tec',
