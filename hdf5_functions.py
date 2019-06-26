@@ -1437,7 +1437,7 @@ def main():
 
     msouts = []
     for new_h5parm in new_h5parms:
-        msouts.append(apply_h5parm(h5parm=new_h5parm, ms=ms, solutions=['phase', 'amplitude']))  # outputs an ms per direction
+        msouts.append(apply_h5parm(h5parm=new_h5parm, ms=ms, solutions=['phase', 'amplitude', 'tec']))  # outputs an ms per direction
 
     # TODO loop 3 has to be run from the directory the ms is in, so running it
     #      manually (it fails from within this script)
