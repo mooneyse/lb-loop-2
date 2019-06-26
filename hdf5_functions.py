@@ -1253,6 +1253,7 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
             empty_diag_P_val[:, :, ant, 1, 0] = new_P_val_yy
             empty_diag_P_wgt[:, :, ant, 0, 0] = new_P_wgt_xx
             empty_diag_P_wgt[:, :, ant, 1, 0] = new_P_wgt_yy
+            print(ant)
             if ant == 0:
                 print(new_A_val_xx[3])
 
