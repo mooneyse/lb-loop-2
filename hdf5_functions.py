@@ -21,6 +21,7 @@ import datetime
 import fnmatch
 import os
 import subprocess
+import sys
 import uuid
 
 __author__ = 'Sean Mooney'
@@ -1320,10 +1321,19 @@ def main():
         print('    $ python2 /data020/scratch/sean/letsgetloopy/lb-loop-2/loop3B_v1.py', msout)
 
     print('Then run combine_h5s and update_list.')
-    # loop3_h5s = combine_h5s(loop3_dir='?')
-    # update_list(initial_h5parm=h5parm, incremental_h5parm=loop3_phases,
-    #             mtf=mtf, threshold=threshold, amplitude_h5parm=loop3_amplitudes)
+    sys.exit()
+    for msout, initial_h5parm in zip(msouts, new_h5parms):
+        loop3_dir = 'loop3_' + msout[:-3]
+        loop3_h5s = combine_h5s(loop3_dir=loop3_dir)
+        update_list(initial_h5parm=initial_h5parm, incremental_h5parm=loop3_h5s,
+                    mtf=mtf, threshold=threshold)
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+
+    loop3_h5s = combine_h5s(loop3_dir='/data020/scratch/sean/letsgetloopy/loop3_SILTJ135044.06+544752.7_L693725_phasecal.apply_tec-5fa200')
+    print(loop3loop3_h5s)
+    # update_list(initial_h5parm='SILTJ135044.06+544752.7_L693725_phasecal_207.684_54.798.h5',
+    #             incremental_h5parm=loop3_h5s,
+    #             mtf='/data020/scratch/sean/letsgetloopy/mtf.txt')
