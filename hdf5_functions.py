@@ -934,6 +934,7 @@ def residual_tec_solve(ms, column_out='DATA', solint=5.):
     h5parm = parset[:-5] + 'h5'
     msout = h5parm[:-2] + '_resid_tec.MS'
     column_in = 'DATA'
+    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     print('residual_tec_solve running...')
     with open(parset, 'w') as f:  # create the parset
         f.write('# created by residual_tec_solve at {}\n\n'.format(now))
@@ -947,6 +948,9 @@ def residual_tec_solve(ms, column_out='DATA', solint=5.):
         f.write('residual_tec.parmdb        = {}}\n'.format(h5parm))
         f.write('residual_tec.applysolution = True\n')  # apply on the fly
         f.write('residual_tec.solint        = {}\n'.format(solint))
+
+    ndppp_output = subprocess.check_output(['NDPPP', parset])
+    os.remove(parset)
 
     return msout, h5parm
 
@@ -1019,7 +1023,6 @@ def apply_h5parm(h5parm, ms, column_out='DATA', solutions=['phase']):
             f.write('apply_tec.solset                    = sol002\n')
             f.write('apply_tec.correction                = tec000\n')
 
-    f.close()
     ndppp_output = subprocess.check_output(['NDPPP', parset])
     os.remove(parset)
 
