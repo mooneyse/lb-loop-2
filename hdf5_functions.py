@@ -1182,7 +1182,7 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         empty_diag_A_val = np.zeros((len(new_diag_time), len(new_diag_freq), len(new_diag_ant), 2, 1))  # time, freq, ant, pol, dir
         empty_diag_A_wgt = np.zeros((len(new_diag_time), len(new_diag_freq), len(new_diag_ant), 2, 1))  # time, freq, ant, pol, dir
         empty_diag_P_val = np.zeros((len(new_diag_time), len(new_diag_freq), len(new_diag_ant), 2, 1))  # time, freq, ant, pol, dir
-        empty_diag_p_wgt = np.zeros((len(new_diag_time), len(new_diag_freq), len(new_diag_ant), 2, 1))  # time, freq, ant, pol, dir
+        empty_diag_P_wgt = np.zeros((len(new_diag_time), len(new_diag_freq), len(new_diag_ant), 2, 1))  # time, freq, ant, pol, dir
 
         summed_values, summed_weights = [], []
 
