@@ -1259,11 +1259,11 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         P_vals = empty_diag_P_val
         P_weights = empty_diag_P_wgt
 
-        print('A_vals', A_vals)
-        print('init_diag_A_val', init_diag_A_val)
-        print('increm_diag_A_val', increm_diag_A_val)
-        print('init_diag_A_val_interp',init_diag_A_val_interp)
-        print('increm_diag_A_val_interp',increm_diag_A_val_interp)
+        print('A_vals', A_vals[0,0,0,0,0])
+        print('init_diag_A_val', init_diag_A_val[0,0,0,0,0])
+        print('increm_diag_A_val', increm_diag_A_val[0,0,0,0,0])
+        print('init_diag_A_val_interp',init_diag_A_val_interp[0,0,0,0,0])
+        print('increm_diag_A_val_interp',increm_diag_A_val_interp[0,0,0,0,0])
 
         # write these best phase solutions to the combined_h5parm
         solset = h.makeSolset('sol001')  # creates sol001
