@@ -964,7 +964,7 @@ def apply_h5parm(h5parm, ms, column_out='DATA', solutions=['phase']):
             f.write('apply_tec.type                      = applycal\n')
             f.write('apply_tec.parmdb                    = {}\n'.format(h5parm))
             f.write('apply_tec.solset                    = sol002\n')
-            f.write('apply_tec.phase.correction          = tec000\n')
+            f.write('apply_tec.correction                = tec000\n')
 
     f.close()
     ndppp_output = subprocess.check_output(['NDPPP', parset])
