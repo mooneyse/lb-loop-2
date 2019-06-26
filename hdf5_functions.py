@@ -936,15 +936,16 @@ def apply_h5parm(h5parm, ms, column_out='DATA', solutions=['phase']):
         f.write('msout.datacolumn                    = {}\n\n'.format(column_out))
 
         if 'amplitude' in solutions and 'tec' in solutions:
-            print('Applying phase and amplitude/phase solutions.')
+            print('Applying phase, amplitude, and TEC solutions.')
             f.write('steps                               = [apply_phase, apply_diagonal, apply_tec]\n\n')
         elif 'amplitude' not in solutions and 'tec' in solutions:
-            print('Applying phase and amplitude/phase solutions.')
+            print('Applying phase and TEC solutions.')
             f.write('steps                               = [apply_phase, apply_tec]\n\n')
         elif 'amplitude' in solutions and 'tec' not in solutions:
-            print('Applying phase and amplitude/phase solutions.')
+            print('Applying phase and amplitude solutions.')
             f.write('steps                               = [apply_phase, apply_diagonal]\n\n')
         else:
+            print('Applying phase solutions.')            
             f.write('steps                               = [apply_phase]\n\n')
 
         f.write('apply_phase.type                    = applycal\n')
