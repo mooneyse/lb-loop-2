@@ -1030,7 +1030,6 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
     A new h5parm that is a combination of new_h5parm and loop3_h5parm (str).'''
 
     # get solutions from new_h5parm and loop3_h5parm
-    print(initial_h5parm,'asdfasdf')
     f = lh5.h5parm(initial_h5parm)  # from new_h5parm
     initial_phase = f.getSolset('sol000').getSoltab('phase000')
     try:  # h5parms from dir2phasesol have a direction, but in case not
@@ -1120,19 +1119,11 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
                           vals=vals,
                           weights=weights)  # creates phase000
 
-    if amplitude_h5parm != '':
-        d = solset.makeSoltab('amplitude',
-                              axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                              axesVals=[new_times, freq, all_antennas, pol, dir_],
-                              vals=amp_vals,
-                              weights=amp_weights)  # creates amplitude000
-
     # copy source and antenna tables into the new h5parm
     source_table = table.obj._f_get_child('source')
     source_table.append(source_soltab)
     antenna_table = table.obj._f_get_child('antenna')
     antenna_table.append(antenna_soltab)  # from dictionary to list
-
 
     if amplitudes_included:  # include amplitude solutions if they exist
         initial_diagonal_A = f.getSolset('sol001').getSoltab('amplitude000')
