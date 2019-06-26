@@ -945,7 +945,7 @@ def apply_h5parm(h5parm, ms, column_out='DATA', solutions=['phase']):
             print('Applying phase and amplitude solutions.')
             f.write('steps                               = [apply_phase, apply_diagonal]\n\n')
         else:
-            print('Applying phase solutions.')            
+            print('Applying phase solutions.')
             f.write('steps                               = [apply_phase]\n\n')
 
         f.write('apply_phase.type                    = applycal\n')
