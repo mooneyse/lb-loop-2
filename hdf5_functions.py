@@ -131,6 +131,7 @@ def combine_h5s(phase_h5='', amplitude_h5='', tec_h5='', loop3_dir=''):
 
     # make new solution tables in the new h5parm
     new_h5 = phase_h5[:-3] + '_P_A.h5'  # lazy method
+    new_h5 = phase_h5[:-3] + '_phase_diag.h5' if not tec_h5 else phase_h5[:-3] + '_phase_diag_tec.h5'
     n = lh5.h5parm(new_h5, readonly=False)
 
     n_phase_solset = n.makeSolset(solsetName='sol000')
@@ -181,7 +182,7 @@ def combine_h5s(phase_h5='', amplitude_h5='', tec_h5='', loop3_dir=''):
                                     axesVals=[t_soltab.time, t_soltab.freq, t_soltab.ant],
                                     vals=t_val,
                                     weights=t_weight)
-                                    
+
         t.close()
 
     # tidy up
