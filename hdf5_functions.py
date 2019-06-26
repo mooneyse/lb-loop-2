@@ -943,7 +943,7 @@ def add_amplitude_and_phase_solutions(diag_A_1, diag_P_1, diag_A_2, diag_P_2):
         amplitude_final = np.zeros(diag_A_1.shape)
         phase_final = np.zeros(diag_P_1.shape)
 
-        for i in diag_A_1.shape[1]:
+        for i in range(diag_A_1.shape[1]):
             amplitude_1_2, phase_1_2 = [], []
 
             for A1, P1, A2, P2 in zip(diag_A_1[:, i], diag_P_1[:, i], diag_A_2[:, i], diag_P_2[:, i]):
