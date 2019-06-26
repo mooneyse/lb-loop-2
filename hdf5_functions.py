@@ -952,6 +952,7 @@ def add_amplitude_and_phase_solutions(diag_A_1, diag_P_1, diag_A_2, diag_P_2):
                 complex_1_2 = complex_1 + complex_2
 
                 amplitude_1_2.append(abs(complex_1_2))
+                print('fffff', complex.imag, complex.imag.shape, type(complex.imag))
                 phase_1_2.append(np.arctan2(complex.imag, complex.real))
 
             amplitude_final[:, i] = amplitude_1_2
