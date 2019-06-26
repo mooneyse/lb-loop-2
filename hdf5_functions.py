@@ -181,6 +181,8 @@ def combine_h5s(phase_h5='', amplitude_h5='', tec_h5='', loop3_dir=''):
                                     axesVals=[t_soltab.time, t_soltab.freq, t_soltab.ant],
                                     vals=t_val,
                                     weights=t_weight)
+                                    
+        t.close()
 
     # tidy up
     p.close()
