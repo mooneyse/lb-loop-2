@@ -1030,6 +1030,7 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
     A new h5parm that is a combination of new_h5parm and loop3_h5parm (str).'''
 
     # get solutions from new_h5parm and loop3_h5parm
+    print(initial_h5parm,'asdfasdf')
     f = lh5.h5parm(initial_h5parm)  # from new_h5parm
     initial_phase = f.getSolset('sol000').getSoltab('phase000')
     try:  # h5parms from dir2phasesol have a direction, but in case not
@@ -1390,6 +1391,6 @@ def main():
 if __name__ == '__main__':
     # main()
 
-    update_list(initial_h5parm='SILTJ135044.06+544752.7_L693725_phasecal_207.684_54.798.h5',
+    update_list(initial_h5parm='/data020/scratch/sean/letsgetloopy/SILTJ135044.06+544752.7_L693725_phasecal_207.684_54.798.h5',
                 incremental_h5parm='/data020/scratch/sean/letsgetloopy/loop3_SILTJ135044.06+544752.7_L693725_phasecal.apply_tec-5fa200/SILTJ135044.06+544752.7_L693725_phasecal.apply_tec-5fa200.MS_01_c2_combo.h5',
                 mtf='/data020/scratch/sean/letsgetloopy/mtf.txt')
