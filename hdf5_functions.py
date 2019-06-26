@@ -372,7 +372,7 @@ def dir2phasesol_wrapper(mtf, ms, directions=[], cores=4):
     return new_h5parms
 
 
-def interpolate_time(the_array, the_times, new_times):
+def interpolate_time(the_array, the_times, new_times, tec=False):
     '''Given a h5parm array, it will interpolate the values in the time axis
     from whatever it is to a given value.
 
@@ -386,26 +386,45 @@ def interpolate_time(the_array, the_times, new_times):
     The array of values or weights for a h5parm expanded to fit the new time
     axis. (NumPy array)'''
 
-    # get the original data
-    time, freq, ant, pol, dir_ = the_array.shape  # axes were reordered earlier
+    if tec:
+        # get the original data
+        time, freq, ant, dir_ = the_array.shape  # axes were reordered earlier
 
-    # make the new array
-    interpolated_array = np.ones(shape=(len(new_times), freq, ant, pol, dir_))
+        # make the new array
+        interpolated_array = np.ones(shape=(len(new_times), freq, ant, dir_))
 
-    for a in range(ant):  # for one antenna only
-        old_x_values = the_array[:, 0, a, 0, 0]  # xx
-        old_y_values = the_array[:, 0, a, 1, 0]  # yy
+        for a in range(ant):  # for one antenna only
+            old_values = the_array[:, 0, a, 0]  # xx
 
-        # calculate the interpolated values
-        x1 = interp1d(the_times, old_x_values, kind='nearest', bounds_error=False)
-        y1 = interp1d(the_times, old_y_values, kind='nearest', bounds_error=False)
+            # calculate the interpolated values
+            f = interp1d(the_times, old_values, kind='nearest', bounds_error=False)
 
-        new_x_values = x1(new_times)
-        new_y_values = y1(new_times)
+            new_values = f(new_times)
 
-        # assign the interpolated values to the new array
-        interpolated_array[:, 0, a, 0, 0] = new_x_values  # new x values
-        interpolated_array[:, 0, a, 1, 0] = new_y_values  # new y values
+            # assign the interpolated values to the new array
+            interpolated_array[:, 0, a, 0] = new_values  # new x values
+
+    else:
+        # get the original data
+        time, freq, ant, pol, dir_ = the_array.shape  # axes were reordered earlier
+
+        # make the new array
+        interpolated_array = np.ones(shape=(len(new_times), freq, ant, pol, dir_))
+
+        for a in range(ant):  # for one antenna only
+            old_x_values = the_array[:, 0, a, 0, 0]  # xx
+            old_y_values = the_array[:, 0, a, 1, 0]  # yy
+
+            # calculate the interpolated values
+            x1 = interp1d(the_times, old_x_values, kind='nearest', bounds_error=False)
+            y1 = interp1d(the_times, old_y_values, kind='nearest', bounds_error=False)
+
+            new_x_values = x1(new_times)
+            new_y_values = y1(new_times)
+
+            # assign the interpolated values to the new array
+            interpolated_array[:, 0, a, 0, 0] = new_x_values  # new x values
+            interpolated_array[:, 0, a, 1, 0] = new_y_values  # new y values
 
     return interpolated_array
 
@@ -459,6 +478,9 @@ def build_soltab(soltab, working_data, solset):
 
     time_mins, time_maxs, time_intervals, frequencies = [], [], [], []
 
+    # looping through the h5parms to build a new time axis; this has to be done
+    # before getting the solutions from the h5parms so they are being looped
+    # over twice
     for my_line in range(len(working_data)):  # one line per station
         my_station = working_data[my_line][0]
         my_h5parm = working_data[my_line][len(working_data[my_line]) - 1]
@@ -503,8 +525,8 @@ def build_soltab(soltab, working_data, solset):
                     w_expanded = np.expand_dims(w, axis=2)
                     print('Need to make interpolate_time handle TEC (no pol axis)')
                     sys.exit()  # BUG fix interpolate_time for TEC
-                    v_interpolated = interpolate_time(the_array=v_expanded, the_times=tab.time[:], new_times=new_time)
-                    w_interpolated = interpolate_time(the_array=w_expanded, the_times=tab.time[:], new_times=new_time)
+                    v_interpolated = interpolate_time(the_array=v_expanded, the_times=tab.time[:], new_times=new_time, tec=True)
+                    w_interpolated = interpolate_time(the_array=w_expanded, the_times=tab.time[:], new_times=new_time, tec=True)
                     val.append(v_interpolated)
                     weight.append(w_interpolated)
             lo.close()
@@ -862,25 +884,25 @@ def dir2phasesol(mtf, ms='', directions=[]):
         print('No amplitude solutions found.')
         pass
 
-    # try:  # bring across tec solutions if there are any
-    #     vals, weights, time, freq, ant = build_soltab(soltab='tec', working_data=working_data, solset='sol002')
-    #     print('Building TEC solutions.')
-    #     tec_solset = h.makeSolset('sol002')
-    #     c = tec_solset.makeSoltab('tec',
-    #                               axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-    #                               axesVals=[time, freq, ant, pol, dir_],
-    #                               vals=vals,
-    #                               weights=weights)  # creates tec000
-    #
-    #     # make source and antenna tables
-    #     tec_source = tec_solset.obj._f_get_child('source')
-    #     tec_source.append(source_soltab.items())  # from dictionary to list
-    #     tec_antenna = tec_solset.obj._f_get_child('antenna')
-    #     tec_antenna.append(antenna_soltab.items())  # from dictionary to list
-    #
-    # except:
-    #     print('No TEC solutions found.')
-    #     pass
+    try:  # bring across tec solutions if there are any
+        vals, weights, time, freq = build_soltab(soltab='tec', working_data=working_data, solset='sol002')
+        print('Building TEC solutions.')
+        tec_solset = h.makeSolset('sol002')
+        c = tec_solset.makeSoltab('tec',
+                                  axesNames=['time', 'freq', 'ant', 'dir'],
+                                  axesVals=[time, freq, ant, dir_],
+                                  vals=vals,
+                                  weights=weights)  # creates tec000
+
+        # make source and antenna tables
+        tec_source = tec_solset.obj._f_get_child('source')
+        tec_source.append(source_soltab.items())  # from dictionary to list
+        tec_antenna = tec_solset.obj._f_get_child('antenna')
+        tec_antenna.append(antenna_soltab.items())  # from dictionary to list
+
+    except:
+        print('No TEC solutions found.')
+        pass
 
     h.close()  # close the new h5parm
     os.remove(working_file)
@@ -914,9 +936,15 @@ def apply_h5parm(h5parm, ms, column_out='DATA', solutions=['phase']):
         f.write('msin                                = {}\n'.format(ms))
         f.write('msin.datacolumn                     = {}\n'.format(column_in))
         f.write('msout                               = {}\n'.format(msout))
-        f.write('msout.datacolumn                    = {}\n'.format(column_out))
+        f.write('msout.datacolumn                    = {}\n\n'.format(column_out))
 
-        if 'amplitude' in solutions:
+        if 'amplitude' in solutions and 'tec' in solutions:
+            print('Applying phase and amplitude/phase solutions.')
+            f.write('steps                               = [apply_phase, apply_diagonal, apply_tec]\n\n')
+        elif 'amplitude' not in solutions and 'tec' in solutions:
+            print('Applying phase and amplitude/phase solutions.')
+            f.write('steps                               = [apply_phase, apply_tec]\n\n')
+        elif 'amplitude' in solutions and 'tec' not in solutions:
             print('Applying phase and amplitude/phase solutions.')
             f.write('steps                               = [apply_phase, apply_diagonal]\n\n')
         else:
@@ -932,8 +960,14 @@ def apply_h5parm(h5parm, ms, column_out='DATA', solutions=['phase']):
             f.write('apply_diagonal.parmdb               = {}\n'.format(h5parm))
             f.write('apply_diagonal.solset               = sol001\n')
             f.write('apply_diagonal.steps                = [amplitude, phase]\n')
-            f.write('apply_diagonal.amplitude.correction = amplitude000\n\n')
-            f.write('apply_diagonal.phase.correction     = phase000\n')
+            f.write('apply_diagonal.amplitude.correction = amplitude000\n')
+            f.write('apply_diagonal.phase.correction     = phase000\n\n')
+
+        if 'tec' in solutions:
+            f.write('apply_tec.type                      = applycal\n')
+            f.write('apply_tec.parmdb                    = {}\n'.format(h5parm))
+            f.write('apply_tec.solset                    = sol002\n')
+            f.write('apply_tec.phase.correction          = tec000\n')        
 
     f.close()
     ndppp_output = subprocess.check_output(['NDPPP', parset])
@@ -1397,7 +1431,7 @@ def main():
 
     evaluate_solutions(h5parm=combined_132737_h5, mtf=mtf)
     evaluate_solutions(h5parm=combined_133749_h5, mtf=mtf)
-    '''
+
     new_h5parms = dir2phasesol_wrapper(mtf=mtf,
                                        ms=ms,
                                        directions=directions,
@@ -1421,7 +1455,7 @@ def main():
         loop3_h5s = combine_h5s(loop3_dir=loop3_dir)
         update_list(initial_h5parm=initial_h5parm, incremental_h5parm=loop3_h5s,
                     mtf=mtf, threshold=threshold)
-    '''
+
 
 if __name__ == '__main__':
     main()
