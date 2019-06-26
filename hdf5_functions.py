@@ -1283,10 +1283,6 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         antenna_table = solset.obj._f_get_child('antenna')
         antenna_table.append(antenna_soltab)
 
-        p_source = p.getSolset('sol000').getSou().items()
-        p_antenna = p.getSolset('sol000').getAnt().items()
-
-
     f.close()
     g.close()
     h.close()
