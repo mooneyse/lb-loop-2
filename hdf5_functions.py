@@ -1333,7 +1333,7 @@ if __name__ == '__main__':
     # main()
 
     loop3_h5s = combine_h5s(loop3_dir='/data020/scratch/sean/letsgetloopy/loop3_SILTJ135044.06+544752.7_L693725_phasecal.apply_tec-5fa200')
-    print(loop3loop3_h5s)
+    print(loop3_h5s)
     # update_list(initial_h5parm='SILTJ135044.06+544752.7_L693725_phasecal_207.684_54.798.h5',
     #             incremental_h5parm=loop3_h5s,
     #             mtf='/data020/scratch/sean/letsgetloopy/mtf.txt')
