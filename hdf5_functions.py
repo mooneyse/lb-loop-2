@@ -936,10 +936,10 @@ def add_amplitude_and_phase_solutions(diag_A_1, diag_P_1, diag_A_2, diag_P_2):
     amplitude_final, phase_final = [], []
 
     # convert nan to zero, otherwise nan + x = nan, not x
-    diag_A_1 = p.nan_to_num(diag_A_1)
-    diag_P_1 = p.nan_to_num(diag_P_1)
-    diag_A_2 = p.nan_to_num(diag_A_2)
-    diag_P_2 = p.nan_to_num(diag_P_2)
+    diag_A_1 = np.nan_to_num(diag_A_1)
+    diag_P_1 = np.nan_to_num(diag_P_1)
+    diag_A_2 = np.nan_to_num(diag_A_2)
+    diag_P_2 = np.nan_to_num(diag_P_2)
 
     for A1, P1, A2, P2 in zip(diag_A_1, diag_P_1, diag_A_2, diag_P_2):
         complex_A1 = A1 * complex(np.cos(P1), np.sin(P1))
