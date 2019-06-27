@@ -1508,8 +1508,6 @@ def main():
         update_list(initial_h5parm=initial_h5parm, incremental_h5parm=loop3_h5s,
                     mtf=mtf, threshold=threshold)
 
-    # TODO plot the amplitude and TEC solutions to make sure they are correct
-
 
 if __name__ == '__main__':
     main()
