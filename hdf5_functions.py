@@ -1503,12 +1503,12 @@ def main():
     print('Then run combine_h5s and update_list.')
 
     for msout, initial_h5parm in zip(msouts, new_h5parms):
-        loop3_dir = 'loop3_' + msout[:-3]
+        loop3_dir = os.path.dirname(os.path.dirname(msout + '/')) + '/loop3_' + os.path.basename(msout)[:-3]
         loop3_h5s = combine_h5s(loop3_dir=loop3_dir)
         update_list(initial_h5parm=initial_h5parm, incremental_h5parm=loop3_h5s,
                     mtf=mtf, threshold=threshold)
 
-    # TODO plot the amplitude and TEC solutions to make sur they are correct
+    # TODO plot the amplitude and TEC solutions to make sure they are correct
 
 
 if __name__ == '__main__':
