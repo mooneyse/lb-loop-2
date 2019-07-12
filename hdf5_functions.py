@@ -1149,6 +1149,35 @@ def sort_axes(soltab, tec=False):
     return reordered_values, reordered_weights
 
 
+def rejig_solsets(h5parm):
+    """This is a specific funtion to take a h5parm with three solsets, where
+    sol000 has phase solutions (phase000), sol001 has diagonal solutions
+    (amplitude000 and phase000), and sol002 has tec solutions (tec000). It adds
+    the values in sol000 and sol001 and then outputs a h5parm that has one
+    solset that has phase000, amplitude000 (the sum of the phase and diagonal
+    solutions), and tec000.
+
+    Parameters
+    ----------
+    h5parm : string
+        The filename of the h5parm with the three solsets, including the
+        filepath.
+
+    Returns
+    -------
+    string
+        Filename (including the filepath) of the h5parm with the solutions in
+        the format described above.
+    """
+    new_h5parm = h5parm  # for now, do nothing
+
+    # TODO write this function, and allay my concerns about setting A = 1 for
+    # the phase solutions
+    # delete h5parm before return
+
+    return new_h5parm
+
+
 def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
                 amplitudes_included=True, tec_included=True):
     '''Combine the phase solutions from the initial h5parm and the final
@@ -1506,10 +1535,17 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
     g.close()
     h.close()
 
+    # TODO now we have a h5parm with 3 solsets, sol000 has phase solutions
+    # (phase000), sol001 has diagonal solutions (amplitude000 and phase000),
+    # and sol002 has tec solutions (tec000) - however, we want to change this
+    # to produce one hdf5 with 1 solset, which has phase000, amplitude000,
+    # and tec000
+    rejigged_h5parm = rejig_solsets(h5parm=combined_h5parm)
+
     # evaluate the solutions and update the master file
     evaluate_solutions(h5parm=combined_h5parm, mtf=mtf, threshold=threshold)
 
-    return combined_h5parm
+    return rejigged_h5parm
 
 
 def main():
