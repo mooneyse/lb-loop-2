@@ -1530,14 +1530,6 @@ def main():
                         default='/data020/scratch/sean/letsgetloopy/mtf.txt',
                         help='master text file')
 
-    # parser.add_argument('-p',
-    #                     '--h5parms',
-    #                     required=False,
-    #                     type=str,
-    #                     default=[],
-    #                     nargs='+'
-    #                     help='h5parms to use')
-
     parser.add_argument('-f',
                         '--ms',
                         required=False,
@@ -1568,7 +1560,6 @@ def main():
 
     args = parser.parse_args()
     mtf = args.mtf
-    # h5parms = args.h5parms
     ms = args.ms
     threshold = args.threshold
     cores = args.cores
@@ -1596,7 +1587,7 @@ def main():
     for new_h5parm in new_h5parms:
         msout = apply_h5parm(h5parm=new_h5parm, ms=ms, solutions=['phase', 'amplitude', 'tec'])  # outputs an ms per direction
         msout_tec = msout  # TODO need a skymodel in residual_tec_solve to test this
-        # resid_tec_h5parm, msout_tec = residual_tec_solve(ms=msout)
+        # resid_tec_h5parm, msout_tec = residual_tec_solve(ms=msout)  # this is being built into loop 3
         msouts.append(msout_tec)
 
     print('Running loop 3...')  # has to be run from the same directory as the ms
