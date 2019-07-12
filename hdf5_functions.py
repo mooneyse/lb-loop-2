@@ -1108,7 +1108,7 @@ def make_new_times(time1, time2):
     return new_time
 
 
-def sort_axes(soltab):
+def sort_axes(soltab, tec=False):
     ''' Add a direction axis if there is none and sort the axes into a
      predefined order.
 
@@ -1135,10 +1135,16 @@ def sort_axes(soltab):
         values = soltab.val
         weights = soltab.weight
 
-    reordered_values = reorderAxes(values, axes_names,
-                                   ['time', 'freq', 'ant','pol', 'dir'])
-    reordered_weights = reorderAxes(weights, axes_names,
-                                    ['time', 'freq', 'ant','pol', 'dir'])
+    if tec:
+        reordered_values = reorderAxes(values, axes_names,
+                                       ['time', 'freq', 'ant', 'dir'])
+        reordered_weights = reorderAxes(weights, axes_names,
+                                        ['time', 'freq', 'ant', 'dir'])
+    else:
+        reordered_values = reorderAxes(values, axes_names,
+                                       ['time', 'freq', 'ant','pol', 'dir'])
+        reordered_weights = reorderAxes(weights, axes_names,
+                                        ['time', 'freq', 'ant','pol', 'dir'])
 
     return reordered_values, reordered_weights
 
@@ -1395,9 +1401,107 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
 
     if tec_included:  # include tec solutions if they exist
         # initial tec will be coming from initial_h5parm but the incremental_tec
-        # will be from the residual tec solve, not loop 3, so we will have an
-        # additional hdf5 that has to be passed in here
-        print('Solve for residual TEC first!')
+        # will be from the residual tec solve, which will be implemented into
+        # loop 3 soon
+
+        # NOTE 12 July 2019 - adding TEC functionality
+        # assign all the information to variables
+        solset_tec, soltab_tec = 'sol002', 'tec000'
+
+        initial_tec = f.getSolset(solset_tec).getSoltab(soltab_tec)
+        try:  #  may not contain a direction dimension
+            initial_dir = initial_tec.dir[:]
+        except:
+            initial_dir = ['0']  # if it is missing
+        initial_time = initial_tec.time[:]
+        initial_freq = initial_tec.freq[:]
+        initial_ant = initial_tec.ant[:]
+        initial_val = initial_tec.val[:]
+        initial_weight = initial_tec.weight[:]
+
+        incremental_tec = g.getSolset(solset_tec).getSoltab(soltab_tec)
+        antenna_tec = g.getSolset(solset_tec).getAnt().items()
+        source_tec = g.getSolset(solset_tec).getSou().items()
+
+        try:
+            incremental_dir = incremental_tec.dir[:]
+        except:
+            incremental_dir = initial_dir  # if none, take it from the other h5
+        incremental_time = incremental_tec.time[:]
+        incremental_freq = incremental_tec.freq[:]
+        incremental_ant = incremental_tec.ant[:]
+        incremental_val = incremental_tec.val[:]
+        incremental_weight = incremental_tec.weight[:]
+
+        # for comined_h5parm, we want to get val_initial and val_incremental on
+        # the same time axis, so first, build the new time axis and order the
+        # array
+        new_times = make_new_times(initial_time, incremental_time)
+        # new_times go from the lowest minimum to the highest maximum on the
+        # shortest interval
+        initial_sorted_val, initial_sorted_weight = sort_axes(initial_tec)
+        incremental_sorted_val, incremental_sorted_weight = sort_axes(incremental_tec)
+        # sort_axes sorts the axis into the order I want and adds a direction
+        # axis if there is not one
+
+        # interpolate the solutions from both h5parms onto this new time axis
+        initial_val_new = interpolate_time(initial_sorted_val, initial_time, new_times, tec=True)
+        initial_weight_new = interpolate_time(initial_sorted_weight, initial_time, new_times, tec=True)
+        incremental_val_new = interpolate_time(incremental_sorted_val, incremental_time, new_times, tec=True)
+        incremental_weight_new = interpolate_time(incremental_sorted_weight, incremental_time, new_times, tec=True)
+
+        # this protects against the antennas not being in the same order in each h5parm
+        all_antennas = sorted(list(set(initial_ant.tolist() + incremental_ant.tolist())))  # total unique list of antennas
+        default_shape = (len(new_times), 1, 1)  # time, freq, dir
+        summed_values, summed_weights = [], []
+
+        # actually do the adding, where we go through each antenna and combine
+        # the solutions
+        for antenna in all_antennas:  # for each antenna in either h5parm
+            # get values and weights from the first h5parm
+            val1 = np.zeros(default_shape)
+            wgt1 = np.zeros(default_shape)
+            for ant1 in range(len(initial_ant)):
+                if antenna == initial_ant[ant1]:
+                    val1 = initial_val_new[:, :, ant1, :]
+                    wgt1 = initial_weight_new[:, :, ant1, :]
+
+            # get values and weights from the second h5parm
+            val2 = np.zeros(default_shape)
+            wgt2 = np.zeros(default_shape)
+            for ant2 in range(len(incremental_ant)):
+                if antenna == incremental_ant[ant2]:
+                    val2 = incremental_val_new[:, :, ant2, :]
+                    wgt2 = incremental_weight_new[:, :, ant2, :]
+
+            # and add them, converting nan to zero
+            # the values are simple addition and I avearge the weights, but
+            # this is a WARNING that this may not be the desired behaviour
+            val_new = np.expand_dims(np.nan_to_num(val1) + np.nan_to_num(val2), axis=2)
+            wgt_new = np.expand_dims((np.nan_to_num(wgt1) + np.nan_to_num(wgt2)) / 2, axis=2)
+
+            summed_values.append(val_new)
+            summed_weights.append(wgt_new)
+
+        # get the array into the right format
+        vals = np.concatenate(summed_values, axis=2)
+        weights = np.concatenate(summed_weights, axis=2)
+
+        freq = np.average([initial_freq, incremental_freq], axis=0)  # handles multiple frequencies
+
+        # write these best phase solutions to the combined_h5parm
+        solset = h.makeSolset(solset_tec)  # creates sol002 in h which is the new h5parm
+        t = solset.makeSoltab('tec',
+                              axesNames=['time', 'freq', 'ant', 'dir'],
+                              axesVals=[new_times, freq, all_antennas, incremental_dir],
+                              vals=vals,
+                              weights=weights)  # creates tec000
+
+        # copy source and antenna tables into the new h5parm
+        source_table = solset.obj._f_get_child('source')
+        source_table.append(source_tec)
+        antenna_table = solset.obj._f_get_child('antenna')
+        antenna_table.append(antenna_tec)
 
     f.close()
     g.close()
