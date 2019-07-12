@@ -1404,7 +1404,6 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         # will be from the residual tec solve, which will be implemented into
         # loop 3 soon
 
-        # NOTE 12 July 2019 - adding TEC functionality
         # assign all the information to variables
         solset_tec, soltab_tec = 'sol002', 'tec000'
 
