@@ -1034,6 +1034,15 @@ def add_amplitude_and_phase_solutions(diag_A_1, diag_P_1, diag_A_2, diag_P_2):
     and return the amplitude and phase components of the result. The solutions
     must be on the same time axis.
 
+    Note on adding amplitudes and phases:
+    If there is no amplitude, what do we do? We should not take A = 1 as this
+    biases the sum. e.g. say
+    [A1 = 1, P1 = 1], [A2 = 1000, P2 = 2], [A3 = 0.001, P3 = 2], then
+    [A1, P1] + [A2, P2] ~ [A2, P2] and [A1, P1] + [A3, P3] ~ [A1, P1].
+    i.e. the ratio of A1 to A2 or A3 biases the sum. The best course of action
+    is to set the amplitude equal to the amplitude it is being added to, in the
+    case there is none.
+
     Args:
     amplitudes (list or NumPy array): Amplitude solutions.
     amplitude_phases (list or NumPy array): Phase solutions from the amplitude
@@ -1043,7 +1052,13 @@ def add_amplitude_and_phase_solutions(diag_A_1, diag_P_1, diag_A_2, diag_P_2):
     Returns:
     Amplitude solutions (NumPy array), phase solutions (NumPy array)'''
 
+    if diag_A_1 == '':
+        diag_A_1 = diag_A_2
+    elif diag_A_2 == '':
+        diag_A_2 = diag_A_1
+
     # convert nan to zero, otherwise nan + x = nan, not x
+
     diag_A_1 = np.nan_to_num(diag_A_1)
     diag_P_1 = np.nan_to_num(diag_P_1)
     diag_A_2 = np.nan_to_num(diag_A_2)
