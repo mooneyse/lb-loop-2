@@ -1782,9 +1782,13 @@ def main():
 
     msouts = []
     for new_h5parm in new_h5parms:
-        msout = apply_h5parm(h5parm=new_h5parm, ms=ms, solutions=['phase', 'amplitude', 'tec'])  # outputs an ms per direction
-        msout_tec = msout  # TODO need a skymodel in residual_tec_solve to test this
-        # resid_tec_h5parm, msout_tec = residual_tec_solve(ms=msout)  # this is being built into loop 3
+        # outputs an ms per direction
+        msout = apply_h5parm(h5parm=new_h5parm,
+                             ms=ms,
+                             solutions=['phase', 'amplitude', 'tec'])
+        msout_tec = msout  # TODO need a skymodel in residual_tec_solve to test
+        # resid_tec_h5parm, msout_tec = residual_tec_solve(ms=msout)
+        # that is being built into loop 3
         msouts.append(msout_tec)
 
     print('Running loop 3...')  # has to be run from the same directory as the ms
