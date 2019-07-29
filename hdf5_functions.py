@@ -1242,10 +1242,10 @@ def rejig_solsets(h5parm):
 
     # add the solutions together
     default_shape = (len(time), len(phase.freq), 1, 1)  # time, freq, pol, dir
-    empty_A_val = np.zeros((len(time), len(freq), len(ant), 2, 1))  # time, freq, ant, pol, dir
-    empty_A_wgt = np.zeros((len(time), len(freq), len(ant), 2, 1))  # time, freq, ant, pol, dir
-    empty_P_val = np.zeros((len(time), len(freq), len(ant), 2, 1))  # time, freq, ant, pol, dir
-    empty_P_wgt = np.zeros((len(time), len(freq), len(ant), 2, 1))  # time, freq, ant, pol, dir
+    empty_A_val = np.zeros((len(time), len(freq), len(ant), 2, 1))
+    empty_A_wgt = np.zeros((len(time), len(freq), len(ant), 2, 1))
+    empty_P_val = np.zeros((len(time), len(freq), len(ant), 2, 1))
+    empty_P_wgt = np.zeros((len(time), len(freq), len(ant), 2, 1))
 
     for n in range(len(ant)):  # for each antenna in either h5parm
         antenna = ant[n]
@@ -1311,33 +1311,35 @@ def rejig_solsets(h5parm):
     amp_vals, phase_vals = empty_A_val, empty_P_val
     amp_weights, phase_weights = empty_A_wgt, empty_P_wgt
 
-    # put the resulting amplitude and phase in sol000/amplitude000 and sol000/phase000 in h5parm2 respectively
-    new_amplitude = h2.getSolset('sol000').makeSoltab('amplitude000',
-                                                      axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                                                      axesVals=[time, freq, ant, pol, dir_],
-                                                      vals=amp_vals,
-                                                      weights=amp_weights)
+    # put the resulting amplitude and phase in sol000/amplitude000 and
+    # sol000/phase000 in h5parm2 respectively
+    sol000 = h2.makeSolset('sol000')
+    sol000.makeSoltab('amplitude000',
+                      axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+                      axesVals=[time, freq, ant, pol, dir_],
+                      vals=amp_vals,
+                      weights=amp_weights)
 
-    new_phase = h2.getSolset('sol000').makeSoltab('phase000',
-                                                  axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                                                  axesVals=[time, freq, ant, pol, dir_],
-                                                  vals=phase_vals,
-                                                  weights=phase_weights)
+    sol000.makeSoltab('phase000',
+                      axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+                      axesVals=[time, freq, ant, pol, dir_],
+                      vals=phase_vals,
+                      weights=phase_weights)
 
     # move sol002/tec000 from the h5parm to sol000/tec000 in the new h5parm
     tec = h1.getSolset('sol002').getSoltab('tec000')
-    tec_sorted = sort_axes(tec, tec=True)  # time', 'freq', 'ant', 'dir'
-    new_tec = h2.getSolset('sol000').makeSoltab('tec000',
-                                                axesNames=tec_sorted.getAxesNames(),
-                                                axesVals=[tec_sorted.time, tec_sorted.freq, tec_sorted.ant, dir_],
-                                                vals=tec_sorted.val,
-                                                weights=tec_sorted.weight)
+    tec_srt_val, tec_srt_wgt = sort_axes(tec, tec=True)  # time, freq, ant, dir
+    sol000.makeSoltab('tec000',
+                      axesNames=['time', 'freq', 'ant', 'dir'],
+                      axesVals=[tec.time, tec.freq, tec.ant, dir_],
+                      vals=tec_srt_val,
+                      weights=tec_srt_wgt)
 
     # close h5parms and delete the old h5parm
     h1.close()
     h2.close()
 
-    os.remove(h5parm)
+    # os.remove(h5parm)
 
     return new_h5parm
 
