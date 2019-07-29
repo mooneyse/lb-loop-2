@@ -1243,8 +1243,6 @@ def rejig_solsets(h5parm):
     empty_P_val = np.zeros((len(time), len(freq), len(ant), 2, 1))  # time, freq, ant, pol, dir
     empty_P_wgt = np.zeros((len(time), len(freq), len(ant), 2, 1))  # time, freq, ant, pol, dir
 
-    summed_values, summed_weights = [], []
-
     for n in range(len(ant)):  # for each antenna in either h5parm
         antenna = ant[n]
         # set empty variables in case there is not data for all antennas
@@ -1285,7 +1283,8 @@ def rejig_solsets(h5parm):
         diag_P_wgt_xx, diag_P_wgt_yy = np.nan_to_num(diag_P_wgt_xx), np.nan_to_num(diag_P_wgt_yy)
 
         # add them
-        # here setting the amplitude of the phase only solutions to the amplitude of the diagonal solutions
+        # here setting the amplitude of the phase only solutions to the
+        # amplitude of the diagonal solutions
         amp_sum_xx, ph_sum_xx = add_amplitude_and_phase_solutions(diag_A_1=diag_A_val_xx, diag_P_1=ph_val_xx, diag_A_2=diag_A_val_xx, diag_P_2=diag_P_val_xx)
         amp_sum_yy, ph_sum_yy = add_amplitude_and_phase_solutions(diag_A_1=diag_A_val_yy, diag_P_1=ph_val_yy, diag_A_2=diag_A_val_yy, diag_P_2=diag_P_val_yy)
 
