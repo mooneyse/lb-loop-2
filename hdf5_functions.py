@@ -1232,9 +1232,13 @@ def rejig_solsets(h5parm):
     # get list of total combined antennas
     # this protects against the antennas not being in the order in each h5parm
     freq = np.mean([phase.freq, diagonal_phase.freq], axis=0)
-    ant = sorted(list(set(phase.ant.tolist() + diagonal_phase.ant.tolist())))  # total unique list of antennas
+    # get total unique list of antennas
+    ant = sorted(list(set(phase.ant.tolist() + diagonal_phase.ant.tolist())))
     pol = ['XX', 'YY']
-    dir_ = phase.dir  # assume phase and diagonal solutions are in the same direction
+    try:
+        dir_ = phase.dir  # assume phase and diagonal solutions in same dir
+    except AttributeError:
+        dir_ = [0]
 
     # add the solutions together
     default_shape = (len(time), len(phase.freq), 1, 1)  # time, freq, pol, dir
