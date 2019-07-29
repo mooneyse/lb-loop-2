@@ -1200,7 +1200,7 @@ def rejig_solsets(h5parm):
     """
 
     # get the old h5parm and create the new h5parm
-    new_h5parm = h5parm[:-3]+'-ddf-'+h5parm[-3:]  # name for new hdf5 file
+    new_h5parm = h5parm[:-3] + '-ddf' + h5parm[-3:]  # name for new hdf5 file
     h1 = lh5.h5parm(h5parm)  # old h5parm
     h2 = lh5.h5parm(new_h5parm, readonly=False)  # new h5parm
 
@@ -1213,21 +1213,21 @@ def rejig_solsets(h5parm):
     # sol001/phase000, amplitude000 (set the amplitude for the phase-only term
     # to the amplitude from the diagonal term)
 
-    # sort the soltab axes so they are the same before summing
-    phase = sort_axes(phase)  # ['time', 'freq', 'ant', 'pol', 'dir']
-    diagonal_amplitude = sort_axes(diagonal_amplitude)  # ['time', 'freq', 'ant', 'pol', 'dir']
-    diagonal_phase = sort_axes(diagonal_phase)  # ['time', 'freq', 'ant', 'pol', 'dir']
-
     # get the phase and diagonal solutions on the same time axis
-    time = make_new_times(phase.time, diagonal_phase.time)  # build new time axis
+    time = make_new_times(phase.time, diagonal_phase.time)  # get new time axis
+
+    # sort the soltab axes so they are the same before summing
+    ph_val_srt, ph_wgt_srt = sort_axes(phase)
+    diag_A_val_srt, diag_A_wgt_srt = sort_axes(diagonal_amplitude)
+    diag_P_val_srt, diag_P_wgt_srt = sort_axes(diagonal_phase)
 
     # interpolate solutions
-    phase_val_new = interpolate_time(phase.val, phase.time, time)
-    phase_weight_new = interpolate_time(phase.weight, phase.time, time)
-    diagonal_amplitude_val_new = interpolate_time(diagonal_amplitude.val, diagonal_amplitude.time, time)
-    diagonal_amplitude_weight_new = interpolate_time(diagonal_amplitude.weight, diagonal_amplitude.time, time)
-    diagonal_phase_val_new = interpolate_time(diagonal_phase.val, diagonal_phase.time, time)
-    diagonal_phase_weight_new = interpolate_time(diagonal_phase.weight, diagonal_phase.time, time)
+    phase_val_new = interpolate_time(ph_val_srt, phase.time, time)
+    phase_weight_new = interpolate_time(ph_wgt_srt, phase.time, time)
+    diagonal_amplitude_val_new = interpolate_time(diag_A_val_srt, diagonal_amplitude.time, time)
+    diagonal_amplitude_weight_new = interpolate_time(diag_A_wgt_srt, diagonal_amplitude.time, time)
+    diagonal_phase_val_new = interpolate_time(diag_P_val_srt, diagonal_phase.time, time)
+    diagonal_phase_weight_new = interpolate_time(diag_P_wgt_srt, diagonal_phase.time, time)
 
     # get list of total combined antennas
     # this protects against the antennas not being in the order in each h5parm
@@ -1251,27 +1251,28 @@ def rejig_solsets(h5parm):
         diag_P_val_xx, diag_P_val_yy, diag_P_wgt_xx, diag_P_wgt_yy = np.zeros(default_shape), np.zeros(default_shape), np.zeros(default_shape), np.zeros(default_shape)
 
         # loop through combined antenna list, adding the phase and diagonal solutions
-        for a in range(len(phase.ant)):  # get values and weights from the phase soltab for this antenna
+        for a in range(len(phase.ant)):
+            # get values and weights from the phase soltab for this antenna
             if antenna == phase.ant[a]:
-                ph_val_xx = phase_val_new[:, :, a, 0, 0]  # ['time', 'freq', 'ant', 'pol', 'dir']
-                ph_val_yy = phase_val_new[:, :, a, 1, 0]  # ['time', 'freq', 'ant', 'pol', 'dir']
-                ph_wgt_xx = phase_weight_new[:, :, a, 0, 0]  # ['time', 'freq', 'ant', 'pol', 'dir']
-                ph_wgt_yy = phase_weight_new[:, :, a, 1, 0]  # ['time', 'freq', 'ant', 'pol', 'dir']
+                ph_val_xx = phase_val_new[:, :, a, 0, 0]
+                ph_val_yy = phase_val_new[:, :, a, 1, 0]
+                ph_wgt_xx = phase_weight_new[:, :, a, 0, 0]
+                ph_wgt_yy = phase_weight_new[:, :, a, 1, 0]
 
         # get values and weights from the diagonal soltabs for this antenna
         for a in range(len(diagonal_phase.ant)):
             if antenna == diagonal_phase.ant[a]:
-                diag_A_val_xx = diagonal_amplitude_val_new[:, :, a, 0, 0]  # ['time', 'freq', 'ant', 'pol', 'dir']
-                diag_A_val_yy = diagonal_amplitude_val_new[:, :, a, 1, 0]  # ['time', 'freq', 'ant', 'pol', 'dir']
-                diag_A_wgt_xx = diagonal_amplitude_weight_new[:, :, a, 0, 0]  # ['time', 'freq', 'ant', 'pol', 'dir']
-                diag_A_wgt_yy = diagonal_amplitude_weight_new[:, :, a, 1, 0]  # ['time', 'freq', 'ant', 'pol', 'dir']
+                diag_A_val_xx = diagonal_amplitude_val_new[:, :, a, 0, 0]
+                diag_A_val_yy = diagonal_amplitude_val_new[:, :, a, 1, 0]
+                diag_A_wgt_xx = diagonal_amplitude_weight_new[:, :, a, 0, 0]
+                diag_A_wgt_yy = diagonal_amplitude_weight_new[:, :, a, 1, 0]
 
         for a in range(len(diagonal_amplitude.ant)):
             if antenna == diagonal_amplitude.ant[a]:
-                diag_P_val_xx = diagonal_amplitude_val_new[:, :, a, 0, 0]  # ['time', 'freq', 'ant', 'pol', 'dir']
-                diag_P_val_yy = diagonal_amplitude_val_new[:, :, a, 1, 0]  # ['time', 'freq', 'ant', 'pol', 'dir']
-                diag_P_wgt_xx = diagonal_amplitude_weight_new[:, :, a, 0, 0]  # ['time', 'freq', 'ant', 'pol', 'dir']
-                diag_P_wgt_yy = diagonal_amplitude_weight_new[:, :, a, 1, 0]  # ['time', 'freq', 'ant', 'pol', 'dir']
+                diag_P_val_xx = diagonal_amplitude_val_new[:, :, a, 0, 0]
+                diag_P_val_yy = diagonal_amplitude_val_new[:, :, a, 1, 0]
+                diag_P_wgt_xx = diagonal_amplitude_weight_new[:, :, a, 0, 0]
+                diag_P_wgt_yy = diagonal_amplitude_weight_new[:, :, a, 1, 0]
 
         # convert nan to zero
         # do we want to covert nan to numbers for weights? probably just the weights
