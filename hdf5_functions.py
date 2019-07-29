@@ -5,27 +5,28 @@
    https://github.com/lmorabit/long_baseline_pipeline.'''
 
 from __future__ import print_function
-from functools import partial
+# from functools import partial
 from multiprocessing import Pool
-from pathlib import Path  # on CEP3, "pip install --user pathlib"
+# from pathlib import Path  # on CEP3, "pip install --user pathlib"
 import argparse
-from astropy.coordinates import SkyCoord
-from losoto.lib_operations import reorderAxes
-import losoto.h5parm as lh5  # on CEP3, "module load losoto"
-# import astropy.units as u
-import numpy as np
-import pyrap.tables as pt
 import csv
+# import astropy.units as u
 import datetime
 import fnmatch
 import os
 import subprocess
 # import sys
 import uuid
+import numpy as np
+from astropy.coordinates import SkyCoord
 from scipy.interpolate import interp1d
+from losoto.lib_operations import reorderAxes
+import losoto.h5parm as lh5  # on CEP3, "module load losoto"
+import pyrap.tables as pt
 
 __author__ = 'Sean Mooney'
 __date__ = '01 June 2019'
+
 
 def dir_from_ms(ms, verbose=False):
     ''' Gets the pointing centre (right ascension and declination) from the
@@ -46,7 +47,7 @@ def dir_from_ms(ms, verbose=False):
 
     if verbose:
         print('Getting direction from {}.'.format(ms))
-    t  = pt.table(ms, readonly=True, ack=False)
+    t = pt.table(ms, readonly=True, ack=False)
     field = pt.table(t.getkeyword('FIELD'), readonly=True, ack=False)
     directions = field.getcell('PHASE_DIR', 0)[0].tolist()  # radians
     field.close()
@@ -1406,11 +1407,11 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
     initial_time = initial_phase.time[:]
     initial_freq = initial_phase.freq[:]
     initial_ant = initial_phase.ant[:]
-    initial_val = initial_phase.val[:]
-    initial_weight = initial_phase.weight[:]
+    # initial_val = initial_phase.val[:]
+    # initial_weight = initial_phase.weight[:]
 
     g = lh5.h5parm(incremental_h5parm)  # from loop3_h5parm
-    sol000 = g.getSolset('sol000')  # change to take highest solset?
+    # sol000 = g.getSolset('sol000')  # change to take highest solset?
     incremental_phase = g.getSolset('sol000').getSoltab('phase000')
     antenna_soltab = g.getSolset('sol000').getAnt().items()  # dict to list
     source_soltab = g.getSolset('sol000').getSou().items()  # dict to list
@@ -1422,8 +1423,8 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
     incremental_time = incremental_phase.time[:]
     incremental_freq = incremental_phase.freq[:]
     incremental_ant = incremental_phase.ant[:]
-    incremental_val = incremental_phase.val[:]
-    incremental_weight = incremental_phase.weight[:]
+    # incremental_val = incremental_phase.val[:]
+    # incremental_weight = incremental_phase.weight[:]
 
     # for comined_h5parm
     # make val_initial and val_incremental on the same time axis
@@ -1445,8 +1446,8 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
 
     # get total unique list of antennas
     # this protects against the antennas not being in the order in each h5parm
-    AA = list(set(initial_ant.tolist() + incremental_ant.tolist()))
-    all_antennas = sorted(AA)
+    A = list(set(initial_ant.tolist() + incremental_ant.tolist()))
+    all_antennas = sorted(A)
     default_shape = (len(new_times), 1, 2, 1)
     summed_values, summed_weights = [], []
 
@@ -1533,9 +1534,9 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         # get the frequencies and the list of antennas for the new array
         new_diag_freq = np.mean([initial_diagonal_A.freq,
                                  incremental_diagonal_A.freq], axis=0)
-        AA = set(initial_diagonal_A.ant.tolist() +
+        A = set(initial_diagonal_A.ant.tolist() +
                  incremental_diagonal_A.ant.tolist())
-        new_diag_ant = sorted(list(AA))
+        new_diag_ant = sorted(list(A))
 
         # add the diagonal solutions together
         default_shape = np.zeros((len(new_diag_time),
@@ -1742,8 +1743,8 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
                                                   tec=True)
 
         # protects against antennas not being in the same order in each h5parm
-        AA = list(set(initial_ant.tolist() + incremental_ant.tolist()))
-        all_antennas = sorted(AA)  # total unique list of antennas
+        A = list(set(initial_ant.tolist() + incremental_ant.tolist()))
+        all_antennas = sorted(A)  # total unique list of antennas
         default_shape = (len(new_times), 1, 1)  # time, freq, dir
         summed_values, summed_weights = [], []
 
