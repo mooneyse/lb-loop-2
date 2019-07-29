@@ -1224,10 +1224,16 @@ def rejig_solsets(h5parm):
     # interpolate solutions
     phase_val_new = interpolate_time(ph_val_srt, phase.time, time)
     phase_weight_new = interpolate_time(ph_wgt_srt, phase.time, time)
-    diagonal_amplitude_val_new = interpolate_time(diag_A_val_srt, diagonal_amplitude.time, time)
-    diagonal_amplitude_weight_new = interpolate_time(diag_A_wgt_srt, diagonal_amplitude.time, time)
-    diagonal_phase_val_new = interpolate_time(diag_P_val_srt, diagonal_phase.time, time)
-    diagonal_phase_weight_new = interpolate_time(diag_P_wgt_srt, diagonal_phase.time, time)
+    diagonal_amplitude_val_new = interpolate_time(diag_A_val_srt,
+                                                  diagonal_amplitude.time,
+                                                  time)
+    diagonal_amplitude_weight_new = interpolate_time(diag_A_wgt_srt,
+                                                     diagonal_amplitude.time,
+                                                     time)
+    diagonal_phase_val_new = interpolate_time(diag_P_val_srt,
+                                              diagonal_phase.time, time)
+    diagonal_phase_weight_new = interpolate_time(diag_P_wgt_srt,
+                                                 diagonal_phase.time, time)
 
     # get list of total combined antennas
     # this protects against the antennas not being in the order in each h5parm
@@ -1250,11 +1256,20 @@ def rejig_solsets(h5parm):
     for n in range(len(ant)):  # for each antenna in either h5parm
         antenna = ant[n]
         # set empty variables in case there is not data for all antennas
-        ph_val_xx, ph_val_yy, ph_wgt_xx, ph_wgt_yy = np.zeros(default_shape), np.zeros(default_shape), np.zeros(default_shape), np.zeros(default_shape)
-        diag_A_val_xx, diag_A_val_yy, diag_A_wgt_xx, diag_A_wgt_yy = np.zeros(default_shape), np.zeros(default_shape), np.zeros(default_shape), np.zeros(default_shape)
-        diag_P_val_xx, diag_P_val_yy, diag_P_wgt_xx, diag_P_wgt_yy = np.zeros(default_shape), np.zeros(default_shape), np.zeros(default_shape), np.zeros(default_shape)
+        ph_val_xx = np.zeros(default_shape)
+        ph_val_yy = np.zeros(default_shape)
+        ph_wgt_xx = np.zeros(default_shape)
+        ph_wgt_yy = np.zeros(default_shape)
+        diag_A_val_xx = np.zeros(default_shape)
+        diag_A_val_yy = np.zeros(default_shape)
+        diag_A_wgt_xx = np.zeros(default_shape)
+        diag_A_wgt_yy = np.zeros(default_shape)
+        diag_P_val_xx = np.zeros(default_shape)
+        diag_P_val_yy = np.zeros(default_shape)
+        diag_P_wgt_xx = np.zeros(default_shape)
+        diag_P_wgt_yy = np.zeros(default_shape)
 
-        # loop through combined antenna list, adding the phase and diagonal solutions
+        # loop through combined antenna list adding phase & diagonal solutions
         for a in range(len(phase.ant)):
             # get values and weights from the phase soltab for this antenna
             if antenna == phase.ant[a]:
@@ -1273,25 +1288,35 @@ def rejig_solsets(h5parm):
 
         for a in range(len(diagonal_amplitude.ant)):
             if antenna == diagonal_amplitude.ant[a]:
-                diag_P_val_xx = diagonal_amplitude_val_new[:, :, a, 0, 0]
-                diag_P_val_yy = diagonal_amplitude_val_new[:, :, a, 1, 0]
-                diag_P_wgt_xx = diagonal_amplitude_weight_new[:, :, a, 0, 0]
-                diag_P_wgt_yy = diagonal_amplitude_weight_new[:, :, a, 1, 0]
+                diag_P_val_xx = diagonal_phase_val_new[:, :, a, 0, 0]
+                diag_P_val_yy = diagonal_phase_val_new[:, :, a, 1, 0]
+                diag_P_wgt_xx = diagonal_phase_weight_new[:, :, a, 0, 0]
+                diag_P_wgt_yy = diagonal_phase_weight_new[:, :, a, 1, 0]
 
         # convert nan to zero
-        # do we want to covert nan to numbers for weights? probably just the weights
-        # ph_val_xx, ph_val_yy = np.nan_to_num(ph_val_xx), np.nan_to_num(ph_val_yy)
-        # diag_A_val_xx, diag_A_val_yy = np.nan_to_num(diag_A_val_xx), np.nan_to_num(diag_A_val_yy)
-        # diag_P_val_xx, diag_P_val_yy = np.nan_to_num(diag_P_val_xx), np.nan_to_num(diag_P_val_yy)
-        ph_wgt_xx, ph_wgt_yy = np.nan_to_num(ph_wgt_xx), np.nan_to_num(ph_wgt_yy)
-        diag_A_wgt_xx, diag_A_wgt_yy = np.nan_to_num(diag_A_wgt_xx), np.nan_to_num(diag_A_wgt_yy)
-        diag_P_wgt_xx, diag_P_wgt_yy = np.nan_to_num(diag_P_wgt_xx), np.nan_to_num(diag_P_wgt_yy)
+        # do we want to covert nan to numbers for weights? just the weights
+        # ph_val_xx = np.nan_to_num(ph_val_xx)
+        # ph_val_yy = np.nan_to_num(ph_val_yy)
+        # diag_A_val_xx = np.nan_to_num(diag_A_val_xx)
+        # diag_A_val_yy = np.nan_to_num(diag_A_val_yy)
+        # diag_P_val_xx = np.nan_to_num(diag_P_val_xx)
+        # diag_P_val_yy = np.nan_to_num(diag_P_val_yy)
+        ph_wgt_xx = np.nan_to_num(ph_wgt_xx)
+        ph_wgt_yy = np.nan_to_num(ph_wgt_yy)
+        diag_A_wgt_xx = np.nan_to_num(diag_A_wgt_xx)
+        diag_A_wgt_yy = np.nan_to_num(diag_A_wgt_yy)
+        diag_P_wgt_xx = np.nan_to_num(diag_P_wgt_xx)
+        diag_P_wgt_yy = np.nan_to_num(diag_P_wgt_yy)
 
         # add them
         # here setting the amplitude of the phase only solutions to the
         # amplitude of the diagonal solutions
-        amp_sum_xx, ph_sum_xx = add_amplitude_and_phase_solutions(diag_A_1=diag_A_val_xx, diag_P_1=ph_val_xx, diag_A_2=diag_A_val_xx, diag_P_2=diag_P_val_xx)
-        amp_sum_yy, ph_sum_yy = add_amplitude_and_phase_solutions(diag_A_1=diag_A_val_yy, diag_P_1=ph_val_yy, diag_A_2=diag_A_val_yy, diag_P_2=diag_P_val_yy)
+        amp_sum_xx, ph_sum_xx = add_amplitude_and_phase_solutions(
+                                diag_A_1=diag_A_val_xx, diag_P_1=ph_val_xx,
+                                diag_A_2=diag_A_val_xx, diag_P_2=diag_P_val_xx)
+        amp_sum_yy, ph_sum_yy = add_amplitude_and_phase_solutions(
+                                diag_A_1=diag_A_val_yy, diag_P_1=ph_val_yy,
+                                diag_A_2=diag_A_val_yy, diag_P_2=diag_P_val_yy)
 
         # how do we want to add the weights?
         # averaging them here
@@ -1314,13 +1339,13 @@ def rejig_solsets(h5parm):
     # put the resulting amplitude and phase in sol000/amplitude000 and
     # sol000/phase000 in h5parm2 respectively
     sol000 = h2.makeSolset('sol000')
-    sol000.makeSoltab('amplitude000',
+    sol000.makeSoltab('amplitude',
                       axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
                       axesVals=[time, freq, ant, pol, dir_],
                       vals=amp_vals,
                       weights=amp_weights)
 
-    sol000.makeSoltab('phase000',
+    sol000.makeSoltab('phase',
                       axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
                       axesVals=[time, freq, ant, pol, dir_],
                       vals=phase_vals,
@@ -1329,7 +1354,7 @@ def rejig_solsets(h5parm):
     # move sol002/tec000 from the h5parm to sol000/tec000 in the new h5parm
     tec = h1.getSolset('sol002').getSoltab('tec000')
     tec_srt_val, tec_srt_wgt = sort_axes(tec, tec=True)  # time, freq, ant, dir
-    sol000.makeSoltab('tec000',
+    sol000.makeSoltab('tec',
                       axesNames=['time', 'freq', 'ant', 'dir'],
                       axesVals=[tec.time, tec.freq, tec.ant, dir_],
                       vals=tec_srt_val,
@@ -1338,8 +1363,7 @@ def rejig_solsets(h5parm):
     # close h5parms and delete the old h5parm
     h1.close()
     h2.close()
-
-    # os.remove(h5parm)
+    os.remove(h5parm)
 
     return new_h5parm
 
@@ -1367,7 +1391,7 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
     initial_phase = f.getSolset('sol000').getSoltab('phase000')
     try:  # h5parms from dir2phasesol have a direction, but in case not
         initial_dir = initial_phase.dir[:]
-    except:
+    except AttributeError:
         initial_dir = ['0']  # if it is missing
 
     initial_time = initial_phase.time[:]
@@ -1382,9 +1406,9 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
     antenna_soltab = g.getSolset('sol000').getAnt().items()  # dict to list
     source_soltab = g.getSolset('sol000').getSou().items()  # dict to list
 
-    try:  #  may not contain a direction dimension
+    try:  # may not contain a direction dimension
         dir_ = incremental_phase.dir[:]
-    except:
+    except AttributeError:
         dir_ = initial_dir  # if none, take it from the other h5
     incremental_time = incremental_phase.time[:]
     incremental_freq = incremental_phase.freq[:]
