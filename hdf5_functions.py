@@ -8,21 +8,21 @@ from __future__ import print_function
 from functools import partial
 from multiprocessing import Pool
 from pathlib import Path  # on CEP3, "pip install --user pathlib"
-from scipy.interpolate import interp1d
+import argparse
 from astropy.coordinates import SkyCoord
 from losoto.lib_operations import reorderAxes
 import losoto.h5parm as lh5  # on CEP3, "module load losoto"
-import astropy.units as u
-import pyrap.tables as pt
+# import astropy.units as u
 import numpy as np
-import argparse
+import pyrap.tables as pt
 import csv
 import datetime
 import fnmatch
 import os
 import subprocess
-import sys
+# import sys
 import uuid
+from scipy.interpolate import interp1d
 
 __author__ = 'Sean Mooney'
 __date__ = '01 June 2019'
@@ -822,7 +822,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
                       'DE605HBA': np.array([4005681.02, 450968.643, 4926458.211], dtype='float32'),
                       'FR606HBA': np.array([4324016.708, 165545.525, 4670271.363], dtype='float32'),
                       'SE607HBA': np.array([3370271.657, 712125.881, 5349991.165], dtype='float32'),
-                      'UK608HBA': np.array([4008461.941,-100376.609, 4943716.874], dtype='float32'),
+                      'UK608HBA': np.array([4008461.941, -100376.609, 4943716.874], dtype='float32'),
                       'DE609HBA': np.array([3727217.673, 655109.175, 5117003.123], dtype='float32'),
                       'PL610HBA': np.array([3738462.416, 1148244.316, 5021710.658], dtype='float32'),
                       'PL611HBA': np.array([3850980.881, 1438994.879, 4860498.993], dtype='float32'),
@@ -982,7 +982,7 @@ def apply_h5parm(h5parm, ms, column_out='DATA', solutions=['phase']):
     parset = os.path.dirname(h5parm) + '/applyh5parm.parset'
     column_in = 'DATA'
     now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    msout =  ms + '-' + str(uuid.uuid4())[:6] + '.MS'  # probably a better way
+    msout = ms + '-' + str(uuid.uuid4())[:6] + '.MS'  # probably a better way
 
     with open(parset, 'w') as f:  # create the parset
         f.write('# created by apply_h5parm at {}\n\n'.format(now))
@@ -1291,8 +1291,8 @@ def rejig_solsets(h5parm):
 
         # how do we want to add the weights?
         # averaging them here
-        wgt_sum_xx = (ph_wgt_xx + ((diag_A_wgt_xx + diag_P_wgt_xx) / 2) / 2
-        wgt_sum_yy = (ph_wgt_yy + ((diag_A_wgt_yy + diag_P_wgt_yy) / 2) / 2
+        wgt_sum_xx = ph_wgt_xx + ((diag_A_wgt_xx + diag_P_wgt_xx) / 2) / 2
+        wgt_sum_yy = ph_wgt_yy + ((diag_A_wgt_yy + diag_P_wgt_yy) / 2) / 2
 
         # populate the empty arrays with the new solutions
         empty_A_val[:, :, n, 0, 0] = amp_sum_xx
