@@ -1085,13 +1085,15 @@ def add_amplitude_and_phase_solutions(diag_A_1, diag_P_1, diag_A_2, diag_P_2):
         for i in range(diag_A_1.shape[1]):
             amplitude_1_2, phase_1_2 = [], []
 
-            for A1, P1, A2, P2 in zip(diag_A_1[:, i], diag_P_1[:, i], diag_A_2[:, i], diag_P_2[:, i]):
+            for A1, P1, A2, P2 in zip(diag_A_1[:, i], diag_P_1[:, i],
+                                      diag_A_2[:, i], diag_P_2[:, i]):
                 complex_1 = A1 * complex(np.cos(P1), np.sin(P1))
                 complex_2 = A2 * complex(np.cos(P2), np.sin(P2))
                 complex_1_2 = complex_1 + complex_2
 
                 amplitude_1_2.append(abs(complex_1_2))
-                phase_1_2.append(np.arctan2(complex_1_2.imag, complex_1_2.real))
+                phase_1_2.append(np.arctan2(complex_1_2.imag,
+                                            complex_1_2.real))
 
             amplitude_final[:, i] = amplitude_1_2
             phase_final[:, i] = phase_1_2
@@ -1114,15 +1116,21 @@ def add_amplitude_and_phase_solutions(diag_A_1, diag_P_1, diag_A_2, diag_P_2):
 
 
 def make_new_times(time1, time2):
-    '''Make a new time axis from two others, going from the minimum to the
+    """Make a new time axis from two others, going from the minimum to the
     maximum with the smallest time step.
 
-    Args:
-    time1 (list or NumPy array): Times.
-    time2 (list or NumPy array): Other times.
+    Parameters
+    ----------
+    time1 : list or NumPy array
+        Times.
+    time2 : list or NumPy array
+        Other times.
 
-    Returns:
-    New time axis (list).'''
+    Returns
+    -------
+    list
+        New time axis.
+    """
 
     times = [time1, time2]
     time_intervals = []
@@ -1138,7 +1146,7 @@ def make_new_times(time1, time2):
 
 
 def sort_axes(soltab, tec=False):
-    ''' Add a direction axis if there is none and sort the axes into a
+    """Add a direction axis if there is none and sort the axes into a
      predefined order.
 
     Parameters
@@ -1153,7 +1161,8 @@ def sort_axes(soltab, tec=False):
         direction), where a direction axis is included.
     NumPy array
         Weights ordered (time, frequency, antennas, polarisation, and
-        direction), where a direction axis is included. '''
+        direction), where a direction axis is included.
+    """
 
     axes_names = soltab.getAxesNames()
     if 'dir' not in axes_names:  # add the direction dimension
@@ -1421,16 +1430,23 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
     # first, build the new time axis and order the array
     new_times = make_new_times(initial_time, incremental_time)
     initial_sorted_val, initial_sorted_weight = sort_axes(initial_phase)
-    incremental_sorted_val, incremental_sorted_weight = sort_axes(incremental_phase)
+    incremental_sorted_val, incremental_sorted_weight = sort_axes(
+                                                        incremental_phase)
 
     # interpolate the solutions from both h5parms onto this new time axis
-    initial_val_new = interpolate_time(initial_sorted_val, initial_time, new_times)
-    initial_weight_new = interpolate_time(initial_sorted_weight, initial_time, new_times)
-    incremental_val_new = interpolate_time(incremental_sorted_val, incremental_time, new_times)
-    incremental_weight_new = interpolate_time(incremental_sorted_weight, incremental_time, new_times)
+    initial_val_new = interpolate_time(initial_sorted_val, initial_time,
+                                       new_times)
+    initial_weight_new = interpolate_time(initial_sorted_weight, initial_time,
+                                          new_times)
+    incremental_val_new = interpolate_time(incremental_sorted_val,
+                                           incremental_time, new_times)
+    incremental_weight_new = interpolate_time(incremental_sorted_weight,
+                                              incremental_time, new_times)
 
+    # get total unique list of antennas
     # this protects against the antennas not being in the order in each h5parm
-    all_antennas = sorted(list(set(initial_ant.tolist() + incremental_ant.tolist())))  # total unique list of antennas
+    AA = list(set(initial_ant.tolist() + incremental_ant.tolist()))
+    all_antennas = sorted(AA)
     default_shape = (len(new_times), 1, 2, 1)
     summed_values, summed_weights = [], []
 
@@ -1452,8 +1468,10 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
                 wgt2 = incremental_weight_new[:, :, ant2, :, :]
 
         # and add them, converting nan to zero
-        val_new = np.expand_dims(np.nan_to_num(val1) + np.nan_to_num(val2), axis=2)
-        wgt_new = np.expand_dims((np.nan_to_num(wgt1) + np.nan_to_num(wgt2)) / 2, axis=2)
+        val_new = np.expand_dims(np.nan_to_num(val1) + np.nan_to_num(val2),
+                                 axis=2)
+        wgt_new = np.expand_dims((np.nan_to_num(wgt1) +
+                                  np.nan_to_num(wgt2)) / 2, axis=2)
 
         summed_values.append(val_new)
         summed_weights.append(wgt_new)
@@ -1461,7 +1479,8 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
     vals = np.concatenate(summed_values, axis=2)
     weights = np.concatenate(summed_weights, axis=2)
 
-    freq = np.average([initial_freq, incremental_freq], axis=0)  # handles multiple frequencies
+    # handles multiple frequencies
+    freq = np.average([initial_freq, incremental_freq], axis=0)
     pol = np.array(['XX', 'YY'])
 
     combined_h5parm = (os.path.splitext(initial_h5parm)[0] + '_final.h5')
@@ -1470,11 +1489,11 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
     h = lh5.h5parm(combined_h5parm, readonly=False)
     table = h.makeSolset()  # creates sol000
     solset = h.getSolset('sol000')
-    c = solset.makeSoltab('phase',
-                          axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                          axesVals=[new_times, freq, all_antennas, pol, dir_],
-                          vals=vals,
-                          weights=weights)  # creates phase000
+    solset.makeSoltab('phase',
+                      axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+                      axesVals=[new_times, freq, all_antennas, pol, dir_],
+                      vals=vals,
+                      weights=weights)  # creates phase000
 
     # copy source and antenna tables into the new h5parm
     source_table = table.obj._f_get_child('source')
@@ -1490,13 +1509,16 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         incremental_diagonal_P = g.getSolset('sol001').getSoltab('phase000')
 
         # get the two diagonal solution tables onto a new time axis
-        new_diag_time = make_new_times(initial_diagonal_A.time, incremental_diagonal_A.time)
+        new_diag_time = make_new_times(initial_diagonal_A.time,
+                                       incremental_diagonal_A.time)
 
         # sort_axes adds the dir dimension and reorders the axes
         init_diag_A_val, init_diag_A_wgt = sort_axes(initial_diagonal_A)
         init_diag_P_val, init_diag_P_wgt = sort_axes(initial_diagonal_P)
-        increm_diag_A_val, increm_diag_A_wgt = sort_axes(incremental_diagonal_A)
-        increm_diag_P_val, increm_diag_P_wgt = sort_axes(incremental_diagonal_P)
+        increm_diag_A_val, increm_diag_A_wgt = sort_axes(
+                                               incremental_diagonal_A)
+        increm_diag_P_val, increm_diag_P_wgt = sort_axes(
+                                               incremental_diagonal_P)
 
         # interpolate the solutions in the initial and incremental tables
         init_diag_A_val_interp = interpolate_time(the_array=init_diag_A_val, the_times=initial_diagonal_A.time, new_times=new_diag_time)
@@ -1509,29 +1531,51 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         increm_diag_P_wgt_interp = interpolate_time(the_array=increm_diag_P_wgt, the_times=incremental_diagonal_P.time, new_times=new_diag_time)
 
         # get the frequencies and the list of antennas for the new array
-        new_diag_freq = np.mean([initial_diagonal_A.freq, incremental_diagonal_A.freq], axis=0)
-        new_diag_ant = sorted(list(set(initial_diagonal_A.ant.tolist() + incremental_diagonal_A.ant.tolist())))
+        new_diag_freq = np.mean([initial_diagonal_A.freq,
+                                 incremental_diagonal_A.freq], axis=0)
+        AA = set(initial_diagonal_A.ant.tolist() +
+                 incremental_diagonal_A.ant.tolist())
+        new_diag_ant = sorted(list(AA))
 
         # add the diagonal solutions together
-        default_shape = np.zeros((len(new_diag_time), len(new_diag_freq), 1, 1))  # time, freq, pol, dir
-        empty_diag_A_val = np.zeros((len(new_diag_time), len(new_diag_freq), len(new_diag_ant), 2, 1))  # time, freq, ant, pol, dir
-        empty_diag_A_wgt = np.zeros((len(new_diag_time), len(new_diag_freq), len(new_diag_ant), 2, 1))  # time, freq, ant, pol, dir
-        empty_diag_P_val = np.zeros((len(new_diag_time), len(new_diag_freq), len(new_diag_ant), 2, 1))  # time, freq, ant, pol, dir
-        empty_diag_P_wgt = np.zeros((len(new_diag_time), len(new_diag_freq), len(new_diag_ant), 2, 1))  # time, freq, ant, pol, dir
+        default_shape = np.zeros((len(new_diag_time),
+                                  len(new_diag_freq),
+                                  1, 1))  # time, freq, pol, dir
+        empty_diag_A_val = np.zeros((len(new_diag_time), len(new_diag_freq),
+                                     len(new_diag_ant), 2, 1))
+        empty_diag_A_wgt = np.zeros((len(new_diag_time), len(new_diag_freq),
+                                    len(new_diag_ant), 2, 1))
+        empty_diag_P_val = np.zeros((len(new_diag_time), len(new_diag_freq),
+                                    len(new_diag_ant), 2, 1))
+        empty_diag_P_wgt = np.zeros((len(new_diag_time), len(new_diag_freq),
+                                    len(new_diag_ant), 2, 1))
 
         summed_values, summed_weights = [], []
 
         for n in range(len(new_diag_ant)):  # for each antenna in either h5parm
             antenna = new_diag_ant[n]
             # set empty variables in case there is not data for all antennas
-            init_A_val_xx, init_A_val_yy, init_A_wgt_xx, init_A_wgt_yy = default_shape, default_shape, default_shape, default_shape
-            init_P_val_xx, init_P_val_yy, init_P_wgt_xx, init_P_wgt_yy = default_shape, default_shape, default_shape, default_shape
-            increm_A_val_xx, increm_A_val_yy, increm_A_wgt_xx, increm_A_wgt_yy = default_shape, default_shape, default_shape, default_shape
-            increm_P_val_xx, increm_P_val_yy, increm_P_wgt_xx, increm_P_wgt_yy = default_shape, default_shape, default_shape, default_shape
+            init_A_val_xx = default_shape
+            init_A_val_yy = default_shape
+            init_A_wgt_xx = default_shape
+            init_A_wgt_yy = default_shape
+            init_P_val_xx = default_shape
+            init_P_val_yy = default_shape
+            init_P_wgt_xx = default_shape
+            init_P_wgt_yy = default_shape
+            increm_A_val_xx = default_shape
+            increm_A_val_yy = default_shape
+            increm_A_wgt_xx = default_shape
+            increm_A_wgt_yy = default_shape
+            increm_P_val_xx = default_shape
+            increm_P_val_yy = default_shape
+            increm_P_wgt_xx = default_shape
+            increm_P_wgt_yy = default_shape
 
             # get values and weights from the initial h5parm
             for ant in range(len(initial_diagonal_A.ant)):
-                if antenna == initial_diagonal_A.ant[ant]:  # it will also equal initial_diagonal_P.ant[ant]
+                if antenna == initial_diagonal_A.ant[ant]:
+                    # antenna will also equal initial_diagonal_P.ant[ant]
                     init_A_val_xx = init_diag_A_val_interp[:, :, ant, 0, 0]
                     init_A_val_yy = init_diag_A_val_interp[:, :, ant, 1, 0]
                     init_A_wgt_xx = init_diag_A_wgt_interp[:, :, ant, 0, 0]
@@ -1544,40 +1588,59 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
 
             # get values and weights from the incremental h5parm
             for ant in range(len(incremental_diagonal_A.ant)):
-                if antenna == incremental_diagonal_A.ant[ant]:  # it will also equal incremental_diagonal_P.ant[ant]
-                    increm_A_val_xx = init_diag_A_val_interp[:, :, ant, 0, 0]
-                    increm_A_val_yy = init_diag_A_val_interp[:, :, ant, 1, 0]
-                    increm_A_wgt_xx = init_diag_A_wgt_interp[:, :, ant, 0, 0]
-                    increm_A_wgt_yy = init_diag_A_wgt_interp[:, :, ant, 1, 0]
+                if antenna == incremental_diagonal_A.ant[ant]:
+                    increm_A_val_xx = increm_diag_A_val_interp[:, :, ant, 0, 0]
+                    increm_A_val_yy = increm_diag_A_val_interp[:, :, ant, 1, 0]
+                    increm_A_wgt_xx = increm_diag_A_wgt_interp[:, :, ant, 0, 0]
+                    increm_A_wgt_yy = increm_diag_A_wgt_interp[:, :, ant, 1, 0]
 
-                    increm_P_val_xx = init_diag_P_val_interp[:, :, ant, 0, 0]
-                    increm_P_val_yy = init_diag_P_val_interp[:, :, ant, 1, 0]
-                    increm_P_wgt_xx = init_diag_P_wgt_interp[:, :, ant, 0, 0]
-                    increm_P_wgt_yy = init_diag_P_wgt_interp[:, :, ant, 1, 0]
+                    increm_P_val_xx = increm_diag_P_val_interp[:, :, ant, 0, 0]
+                    increm_P_val_yy = increm_diag_P_val_interp[:, :, ant, 1, 0]
+                    increm_P_wgt_xx = increm_diag_P_wgt_interp[:, :, ant, 0, 0]
+                    increm_P_wgt_yy = increm_diag_P_wgt_interp[:, :, ant, 1, 0]
 
             # add the diagonal solutions
-            new_A_val_xx, new_P_val_xx = add_amplitude_and_phase_solutions(diag_A_1=init_A_val_xx, diag_P_1=init_P_val_xx,
-                                                                           diag_A_2=increm_A_val_xx, diag_P_2=increm_P_val_xx)
-            new_A_val_yy, new_P_val_yy = add_amplitude_and_phase_solutions(diag_A_1=init_A_val_yy, diag_P_1=init_P_val_yy,
-                                                                           diag_A_2=increm_A_val_yy, diag_P_2=increm_P_val_yy)
+            new_A_val_xx, new_P_val_xx = add_amplitude_and_phase_solutions(
+                                         diag_A_1=init_A_val_xx,
+                                         diag_P_1=init_P_val_xx,
+                                         diag_A_2=increm_A_val_xx,
+                                         diag_P_2=increm_P_val_xx)
+            new_A_val_yy, new_P_val_yy = add_amplitude_and_phase_solutions(
+                                         diag_A_1=init_A_val_yy,
+                                         diag_P_1=init_P_val_yy,
+                                         diag_A_2=increm_A_val_yy,
+                                         diag_P_2=increm_P_val_yy)
 
             # combine the weights, using the commented out method (1 if all
             # weights are 1, else 0) or the below method, which takes the mean
-            # calculate the new weights, where both have to be 1 for a 1, otherwise 0
+            # calculate the new weights, where both have to be 1 for a 1,
+            # otherwise set to 0
             # new_diag_wgt_xx, new_diag_wgt_yy = [], []
-            # for init_A, init_P, increm_A, increm_P in zip(np.nan_to_num(init_A_wgt_xx), np.nan_to_num(init_P_wgt_xx),
-            #                                               np.nan_to_num(increm_A_wgt_xx), np.nan_to_num(increm_P_wgt_xx)):
-            #     W = 1 if np.sum([init_A, init_P, increm_A, increm_P]) == 4. else 0
+            # a = np.nan_to_num(init_A_wgt_xx)
+            # b = np.nan_to_num(init_P_wgt_xx)
+            # c = np.nan_to_num(increm_A_wgt_xx)
+            # d = np.nan_to_num(increm_P_wgt_xx)
+            # for init_A, init_P, increm_A, increm_P in zip(a, b, c, d):
+            #     W = 1 if np.sum([init_A, init_P, increm_A, increm_P]) == 4
+            #     else 0
             #     new_diag_wgt_xx.append(W)
-            # for init_A, init_P, increm_A, increm_P in zip(np.nan_to_num(init_A_wgt_yy), np.nan_to_num(init_P_wgt_yy),
-            #                                               np.nan_to_num(increm_A_wgt_yy), np.nan_to_num(increm_P_wgt_yy)):
-            #     W = 1 if np.sum([init_A, init_P, increm_A, increm_P]) == 4. else 0
+            # a = np.nan_to_num(init_A_wgt_yy)
+            # b = np.nan_to_num(init_P_wgt_yy)
+            # c = np.nan_to_num(increm_A_wgt_yy)
+            # d = np.nan_to_num(increm_P_wgt_yy)
+            # for init_A, init_P, increm_A, increm_P in zip(a, b, c, d):
+            #     W = 1 if np.sum([init_A, init_P, increm_A, increm_P]) == 4
+            #     else 0
             #     new_diag_wgt_yy.append(W)
 
-            new_A_wgt_xx = (np.nan_to_num(init_A_wgt_xx) + np.nan_to_num(increm_A_wgt_xx)) / 2
-            new_P_wgt_xx = (np.nan_to_num(init_P_wgt_xx) + np.nan_to_num(increm_P_wgt_xx)) / 2
-            new_A_wgt_yy = (np.nan_to_num(init_A_wgt_yy) + np.nan_to_num(increm_A_wgt_yy)) / 2
-            new_P_wgt_yy = (np.nan_to_num(init_P_wgt_yy) + np.nan_to_num(increm_P_wgt_yy)) / 2
+            new_A_wgt_xx = (np.nan_to_num(init_A_wgt_xx) +
+                            np.nan_to_num(increm_A_wgt_xx)) / 2
+            new_P_wgt_xx = (np.nan_to_num(init_P_wgt_xx) +
+                            np.nan_to_num(increm_P_wgt_xx)) / 2
+            new_A_wgt_yy = (np.nan_to_num(init_A_wgt_yy) +
+                            np.nan_to_num(increm_A_wgt_yy)) / 2
+            new_P_wgt_yy = (np.nan_to_num(init_P_wgt_yy) +
+                            np.nan_to_num(increm_P_wgt_yy)) / 2
 
             # populate the empty arrays with the new solutions
             empty_diag_A_val[:, :, n, 0, 0] = new_A_val_xx
@@ -1597,17 +1660,19 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         # write these best phase solutions to the combined_h5parm
         solset = h.makeSolset('sol001')  # creates sol001
 
-        A = solset.makeSoltab('amplitude',
-                              axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                              axesVals=[new_diag_time, new_diag_freq, new_diag_ant, pol, dir_],
-                              vals=A_vals,
-                              weights=A_weights)  # creates amplitude000
+        solset.makeSoltab('amplitude',
+                          axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+                          axesVals=[new_diag_time, new_diag_freq,
+                                    new_diag_ant, pol, dir_],
+                          vals=A_vals,
+                          weights=A_weights)  # creates amplitude000
 
-        P = solset.makeSoltab('phase',
-                              axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                              axesVals=[new_diag_time, new_diag_freq, new_diag_ant, pol, dir_],
-                              vals=P_vals,
-                              weights=P_weights)  # creates phase000
+        solset.makeSoltab('phase',
+                          axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+                          axesVals=[new_diag_time, new_diag_freq,
+                                    new_diag_ant, pol, dir_],
+                          vals=P_vals,
+                          weights=P_weights)  # creates phase000
 
         # copy source and antenna tables into the new solution set
         source_soltab = f.getSolset('sol001').getSou().items()  # dict to list
@@ -1619,23 +1684,23 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         antenna_table.append(antenna_soltab)
 
     if tec_included:  # include tec solutions if they exist
-        # initial tec will be coming from initial_h5parm but the incremental_tec
-        # will be from the residual tec solve, which will be implemented into
-        # loop 3 soon
+        # initial tec will be coming from initial_h5parm but the
+        # incremental_tec will be from the residual tec solve, which will be
+        # implemented into loop 3 soon
 
         # assign all the information to variables
         solset_tec, soltab_tec = 'sol002', 'tec000'
 
         initial_tec = f.getSolset(solset_tec).getSoltab(soltab_tec)
-        try:  #  may not contain a direction dimension
+        try:  # may not contain a direction dimension
             initial_dir = initial_tec.dir[:]
-        except:
+        except AttributeError:
             initial_dir = ['0']  # if it is missing
         initial_time = initial_tec.time[:]
         initial_freq = initial_tec.freq[:]
         initial_ant = initial_tec.ant[:]
-        initial_val = initial_tec.val[:]
-        initial_weight = initial_tec.weight[:]
+        # initial_val = initial_tec.val[:]
+        # initial_weight = initial_tec.weight[:]
 
         incremental_tec = g.getSolset(solset_tec).getSoltab(soltab_tec)
         antenna_tec = g.getSolset(solset_tec).getAnt().items()
@@ -1643,13 +1708,13 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
 
         try:
             incremental_dir = incremental_tec.dir[:]
-        except:
+        except AttributeError:
             incremental_dir = initial_dir  # if none, take it from the other h5
         incremental_time = incremental_tec.time[:]
         incremental_freq = incremental_tec.freq[:]
         incremental_ant = incremental_tec.ant[:]
-        incremental_val = incremental_tec.val[:]
-        incremental_weight = incremental_tec.weight[:]
+        # incremental_val = incremental_tec.val[:]
+        # incremental_weight = incremental_tec.weight[:]
 
         # for comined_h5parm, we want to get val_initial and val_incremental on
         # the same time axis, so first, build the new time axis and order the
@@ -1658,18 +1723,27 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         # new_times go from the lowest minimum to the highest maximum on the
         # shortest interval
         initial_sorted_val, initial_sorted_weight = sort_axes(initial_tec)
-        incremental_sorted_val, incremental_sorted_weight = sort_axes(incremental_tec)
+        incremental_sorted_val, incremental_sorted_weight = sort_axes(
+                                                            incremental_tec)
         # sort_axes sorts the axis into the order I want and adds a direction
         # axis if there is not one
 
         # interpolate the solutions from both h5parms onto this new time axis
-        initial_val_new = interpolate_time(initial_sorted_val, initial_time, new_times, tec=True)
-        initial_weight_new = interpolate_time(initial_sorted_weight, initial_time, new_times, tec=True)
-        incremental_val_new = interpolate_time(incremental_sorted_val, incremental_time, new_times, tec=True)
-        incremental_weight_new = interpolate_time(incremental_sorted_weight, incremental_time, new_times, tec=True)
+        initial_val_new = interpolate_time(initial_sorted_val,
+                                           initial_time, new_times, tec=True)
+        initial_weight_new = interpolate_time(initial_sorted_weight,
+                                              initial_time,
+                                              new_times, tec=True)
+        incremental_val_new = interpolate_time(incremental_sorted_val,
+                                               incremental_time, new_times,
+                                               tec=True)
+        incremental_weight_new = interpolate_time(incremental_sorted_weight,
+                                                  incremental_time, new_times,
+                                                  tec=True)
 
-        # this protects against the antennas not being in the same order in each h5parm
-        all_antennas = sorted(list(set(initial_ant.tolist() + incremental_ant.tolist())))  # total unique list of antennas
+        # protects against antennas not being in the same order in each h5parm
+        AA = list(set(initial_ant.tolist() + incremental_ant.tolist()))
+        all_antennas = sorted(AA)  # total unique list of antennas
         default_shape = (len(new_times), 1, 1)  # time, freq, dir
         summed_values, summed_weights = [], []
 
@@ -1695,8 +1769,10 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
             # and add them, converting nan to zero
             # the values are simple addition and I avearge the weights, but
             # this is a WARNING that this may not be the desired behaviour
-            val_new = np.expand_dims(np.nan_to_num(val1) + np.nan_to_num(val2), axis=2)
-            wgt_new = np.expand_dims((np.nan_to_num(wgt1) + np.nan_to_num(wgt2)) / 2, axis=2)
+            val_new = np.expand_dims(np.nan_to_num(val1) +
+                                     np.nan_to_num(val2), axis=2)
+            wgt_new = np.expand_dims((np.nan_to_num(wgt1) +
+                                      np.nan_to_num(wgt2)) / 2, axis=2)
 
             summed_values.append(val_new)
             summed_weights.append(wgt_new)
@@ -1705,15 +1781,18 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         vals = np.concatenate(summed_values, axis=2)
         weights = np.concatenate(summed_weights, axis=2)
 
-        freq = np.average([initial_freq, incremental_freq], axis=0)  # handles multiple frequencies
+        # handles multiple frequencies
+        freq = np.average([initial_freq, incremental_freq], axis=0)
 
         # write these best phase solutions to the combined_h5parm
-        solset = h.makeSolset(solset_tec)  # creates sol002 in h which is the new h5parm
-        t = solset.makeSoltab('tec',
-                              axesNames=['time', 'freq', 'ant', 'dir'],
-                              axesVals=[new_times, freq, all_antennas, incremental_dir],
-                              vals=vals,
-                              weights=weights)  # creates tec000
+        # creates sol002 in h which is the new h5parm
+        solset = h.makeSolset(solset_tec)
+        solset.makeSoltab('tec',
+                          axesNames=['time', 'freq', 'ant', 'dir'],
+                          axesVals=[new_times, freq, all_antennas,
+                                    incremental_dir],
+                          vals=vals,
+                          weights=weights)  # creates tec000
 
         # copy source and antenna tables into the new h5parm
         source_table = solset.obj._f_get_child('source')
@@ -1762,7 +1841,9 @@ def main():
                         '--ms',
                         required=False,
                         type=str,
-                        default='/data020/scratch/sean/letsgetloopy/SILTJ135044.06+544752.7_L693725_phasecal.apply_tec',
+                        default=('/data020/scratch/sean/letsgetloopy/SILTJ13' +
+                                 '5044.06+544752.7_L693725_phasecal.' +
+                                 'apply_tec'),
                         help='measurement set')
 
     parser.add_argument('-t',
@@ -1793,13 +1874,25 @@ def main():
     cores = args.cores
     directions = args.directions
 
-    combined_132737_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_02_c0.h5',
-                                     amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.apply_tec_A_03_c0.h5',
-                                     tec_h5='/data020/scratch/sean/letsgetloopy/SILTJ132737.15+550405.9_L693725_phasecal.MS_tec.h5')
+    combined_132737_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsget' +
+                                     'loopy/SILTJ132737.15+550405.9_L693725_' +
+                                     'phasecal.apply_tec_02_c0.h5',
+                                     amplitude_h5='/data020/scratch/sean/let' +
+                                     'sgetloopy/SILTJ132737.15+550405.9_L693' +
+                                     '725_phasecal.apply_tec_A_03_c0.h5',
+                                     tec_h5='/data020/scratch/sean/letsgetlo' +
+                                     'opy/SILTJ132737.15+550405.9_L693725_ph' +
+                                     'asecal.MS_tec.h5')
 
-    combined_133749_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_00_c0.h5',
-                                     amplitude_h5='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.apply_tec_A_04_c0.h5',
-                                     tec_h5='/data020/scratch/sean/letsgetloopy/SILTJ133749.65+550102.6_L693725_phasecal.MS_tec.h5')
+    combined_133749_h5 = combine_h5s(phase_h5='/data020/scratch/sean/letsget' +
+                                     'loopy/SILTJ133749.65+550102.6_L693725_' +
+                                     'phasecal.apply_tec_00_c0.h5',
+                                     amplitude_h5='/data020/scratch/sean/let' +
+                                     'sgetloopy/SILTJ133749.65+550102.6_L693' +
+                                     '725_phasecal.apply_tec_A_04_c0.h5',
+                                     tec_h5='/data020/scratch/sean/letsgetlo' +
+                                     'opy/SILTJ133749.65+550102.6_L693725_ph' +
+                                     'asecal.MS_tec.h5')
 
     make_blank_mtf(mtf=mtf)
 
@@ -1822,17 +1915,22 @@ def main():
         # that is being built into loop 3
         msouts.append(msout_tec)
 
-    print('Running loop 3...')  # has to be run from the same directory as the ms
+    print('Running loop 3...')  # has to be run from the same directory as ms
     for msout in msouts:
-        os.system('python2 /data020/scratch/sean/letsgetloopy/lb-loop-2/loop3B_v1.py ' + msout)
+        cmd = ('python2 /data020/scratch/sean/letsgetloopy/lb-loop-2/' +
+               'loop3B_v1.py ' + msout)
+        os.system(cmd)
 
     print('Then run combine_h5s and update_list.')
 
     for msout, initial_h5parm in zip(msouts, new_h5parms):
-        loop3_dir = os.path.dirname(os.path.dirname(msout + '/')) + '/loop3_' + os.path.basename(msout)[:-3]
+        loop3_dir = (os.path.dirname(os.path.dirname(msout + '/')) +
+                     '/loop3_' + os.path.basename(msout)[:-3])
         loop3_h5s = combine_h5s(loop3_dir=loop3_dir)
-        update_list(initial_h5parm=initial_h5parm, incremental_h5parm=loop3_h5s,
-                    mtf=mtf, threshold=threshold)
+        update_list(initial_h5parm=initial_h5parm,
+                    incremental_h5parm=loop3_h5s,
+                    mtf=mtf,
+                    threshold=threshold)
 
 
 if __name__ == '__main__':
