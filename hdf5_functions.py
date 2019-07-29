@@ -5,17 +5,13 @@
    https://github.com/lmorabit/long_baseline_pipeline.'''
 
 from __future__ import print_function
-# from functools import partial
 from multiprocessing import Pool
-# from pathlib import Path  # on CEP3, "pip install --user pathlib"
 import argparse
 import csv
-# import astropy.units as u
 import datetime
 import fnmatch
 import os
 import subprocess
-# import sys
 import uuid
 import numpy as np
 from astropy.coordinates import SkyCoord
@@ -29,7 +25,7 @@ __date__ = '01 June 2019'
 
 
 def dir_from_ms(ms, verbose=False):
-    ''' Gets the pointing centre (right ascension and declination) from the
+    """Gets the pointing centre (right ascension and declination) from the
     measurement set.
 
     Parameters
@@ -40,7 +36,8 @@ def dir_from_ms(ms, verbose=False):
     Returns
     -------
     list
-        Pointing centre from the measurement set.'''
+        Pointing centre from the measurement set.
+    """
 
     # previously using this casacore one liner
     # np.squeeze(tb.table(ms + '::POINTING')[0]['DIRECTION'].tolist())
@@ -57,7 +54,7 @@ def dir_from_ms(ms, verbose=False):
 
 
 def combine_h5s(phase_h5='', amplitude_h5='', tec_h5='', loop3_dir=''):
-    ''' A function that takes a HDF5 with phase000 and a HDF5 with amplitude000
+    """A function that takes a HDF5 with phase000 and a HDF5 with amplitude000
     and phase000 for a particular direction and combines them into one HDF5.
     This is necessary for the way loop 2 works. The dir2phasesol function
     includes amplitude (and also TEC) but it reads the files from working_data
@@ -92,18 +89,20 @@ def combine_h5s(phase_h5='', amplitude_h5='', tec_h5='', loop3_dir=''):
     -------
     string
         Name of the new HDF5 file containing both phase and amplitude/phase
-        solutions. '''
+        solutions.
+    """
 
     if loop3_dir:
         loop3_files = [loop3_dir + '/' + f for f in os.listdir(loop3_dir) if os.path.isfile(os.path.join(loop3_dir, f))]
         only_h5s = [f for f in loop3_files if f.endswith('.h5')]
         amplitude_h5s = fnmatch.filter(only_h5s, '*_A_*.h5')
         for h5 in amplitude_h5s:
-            while h5 in only_h5s: only_h5s.remove(h5)
+            while h5 in only_h5s:
+                only_h5s.remove(h5)
         phase_h5s = only_h5s
         amplitude_h5s.sort()
         phase_h5s.sort()
-        amplitude_h5 =  amplitude_h5s[-1]
+        amplitude_h5 = amplitude_h5s[-1]
         phase_h5 = phase_h5s[-1]
         print('Using {} and {}.'.format(phase_h5, amplitude_h5))
 
@@ -141,11 +140,12 @@ def combine_h5s(phase_h5='', amplitude_h5='', tec_h5='', loop3_dir=''):
     antenna_table = n_phase_solset.obj._f_get_child('antenna')
     antenna_table.append(p_antenna)
 
-    n_phase = n_phase_solset.makeSoltab('phase',
-                                        axesNames=desired_axesNames,
-                                        axesVals=[p_soltab.time, p_soltab.freq, p_soltab.ant, p_soltab.pol],
-                                        vals=p_val_reordered,
-                                        weights=p_weight_reordered)
+    n_phase_solset.makeSoltab('phase',
+                              axesNames=desired_axesNames,
+                              axesVals=[p_soltab.time, p_soltab.freq,
+                                        p_soltab.ant, p_soltab.pol],
+                              vals=p_val_reordered,
+                              weights=p_weight_reordered)
 
     n_amplitude_solset = n.makeSolset(solsetName='sol001')
     source_table = n_amplitude_solset.obj._f_get_child('source')
@@ -153,19 +153,24 @@ def combine_h5s(phase_h5='', amplitude_h5='', tec_h5='', loop3_dir=''):
     antenna_table = n_amplitude_solset.obj._f_get_child('antenna')
     antenna_table.append(a_antenna)
 
-    n_amplitude_A = n_amplitude_solset.makeSoltab('amplitude',
-                                                  axesNames=desired_axesNames,
-                                                  axesVals=[a_soltab_A.time, a_soltab_A.freq, a_soltab_A.ant, a_soltab_A.pol],
-                                                  vals=a_A_val_reordered,
-                                                  weights=a_A_weight_reordered)
+    n_amplitude_solset.makeSoltab('amplitude',
+                                  axesNames=desired_axesNames,
+                                  axesVals=[a_soltab_A.time, a_soltab_A.freq,
+                                            a_soltab_A.ant, a_soltab_A.pol],
+                                  vals=a_A_val_reordered,
+                                  weights=a_A_weight_reordered)
 
-    n_amplitude_theta = n_amplitude_solset.makeSoltab('phase',
-                                                      axesNames=desired_axesNames,
-                                                      axesVals=[a_soltab_theta.time, a_soltab_theta.freq, a_soltab_theta.ant, a_soltab_theta.pol],
-                                                      vals=a_theta_val_reordered,
-                                                      weights=a_theta_weight_reordered)
+    n_amplitude_solset.makeSoltab('phase',
+                                  axesNames=desired_axesNames,
+                                  axesVals=[a_soltab_theta.time,
+                                            a_soltab_theta.freq,
+                                            a_soltab_theta.ant,
+                                            a_soltab_theta.pol],
+                                  vals=a_theta_val_reordered,
+                                  weights=a_theta_weight_reordered)
 
-    if tec_h5:  # if a hdf5 with tec solutions is given too, put this in the new hdf5 also
+    if tec_h5:  # if a hdf5 with tec solutions is given too, put this in the
+        #         new hdf5 also
         t = lh5.h5parm(tec_h5)
         t_soltab = t.getSolset('sol000').getSoltab('tec000')
 
@@ -178,11 +183,12 @@ def combine_h5s(phase_h5='', amplitude_h5='', tec_h5='', loop3_dir=''):
         t_antenna = t_solset.obj._f_get_child('antenna')
         t_antenna.append(t.getSolset('sol000').getAnt().items())
 
-        t_new = t_solset.makeSoltab('tec',
-                                    axesNames=['time', 'freq', 'ant'],
-                                    axesVals=[t_soltab.time, t_soltab.freq, t_soltab.ant],
-                                    vals=t_val,
-                                    weights=t_weight)
+        t_solset.makeSoltab('tec',
+                            axesNames=['time', 'freq', 'ant'],
+                            axesVals=[t_soltab.time, t_soltab.freq,
+                                      t_soltab.ant],
+                            vals=t_val,
+                            weights=t_weight)
 
         t.close()
 
@@ -195,14 +201,15 @@ def combine_h5s(phase_h5='', amplitude_h5='', tec_h5='', loop3_dir=''):
 
 
 def make_blank_mtf(mtf):
-    '''Create an empty master text file containing all of the LOFAR core,
+    """Create an empty master text file containing all of the LOFAR core,
     remote, and international stations, and ST001.
 
     Args:
     mtf (str): The master text file to be created.
 
     Returns:
-    The name of the master text file (str).'''
+    The name of the master text file (str).
+    """
 
     mtf_header = ('# h5parm, ra, dec, ST001, RS106HBA, RS205HBA, RS208HBA, '
                   'RS210HBA, RS305HBA, RS306HBA, RS307HBA, RS310HBA, RS404HBA,'
@@ -230,7 +237,7 @@ def make_blank_mtf(mtf):
 
 
 def interpolate_nan(x_):
-    '''Interpolate NaN values using this answer from Stack Overflow:
+    """Interpolate NaN values using this answer from Stack Overflow:
     https://stackoverflow.com/a/6520696/6386612. This works even if the first
     or last value is nan or if there are multiple nans. It raises an error if
     all values are nan.
@@ -239,7 +246,8 @@ def interpolate_nan(x_):
     x_ (list or NumPy array): Values to interpolate.
 
     Returns:
-    The interpolated values. (NumPy array)'''
+    The interpolated values. (NumPy array)
+    """
 
     x_ = np.array(x_)
     if np.isnan(x_).all():  # if all values are nan
@@ -252,26 +260,28 @@ def interpolate_nan(x_):
 
 
 def coherence_metric(xx, yy):
-    '''Calculates the coherence metric by comparing the XX and YY phases.
+    """Calculates the coherence metric by comparing the XX and YY phases.
 
     Args:
     xx (list or NumPy array): One set of phase solutions.
     yy (list or NumPy array): The other set of phase solutions.
 
     Returns:
-    The coherence metric. (float)'''
+    The coherence metric. (float)
+    """
 
     try:
         xx, yy = interpolate_nan(xx), interpolate_nan(yy)
     except:
-        return np.nan  # if the values are all nan, they cannot be interpolated
-                       # so return a coherence value of nan also
+        # if the values are all nan, they cannot be interpolated so return a
+        # coherence value of nan also
+        return np.nan
 
     return np.nanmean(np.gradient(abs(np.unwrap(xx - yy))) ** 2)
 
 
 def evaluate_solutions(h5parm, mtf, threshold=0.25, verbose=False):
-    '''Get the direction from the h5parm. Evaluate the phase solutions in the
+    """Get the direction from the h5parm. Evaluate the phase solutions in the
     h5parm for each station using the coherence metric. Determine the validity
     of each coherence metric that was calculated. Append the right ascension,
     declination, and validity to the master text file.
@@ -283,12 +293,12 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25, verbose=False):
         the coherence metric.
 
     Returns:
-    The coherence metric for each station. (dict)'''
+    The coherence metric for each station. (dict)
+    """
 
     h = lh5.h5parm(h5parm)
     solname = h.getSolsetNames()[0]  # set to -1 to use only the last solset
     solset = h.getSolset(solname)
-    soltabnames = solset.getSoltabNames()
     soltab = solset.getSoltab('phase000')
     stations = soltab.ant
     source = solset.getSou()  # dictionary
@@ -344,7 +354,7 @@ def evaluate_solutions(h5parm, mtf, threshold=0.25, verbose=False):
 
 
 def dir2phasesol_wrapper(mtf, ms, directions=[], cores=4):
-    '''Book-keeping to get the multiprocessing set up and running.
+    """Book-keeping to get the multiprocessing set up and running.
 
     Args:
     mtf (str): The master text file.
@@ -355,7 +365,7 @@ def dir2phasesol_wrapper(mtf, ms, directions=[], cores=4):
 
     Returns:
     The names of the newly created h5parms in the directions specified. (list)
-    '''
+    """
 
     if not directions:
         directions = dir_from_ms(ms)
@@ -374,7 +384,7 @@ def dir2phasesol_wrapper(mtf, ms, directions=[], cores=4):
 
 
 def interpolate_time(the_array, the_times, new_times, tec=False):
-    '''Given a h5parm array, it will interpolate the values in the time axis
+    """Given a h5parm array, it will interpolate the values in the time axis
     from whatever it is to a given value.
 
     Args:
@@ -385,7 +395,8 @@ def interpolate_time(the_array, the_times, new_times, tec=False):
 
     Returns:
     The array of values or weights for a h5parm expanded to fit the new time
-    axis. (NumPy array)'''
+    axis. (NumPy array)
+    """
 
     if tec:
         # get the original data
@@ -431,7 +442,7 @@ def interpolate_time(the_array, the_times, new_times, tec=False):
 
 
 def dir2phasesol_multiprocessing(args):
-    '''Wrapper to parallelise make_h5parm.
+    """Wrapper to parallelise make_h5parm.
 
     Args:
     args (list or tuple): Parameters to be passed to the dir2phasesol
@@ -439,7 +450,8 @@ def dir2phasesol_multiprocessing(args):
 
     Returns:
     The output of the dir2phasesol function, which is the name of a new
-        h5parm file. (str)'''
+        h5parm file. (str)
+    """
 
     mtf, ms, directions = args
 
@@ -447,7 +459,7 @@ def dir2phasesol_multiprocessing(args):
 
 
 def build_soltab(soltab, working_data, solset):
-    ''' Creates a solution table from many h5parms using data from the
+    """Creates a solution table from many h5parms using data from the
     temporary working file.
 
     Parameters
@@ -475,7 +487,8 @@ def build_soltab(soltab, working_data, solset):
     NumPy array
         Frequency axis to populate the solution table.
     NumPy array
-        Antenna axis to populate the solution table. '''
+        Antenna axis to populate the solution table.
+    """
 
     time_mins, time_maxs, time_intervals, frequencies = [], [], [], []
 
@@ -513,7 +526,7 @@ def build_soltab(soltab, working_data, solset):
             values = np.expand_dims(tab.val, 0)
             weights = np.expand_dims(tab.weight, 0)
 
-        if soltab is 'tec':  # tec will not have a polarisation axis
+        if soltab == 'tec':  # tec will not have a polarisation axis
             reordered_values = reorderAxes(values, axes_names, ['time', 'freq', 'ant', 'dir'])
             reordered_weights = reorderAxes(weights, axes_names, ['time', 'freq', 'ant', 'dir'])
 
@@ -573,7 +586,8 @@ def dir2phasesol(mtf, ms='', directions=[]):
         source in radians.
 
     Returns:
-    The new h5parm to be applied to the measurement set. (str)'''
+    The new h5parm to be applied to the measurement set. (str)
+    '''
 
     # get the direction from the master text file
     # HACK genfromtxt gives empty string for h5parms when names=True is used
@@ -712,7 +726,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
             if phase.ant[s] == my_station.strip():
                 stations_in_correct_order.append(phase.ant[s])
                 # copy values and weights
-                v = reordered_values[:, :, s, :, :]  # time, freq, ant, pol, dir
+                v = reordered_values[:, :, s, :, :]  # time, freq, ant, pol, dr
                 w = reordered_weights[:, :, s, :, :]  # same order as v
                 v_expanded = np.expand_dims(v, axis=2)
                 w_expanded = np.expand_dims(w, axis=2)
@@ -728,7 +742,7 @@ def dir2phasesol(mtf, ms='', directions=[]):
         lo.close()
 
     # properties of the new h5parm
-    freq = np.average(frequencies, axis=0)  # all items in the list should be equal
+    freq = np.average(frequencies, axis=0)  # all items in the list are equal
     ant = stations_in_correct_order  # antennas that will be in the new h5parm
     pol = ['XX', 'YY']  # as standard
     dir_ = [str(directions.ra.rad) + ', ' + str(directions.dec.rad)]  # given
@@ -738,97 +752,175 @@ def dir2phasesol(mtf, ms='', directions=[]):
 
     # write these best phase solutions to the new h5parm
     print('Putting phase soltuions in sol000 in {}.'.format(new_h5parm))
-    c = solset.makeSoltab('phase',
-                          axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                          axesVals=[new_time, freq, ant, pol, dir_],
-                          vals=vals,
-                          weights=weights)  # creates phase000
+    solset.makeSoltab('phase',
+                      axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+                      axesVals=[new_time, freq, ant, pol, dir_],
+                      vals=vals,
+                      weights=weights)  # creates phase000
 
     # copy source and antenna tables into the new h5parm
     source_soltab = {'POINTING':
                      np.array([directions.ra.rad, directions.dec.rad],
                               dtype='float32')}
     # the x, y, z coordinates of the stations should be in these arrays
-    tied = {'ST001': np.array([3826557.5, 461029.06, 5064908], dtype='float32')}
+    tied = {'ST001': np.array([3826557.5, 461029.06, 5064908],
+                              dtype='float32')}
 
-    core = {'CS001HBA0': np.array([3826896.235, 460979.455, 5064658.203], dtype='float32'),
-            'CS001HBA1': np.array([3826979.384, 460897.597, 5064603.189], dtype='float32'),
-            'CS002HBA0': np.array([3826600.961, 460953.402, 5064881.136], dtype='float32'),
-            'CS002HBA1': np.array([3826565.594, 460958.110, 5064907.258], dtype='float32'),
-            'CS003HBA0': np.array([3826471.348, 461000.138, 5064974.201], dtype='float32'),
-            'CS003HBA1': np.array([3826517.812, 461035.258, 5064936.15], dtype='float32'),
-            'CS004HBA0': np.array([3826585.626, 460865.844, 5064900.561], dtype='float32'),
-            'CS004HBA1': np.array([3826579.486, 460917.48, 5064900.502], dtype='float32'),
-            'CS005HBA0': np.array([3826701.16, 460989.25, 5064802.685], dtype='float32'),
-            'CS005HBA1': np.array([3826631.194, 461021.815, 5064852.259], dtype='float32'),
-            'CS006HBA0': np.array([3826653.783, 461136.440, 5064824.943], dtype='float32'),
-            'CS006HBA1': np.array([3826612.499, 461080.298, 5064861.006], dtype='float32'),
-            'CS007HBA0': np.array([3826478.715, 461083.720, 5064961.117], dtype='float32'),
-            'CS007HBA1': np.array([3826538.021, 461169.731, 5064908.827], dtype='float32'),
-            'CS011HBA0': np.array([3826637.421, 461227.345, 5064829.134], dtype='float32'),
-            'CS011HBA1': np.array([3826648.961, 461354.241, 5064809.003], dtype='float32'),
-            'CS013HBA0': np.array([3826318.954, 460856.125, 5065101.85], dtype='float32'),
-            'CS013HBA1': np.array([3826402.103, 460774.267, 5065046.836], dtype='float32'),
-            'CS017HBA0': np.array([3826405.095, 461507.460, 5064978.083], dtype='float32'),
-            'CS017HBA1': np.array([3826499.783, 461552.498, 5064902.938], dtype='float32'),
-            'CS021HBA0': np.array([3826463.502, 460533.094, 5065022.614], dtype='float32'),
-            'CS021HBA1': np.array([3826368.813, 460488.057, 5065097.759], dtype='float32'),
-            'CS024HBA0': np.array([3827218.193, 461403.898, 5064378.79], dtype='float32'),
-            'CS024HBA1': np.array([3827123.504, 461358.861, 5064453.935], dtype='float32'),
-            'CS026HBA0': np.array([3826418.227, 461805.837, 5064941.199], dtype='float32'),
-            'CS026HBA1': np.array([3826335.078, 461887.696, 5064996.213], dtype='float32'),
-            'CS028HBA0': np.array([3825573.134, 461324.607, 5065619.039], dtype='float32'),
-            'CS028HBA1': np.array([3825656.283, 461242.749, 5065564.025], dtype='float32'),
-            'CS030HBA0': np.array([3826041.577, 460323.374, 5065357.614], dtype='float32'),
-            'CS030HBA1': np.array([3825958.428, 460405.233, 5065412.628], dtype='float32'),
-            'CS031HBA0': np.array([3826383.037, 460279.343, 5065105.85], dtype='float32'),
-            'CS031HBA1': np.array([3826477.725, 460324.381, 5065030.705], dtype='float32'),
-            'CS032HBA0': np.array([3826864.262, 460451.924, 5064730.006], dtype='float32'),
-            'CS032HBA1': np.array([3826947.411, 460370.066, 5064674.992], dtype='float32'),
-            'CS101HBA0': np.array([3825899.977, 461698.906, 5065339.205], dtype='float32'),
-            'CS101HBA1': np.array([3825805.288, 461653.869, 5065414.35], dtype='float32'),
-            'CS103HBA0': np.array([3826331.59, 462759.074, 5064919.62], dtype='float32'),
-            'CS103HBA1': np.array([3826248.441, 462840.933, 5064974.634], dtype='float32'),
-            'CS201HBA0': np.array([3826679.281, 461855.243, 5064741.38], dtype='float32'),
-            'CS201HBA1': np.array([3826690.821, 461982.139, 5064721.249], dtype='float32'),
-            'CS301HBA0': np.array([3827442.564, 461050.814, 5064242.391], dtype='float32'),
-            'CS301HBA1': np.array([3827431.025, 460923.919, 5064262.521], dtype='float32'),
-            'CS302HBA0': np.array([3827973.226, 459728.624, 5063975.3], dtype='float32'),
-            'CS302HBA1': np.array([3827890.077, 459810.483, 5064030.313], dtype='float32'),
-            'CS401HBA0': np.array([3826795.752, 460158.894, 5064808.929], dtype='float32'),
-            'CS401HBA1': np.array([3826784.211, 460031.993, 5064829.062], dtype='float32'),
-            'CS501HBA0': np.array([3825568.82, 460647.62, 5065683.028], dtype='float32'),
-            'CS501HBA1': np.array([3825663.508, 460692.658, 5065607.883], dtype='float32')}
+    core = {'CS001HBA0': np.array([3826896.235, 460979.455, 5064658.203],
+                                  dtype='float32'),
+            'CS001HBA1': np.array([3826979.384, 460897.597, 5064603.189],
+                                  dtype='float32'),
+            'CS002HBA0': np.array([3826600.961, 460953.402, 5064881.136],
+                                  dtype='float32'),
+            'CS002HBA1': np.array([3826565.594, 460958.110, 5064907.258],
+                                  dtype='float32'),
+            'CS003HBA0': np.array([3826471.348, 461000.138, 5064974.201],
+                                  dtype='float32'),
+            'CS003HBA1': np.array([3826517.812, 461035.258, 5064936.15],
+                                  dtype='float32'),
+            'CS004HBA0': np.array([3826585.626, 460865.844, 5064900.561],
+                                  dtype='float32'),
+            'CS004HBA1': np.array([3826579.486, 460917.48, 5064900.502],
+                                  dtype='float32'),
+            'CS005HBA0': np.array([3826701.16, 460989.25, 5064802.685],
+                                  dtype='float32'),
+            'CS005HBA1': np.array([3826631.194, 461021.815, 5064852.259],
+                                  dtype='float32'),
+            'CS006HBA0': np.array([3826653.783, 461136.440, 5064824.943],
+                                  dtype='float32'),
+            'CS006HBA1': np.array([3826612.499, 461080.298, 5064861.006],
+                                  dtype='float32'),
+            'CS007HBA0': np.array([3826478.715, 461083.720, 5064961.117],
+                                  dtype='float32'),
+            'CS007HBA1': np.array([3826538.021, 461169.731, 5064908.827],
+                                  dtype='float32'),
+            'CS011HBA0': np.array([3826637.421, 461227.345, 5064829.134],
+                                  dtype='float32'),
+            'CS011HBA1': np.array([3826648.961, 461354.241, 5064809.003],
+                                  dtype='float32'),
+            'CS013HBA0': np.array([3826318.954, 460856.125, 5065101.85],
+                                  dtype='float32'),
+            'CS013HBA1': np.array([3826402.103, 460774.267, 5065046.836],
+                                  dtype='float32'),
+            'CS017HBA0': np.array([3826405.095, 461507.460, 5064978.083],
+                                  dtype='float32'),
+            'CS017HBA1': np.array([3826499.783, 461552.498, 5064902.938],
+                                  dtype='float32'),
+            'CS021HBA0': np.array([3826463.502, 460533.094, 5065022.614],
+                                  dtype='float32'),
+            'CS021HBA1': np.array([3826368.813, 460488.057, 5065097.759],
+                                  dtype='float32'),
+            'CS024HBA0': np.array([3827218.193, 461403.898, 5064378.79],
+                                  dtype='float32'),
+            'CS024HBA1': np.array([3827123.504, 461358.861, 5064453.935],
+                                  dtype='float32'),
+            'CS026HBA0': np.array([3826418.227, 461805.837, 5064941.199],
+                                  dtype='float32'),
+            'CS026HBA1': np.array([3826335.078, 461887.696, 5064996.213],
+                                  dtype='float32'),
+            'CS028HBA0': np.array([3825573.134, 461324.607, 5065619.039],
+                                  dtype='float32'),
+            'CS028HBA1': np.array([3825656.283, 461242.749, 5065564.025],
+                                  dtype='float32'),
+            'CS030HBA0': np.array([3826041.577, 460323.374, 5065357.614],
+                                  dtype='float32'),
+            'CS030HBA1': np.array([3825958.428, 460405.233, 5065412.628],
+                                  dtype='float32'),
+            'CS031HBA0': np.array([3826383.037, 460279.343, 5065105.85],
+                                  dtype='float32'),
+            'CS031HBA1': np.array([3826477.725, 460324.381, 5065030.705],
+                                  dtype='float32'),
+            'CS032HBA0': np.array([3826864.262, 460451.924, 5064730.006],
+                                  dtype='float32'),
+            'CS032HBA1': np.array([3826947.411, 460370.066, 5064674.992],
+                                  dtype='float32'),
+            'CS101HBA0': np.array([3825899.977, 461698.906, 5065339.205],
+                                  dtype='float32'),
+            'CS101HBA1': np.array([3825805.288, 461653.869, 5065414.35],
+                                  dtype='float32'),
+            'CS103HBA0': np.array([3826331.59, 462759.074, 5064919.62],
+                                  dtype='float32'),
+            'CS103HBA1': np.array([3826248.441, 462840.933, 5064974.634],
+                                  dtype='float32'),
+            'CS201HBA0': np.array([3826679.281, 461855.243, 5064741.38],
+                                  dtype='float32'),
+            'CS201HBA1': np.array([3826690.821, 461982.139, 5064721.249],
+                                  dtype='float32'),
+            'CS301HBA0': np.array([3827442.564, 461050.814, 5064242.391],
+                                  dtype='float32'),
+            'CS301HBA1': np.array([3827431.025, 460923.919, 5064262.521],
+                                  dtype='float32'),
+            'CS302HBA0': np.array([3827973.226, 459728.624, 5063975.3],
+                                  dtype='float32'),
+            'CS302HBA1': np.array([3827890.077, 459810.483, 5064030.313],
+                                  dtype='float32'),
+            'CS401HBA0': np.array([3826795.752, 460158.894, 5064808.929],
+                                  dtype='float32'),
+            'CS401HBA1': np.array([3826784.211, 460031.993, 5064829.062],
+                                  dtype='float32'),
+            'CS501HBA0': np.array([3825568.82, 460647.62, 5065683.028],
+                                  dtype='float32'),
+            'CS501HBA1': np.array([3825663.508, 460692.658, 5065607.883],
+                                  dtype='float32')}
 
-    antenna_soltab = {'RS106HBA': np.array([3829205.598, 469142.533000, 5062181.002], dtype='float32'),
-                      'RS205HBA': np.array([3831479.67, 463487.529000, 5060989.903], dtype='float32'),
-                      'RS208HBA': np.array([3847753.31, 466962.809000, 5048397.244], dtype='float32'),
-                      'RS210HBA': np.array([3877827.56186, 467536.604956, 5025445.584], dtype='float32'),
-                      'RS305HBA': np.array([3828732.721, 454692.421000, 5063850.334], dtype='float32'),
-                      'RS306HBA': np.array([3829771.249, 452761.702000, 5063243.181], dtype='float32'),
-                      'RS307HBA': np.array([3837964.52, 449627.261000, 5057357.585], dtype='float32'),
-                      'RS310HBA': np.array([3845376.29, 413616.564000, 5054796.341], dtype='float32'),
-                      'RS404HBA': np.array([0.0, 0.0, 0.0], dtype='float32'),  # not operational yet
-                      'RS406HBA': np.array([3818424.939, 452020.269000, 5071817.644], dtype='float32'),
-                      'RS407HBA': np.array([3811649.455, 453459.894000, 5076728.952], dtype='float32'),
-                      'RS409HBA': np.array([3824812.621, 426130.330000, 5069251.754], dtype='float32'),
-                      'RS410HBA': np.array([0.0, 0.0, 0.0], dtype='float32'),  # not operational yet
-                      'RS503HBA': np.array([3824138.566, 459476.972, 5066858.578], dtype='float32'),
-                      'RS508HBA': np.array([3797136.484, 463114.447, 5086651.286], dtype='float32'),
-                      'RS509HBA': np.array([3783537.525, 450130.064, 5097866.146], dtype='float32'),
-                      'DE601HBA': np.array([4034101.522, 487012.757, 4900230.499], dtype='float32'),
-                      'DE602HBA': np.array([4152568.006, 828789.153, 4754362.203], dtype='float32'),
-                      'DE603HBA': np.array([3940295.706, 816722.865, 4932394.416], dtype='float32'),
-                      'DE604HBA': np.array([3796379.823, 877614.13, 5032712.528], dtype='float32'),
-                      'DE605HBA': np.array([4005681.02, 450968.643, 4926458.211], dtype='float32'),
-                      'FR606HBA': np.array([4324016.708, 165545.525, 4670271.363], dtype='float32'),
-                      'SE607HBA': np.array([3370271.657, 712125.881, 5349991.165], dtype='float32'),
-                      'UK608HBA': np.array([4008461.941, -100376.609, 4943716.874], dtype='float32'),
-                      'DE609HBA': np.array([3727217.673, 655109.175, 5117003.123], dtype='float32'),
-                      'PL610HBA': np.array([3738462.416, 1148244.316, 5021710.658], dtype='float32'),
-                      'PL611HBA': np.array([3850980.881, 1438994.879, 4860498.993], dtype='float32'),
-                      'PL612HBA': np.array([3551481.817, 1334203.573, 5110157.41], dtype='float32'),
-                      'IE613HBA': np.array([3801692.0, -528983.94, 5076958.0], dtype='float32')}
+    antenna_soltab = {'RS106HBA': np.array([3829205.598, 469142.533000,
+                                            5062181.002], dtype='float32'),
+                      'RS205HBA': np.array([3831479.67, 463487.529000,
+                                            5060989.903], dtype='float32'),
+                      'RS208HBA': np.array([3847753.31, 466962.809000,
+                                            5048397.244], dtype='float32'),
+                      'RS210HBA': np.array([3877827.56186, 467536.604956,
+                                            5025445.584], dtype='float32'),
+                      'RS305HBA': np.array([3828732.721, 454692.421000,
+                                            5063850.334], dtype='float32'),
+                      'RS306HBA': np.array([3829771.249, 452761.702000,
+                                            5063243.181], dtype='float32'),
+                      'RS307HBA': np.array([3837964.52, 449627.261000,
+                                            5057357.585], dtype='float32'),
+                      'RS310HBA': np.array([3845376.29, 413616.564000,
+                                            5054796.341], dtype='float32'),
+                      'RS404HBA': np.array([0.0, 0.0, 0.0],
+                                           dtype='float32'),  # not operational
+                      'RS406HBA': np.array([3818424.939, 452020.269000,
+                                            5071817.644], dtype='float32'),
+                      'RS407HBA': np.array([3811649.455, 453459.894000,
+                                            5076728.952], dtype='float32'),
+                      'RS409HBA': np.array([3824812.621, 426130.330000,
+                                            5069251.754], dtype='float32'),
+                      'RS410HBA': np.array([0.0, 0.0, 0.0],
+                                           dtype='float32'),  # not operational
+                      'RS503HBA': np.array([3824138.566, 459476.972,
+                                            5066858.578], dtype='float32'),
+                      'RS508HBA': np.array([3797136.484, 463114.447,
+                                            5086651.286], dtype='float32'),
+                      'RS509HBA': np.array([3783537.525, 450130.064,
+                                            5097866.146], dtype='float32'),
+                      'DE601HBA': np.array([4034101.522, 487012.757,
+                                            4900230.499], dtype='float32'),
+                      'DE602HBA': np.array([4152568.006, 828789.153,
+                                            4754362.203], dtype='float32'),
+                      'DE603HBA': np.array([3940295.706, 816722.865,
+                                            4932394.416], dtype='float32'),
+                      'DE604HBA': np.array([3796379.823, 877614.13,
+                                            5032712.528], dtype='float32'),
+                      'DE605HBA': np.array([4005681.02, 450968.643,
+                                            4926458.211], dtype='float32'),
+                      'FR606HBA': np.array([4324016.708, 165545.525,
+                                            4670271.363], dtype='float32'),
+                      'SE607HBA': np.array([3370271.657, 712125.881,
+                                            5349991.165], dtype='float32'),
+                      'UK608HBA': np.array([4008461.941, -100376.609,
+                                            4943716.874], dtype='float32'),
+                      'DE609HBA': np.array([3727217.673, 655109.175,
+                                            5117003.123], dtype='float32'),
+                      'PL610HBA': np.array([3738462.416, 1148244.316,
+                                            5021710.658], dtype='float32'),
+                      'PL611HBA': np.array([3850980.881, 1438994.879,
+                                            4860498.993], dtype='float32'),
+                      'PL612HBA': np.array([3551481.817, 1334203.573,
+                                            5110157.41], dtype='float32'),
+                      'IE613HBA': np.array([3801692.0, -528983.94,
+                                            5076958.0], dtype='float32')}
 
     # delete a key, value pair from the antenna table if it does not exist in
     # the antenna axis
@@ -853,21 +945,26 @@ def dir2phasesol(mtf, ms='', directions=[]):
     antenna_table.append(antenna_soltab.items())  # from dictionary to list
 
     try:  # bring across amplitude solutions if there are any
-        vals, weights, time, freq = build_soltab(soltab='amplitude', working_data=working_data, solset='sol001')
-        print('Putting amplitude soltuions in sol001 in {}.'.format(new_h5parm))
+        vals, weights, time, freq = build_soltab(soltab='amplitude',
+                                                 working_data=working_data,
+                                                 solset='sol001')
+        q = new_h5parm
+        print('Putting amplitude soltuions in sol001 in {}.'.format(q))
         amp_solset = h.makeSolset('sol001')
-        c = amp_solset.makeSoltab('amplitude',
-                                  axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                                  axesVals=[time, freq, ant, pol, dir_],
-                                  vals=vals,
-                                  weights=weights)  # creates amplitude000
+        amp_solset.makeSoltab('amplitude',
+                              axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+                              axesVals=[time, freq, ant, pol, dir_],
+                              vals=vals,
+                              weights=weights)  # creates amplitude000
         # amplitude solutions have a phase component too
-        vals, weights, time, freq = build_soltab(soltab='phase', working_data=working_data, solset='sol001')
-        d = amp_solset.makeSoltab('phase',
-                                  axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
-                                  axesVals=[time, freq, ant, pol, dir_],
-                                  vals=vals,
-                                  weights=weights)  # creates phase000
+        vals, weights, time, freq = build_soltab(soltab='phase',
+                                                 working_data=working_data,
+                                                 solset='sol001')
+        amp_solset.makeSoltab('phase',
+                              axesNames=['time', 'freq', 'ant', 'pol', 'dir'],
+                              axesVals=[time, freq, ant, pol, dir_],
+                              vals=vals,
+                              weights=weights)  # creates phase000
 
         # make source and antenna tables
         # using the source and antenna tables from phase as they should be the
@@ -883,14 +980,16 @@ def dir2phasesol(mtf, ms='', directions=[]):
         pass
 
     # try:  # bring across tec solutions if there are any
-    vals, weights, time, freq = build_soltab(soltab='tec', working_data=working_data, solset='sol002')
+    vals, weights, time, freq = build_soltab(soltab='tec',
+                                             working_data=working_data,
+                                             solset='sol002')
     print('Putting TEC soltuions in sol002 in {}.'.format(new_h5parm))
     tec_solset = h.makeSolset('sol002')
-    c = tec_solset.makeSoltab('tec',
-                              axesNames=['time', 'freq', 'ant', 'dir'],
-                              axesVals=[time, freq, ant, dir_],
-                              vals=vals,
-                              weights=weights)  # creates tec000
+    tec_solset.makeSoltab('tec',
+                          axesNames=['time', 'freq', 'ant', 'dir'],
+                          axesVals=[time, freq, ant, dir_],
+                          vals=vals,
+                          weights=weights)  # creates tec000
 
     # make source and antenna tables
     tec_source = tec_solset.obj._f_get_child('source')
@@ -911,7 +1010,8 @@ def residual_tec_solve(ms, column_out='DATA', solint=5):
     """Write a parset to solve for the residual TEC in the measurement set
     using Gaincal, then execute the parset using NDPPP. For information on
     NDPPP, see this URL:
-    https://www.astron.nl/lofarwiki/doku.php?id=public:user_software:documentation:ndppp
+    https://www.astron.nl/lofarwiki/doku.php?id=public:user_software:documentat
+    ion:ndppp. This step will be built into loop 3 instead.
 
     Parameters
     ----------
@@ -944,19 +1044,19 @@ def residual_tec_solve(ms, column_out='DATA', solint=5):
         f.write('msout                      = {}\n'.format(msout))
         f.write('msout.datacolumn           = {}\n\n'.format(column_out))
         f.write('steps                      = [residual_tec]\n\n')
-        f.write('residual_tec.type          = gaincal\n')  # ddecal also an option
+        f.write('residual_tec.type          = gaincal\n')  # ddecal either
         f.write('residual_tec.caltype       = tec\n')
         f.write('residual_tec.parmdb        = {}\n'.format(h5parm))
         f.write('residual_tec.applysolution = True\n')  # apply on the fly
         f.write('residual_tec.solint        = {}\n'.format(solint))
 
-    ndppp_output = subprocess.check_output(['NDPPP', parset])
+    subprocess.check_output(['NDPPP', parset])
     os.remove(parset)
 
     return msout, h5parm
 
 
-def apply_h5parm(h5parm, ms, column_out='DATA', solutions=['phase']):
+def apply_h5parm(h5parm, ms, col_out='DATA', solutions=['phase']):
     """Creates an NDPPP parset. Applies the output of make_h5parm to the
     measurement set.
 
@@ -990,7 +1090,7 @@ def apply_h5parm(h5parm, ms, column_out='DATA', solutions=['phase']):
         f.write('msin                                = {}\n'.format(ms))
         f.write('msin.datacolumn                     = {}\n'.format(column_in))
         f.write('msout                               = {}\n'.format(msout))
-        f.write('msout.datacolumn                    = {}\n\n'.format(column_out))
+        f.write('msout.datacolumn                    = {}\n\n'.format(col_out))
 
         if 'amplitude' in solutions and 'tec' in solutions:
             print('Applying phase, amplitude, and TEC solutions.')
@@ -1024,7 +1124,7 @@ def apply_h5parm(h5parm, ms, column_out='DATA', solutions=['phase']):
             f.write('apply_tec.solset                    = sol002\n')
             f.write('apply_tec.correction                = tec000\n')
 
-    ndppp_output = subprocess.check_output(['NDPPP', parset])
+    subprocess.check_output(['NDPPP', parset])
     os.remove(parset)
 
     return msout
@@ -1390,21 +1490,28 @@ def rejig_solsets(h5parm):
 
 def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
                 amplitudes_included=True, tec_included=True):
-    '''Combine the phase solutions from the initial h5parm and the final
+    """Combine the phase solutions from the initial h5parm and the final
     h5parm. The initial h5parm contains the initial solutions and the final
     h5parm contains the incremental solutions so they need to be added to form
     the final solutions. Calls evaluate_solutions to update the master file
     with a new line appended.
 
-    Args:
-    new_h5parm (str): The initial h5parm (i.e. from dir2phasesol).
-    loop3_h5parm (str): The final h5parm from loop 3.
-    mtf (str): Master text file.
-    threshold (float; default=0.25): Threshold determining goodness passed to
-        evaluate_solutions.
+    Parameters
+    ----------
+    new_h5parm : string
+        The initial h5parm (i.e. from dir2phasesol).
+    loop3_h5parm : string
+        The final h5parm from loop 3.
+    mtf : string
+        Master text file.
+    threshold : float (default=0.25)
+        Threshold determining goodness passed to evaluate_solutions.
 
-    Returns:
-    A new h5parm that is a combination of new_h5parm and loop3_h5parm (str).'''
+    Returns
+    -------
+    string
+        A new h5parm that is a combination of new_h5parm and loop3_h5parm.
+    """
 
     # get solutions from new_h5parm and loop3_h5parm
     f = lh5.h5parm(initial_h5parm)  # from new_h5parm
@@ -1516,8 +1623,9 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         initial_diagonal_A = f.getSolset('sol001').getSoltab('amplitude000')
         initial_diagonal_P = f.getSolset('sol001').getSoltab('phase000')
 
-        incremental_diagonal_A = g.getSolset('sol001').getSoltab('amplitude000')
-        incremental_diagonal_P = g.getSolset('sol001').getSoltab('phase000')
+        sol001 = g.getSolset('sol001')
+        incremental_diagonal_A = sol001.getSoltab('amplitude000')
+        incremental_diagonal_P = sol001.getSoltab('phase000')
 
         # get the two diagonal solution tables onto a new time axis
         new_diag_time = make_new_times(initial_diagonal_A.time,
@@ -1532,14 +1640,39 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
                                                incremental_diagonal_P)
 
         # interpolate the solutions in the initial and incremental tables
-        init_diag_A_val_interp = interpolate_time(the_array=init_diag_A_val, the_times=initial_diagonal_A.time, new_times=new_diag_time)
-        init_diag_A_wgt_interp = interpolate_time(the_array=init_diag_A_wgt, the_times=initial_diagonal_A.time, new_times=new_diag_time)
-        init_diag_P_val_interp = interpolate_time(the_array=init_diag_P_val, the_times=initial_diagonal_P.time, new_times=new_diag_time)
-        init_diag_P_wgt_interp = interpolate_time(the_array=init_diag_P_wgt, the_times=initial_diagonal_P.time, new_times=new_diag_time)
-        increm_diag_A_val_interp = interpolate_time(the_array=increm_diag_A_val, the_times=incremental_diagonal_A.time, new_times=new_diag_time)
-        increm_diag_A_wgt_interp = interpolate_time(the_array=increm_diag_A_wgt, the_times=incremental_diagonal_A.time, new_times=new_diag_time)
-        increm_diag_P_val_interp = interpolate_time(the_array=increm_diag_P_val, the_times=incremental_diagonal_P.time, new_times=new_diag_time)
-        increm_diag_P_wgt_interp = interpolate_time(the_array=increm_diag_P_wgt, the_times=incremental_diagonal_P.time, new_times=new_diag_time)
+        init_diag_A_time = initial_diagonal_A.time
+        init_diag_P_time = initial_diagonal_P.time
+        incr_diag_A_time = incremental_diagonal_A.time
+        incr_diag_P_time = incremental_diagonal_P.time
+        incr_diag_A_val = increm_diag_A_val
+        incr_diag_A_wgt = increm_diag_A_wgt
+        incr_diag_P_val = increm_diag_P_val
+        incr_diag_P_wgt = increm_diag_P_wgt
+
+        init_diag_A_val_interp = interpolate_time(the_array=init_diag_A_val,
+                                                  the_times=init_diag_A_time,
+                                                  new_times=new_diag_time)
+        init_diag_A_wgt_interp = interpolate_time(the_array=init_diag_A_wgt,
+                                                  the_times=init_diag_A_time,
+                                                  new_times=new_diag_time)
+        init_diag_P_val_interp = interpolate_time(the_array=init_diag_P_val,
+                                                  the_times=init_diag_P_time,
+                                                  new_times=new_diag_time)
+        init_diag_P_wgt_interp = interpolate_time(the_array=init_diag_P_wgt,
+                                                  the_times=init_diag_P_time,
+                                                  new_times=new_diag_time)
+        increm_diag_A_val_interp = interpolate_time(the_array=incr_diag_A_val,
+                                                    the_times=incr_diag_A_time,
+                                                    new_times=new_diag_time)
+        increm_diag_A_wgt_interp = interpolate_time(the_array=incr_diag_A_wgt,
+                                                    the_times=incr_diag_A_time,
+                                                    new_times=new_diag_time)
+        increm_diag_P_val_interp = interpolate_time(the_array=incr_diag_P_val,
+                                                    the_times=incr_diag_P_time,
+                                                    new_times=new_diag_time)
+        increm_diag_P_wgt_interp = interpolate_time(the_array=incr_diag_P_wgt,
+                                                    the_times=incr_diag_P_time,
+                                                    new_times=new_diag_time)
 
         # get the frequencies and the list of antennas for the new array
         new_diag_freq = np.mean([initial_diagonal_A.freq,
