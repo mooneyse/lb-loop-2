@@ -1370,6 +1370,16 @@ def rejig_solsets(h5parm):
                       vals=tec_srt_val,
                       weights=tec_srt_wgt)
 
+    # populate source and antenna tables
+    # copy source and antenna tables into the new solution set
+    source_soltab = h1.getSolset('sol000').getSou().items()  # dict to list
+    antenna_soltab = h1.getSolset('sol000').getAnt().items()  # dict to list
+
+    source_table = h2.getSolset('sol000').obj._f_get_child('source')
+    source_table.append(source_soltab)
+    antenna_table = h2.getSolset('sol000').obj._f_get_child('antenna')
+    antenna_table.append(antenna_soltab)
+
     # close h5parms and delete the old h5parm
     h1.close()
     h2.close()
@@ -1535,7 +1545,7 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         new_diag_freq = np.mean([initial_diagonal_A.freq,
                                  incremental_diagonal_A.freq], axis=0)
         A = set(initial_diagonal_A.ant.tolist() +
-                 incremental_diagonal_A.ant.tolist())
+                incremental_diagonal_A.ant.tolist())
         new_diag_ant = sorted(list(A))
 
         # add the diagonal solutions together
