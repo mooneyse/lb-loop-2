@@ -2053,7 +2053,7 @@ def main():
         # outputs an ms per direction
         msout = apply_h5parm(h5parm=new_h5parm,
                              ms=ms,
-                             solutions=['phase', 'amplitude', 'tec'])
+                             solutions=['phase', 'amplitude'])  # 'tec'
         msout_tec = msout  # TODO need a skymodel in residual_tec_solve to test
         # resid_tec_h5parm, msout_tec = residual_tec_solve(ms=msout)
         # that is being built into loop 3
