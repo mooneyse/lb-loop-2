@@ -174,8 +174,10 @@ def combine_h5s(phase_h5='', amplitude_h5='', tec_h5='', loop3_dir=''):
         t = lh5.h5parm(tec_h5)
         t_soltab = t.getSolset('sol000').getSoltab('tec000')
 
-        t_val = reorderAxes(t_soltab.val, t_soltab.getAxesNames(), ['time', 'freq', 'ant'])  # NOTE no 'dir' axis
-        t_weight = reorderAxes(t_soltab.weight, t_soltab.getAxesNames(), ['time', 'freq', 'ant'])  # NOTE no 'dir' axis
+        t_val = reorderAxes(t_soltab.val, t_soltab.getAxesNames(),
+                            ['time', 'freq', 'ant'])  # NOTE no 'dir' axis
+        t_weight = reorderAxes(t_soltab.weight, t_soltab.getAxesNames(),
+                               ['time', 'freq', 'ant'])  # NOTE no 'dir' axis
 
         t_solset = n.makeSolset(solsetName='sol002')  # in new h5parm
         t_source = t_solset.obj._f_get_child('source')
@@ -1288,7 +1290,7 @@ def sort_axes(soltab, tec=False):
     return reordered_values, reordered_weights
 
 
-def rejig_solsets(h5parm):
+def rejig_solsets(h5parm, is_tec=True):
     """This is a specific funtion to take a h5parm with three solsets, where
     sol000 has phase solutions (phase000), sol001 has diagonal solutions
     (amplitude000 and phase000), and sol002 has tec solutions (tec000). It adds
@@ -1462,13 +1464,14 @@ def rejig_solsets(h5parm):
                       weights=phase_weights)
 
     # move sol002/tec000 from the h5parm to sol000/tec000 in the new h5parm
-    tec = h1.getSolset('sol002').getSoltab('tec000')
-    tec_srt_val, tec_srt_wgt = sort_axes(tec, tec=True)  # time, freq, ant, dir
-    sol000.makeSoltab('tec',
-                      axesNames=['time', 'freq', 'ant', 'dir'],
-                      axesVals=[tec.time, tec.freq, tec.ant, dir_],
-                      vals=tec_srt_val,
-                      weights=tec_srt_wgt)
+    if is_tec:
+        tec = h1.getSolset('sol002').getSoltab('tec000')
+        tec_srt_val, tec_srt_wgt = sort_axes(tec, tec=True)
+        sol000.makeSoltab('tec',
+                          axesNames=['time', 'freq', 'ant', 'dir'],
+                          axesVals=[tec.time, tec.freq, tec.ant, dir_],
+                          vals=tec_srt_val,
+                          weights=tec_srt_wgt)
 
     # populate source and antenna tables
     # copy source and antenna tables into the new solution set
@@ -1953,9 +1956,8 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
     # and sol002 has tec solutions (tec000) - however, we want to change this
     # to produce one hdf5 with 1 solset, which has phase000, amplitude000,
     # and tec000
-    print('Doing rejig')
+    print('Making final HDF5 file.')
     rejigged_h5parm = rejig_solsets(h5parm=combined_h5parm)
-    print('Finished rejig', rejigged_h5parm)
 
     # evaluate the solutions and update the master file
     evaluate_solutions(h5parm=combined_h5parm, mtf=mtf, threshold=threshold)
