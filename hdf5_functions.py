@@ -1957,10 +1957,11 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
     # to produce one hdf5 with 1 solset, which has phase000, amplitude000,
     # and tec000
     print('Making final HDF5 file.')
-    rejigged_h5parm = rejig_solsets(h5parm=combined_h5parm)
+    rejigged_h5parm = rejig_solsets(h5parm=combined_h5parm,
+                                    is_tec=tec_included)
 
     # evaluate the solutions and update the master file
-    evaluate_solutions(h5parm=combined_h5parm, mtf=mtf, threshold=threshold)
+    evaluate_solutions(h5parm=rejigged_h5parm, mtf=mtf, threshold=threshold)
 
     return rejigged_h5parm
 
@@ -2067,16 +2068,19 @@ def main():
                'loop3B_v1.py ' + msout)
         os.system(cmd)
 
-    print('Then run combine_h5s and update_list.')
+    print('Then run combine_h5s (which puts the final loop 3 siolutions in ' +
+          'one HDF5) and update_list (which adds the incremental loop 3' +
+          'solutions to the intial solutions, gets the HDF5 solution sets in' +
+          ' a format suitable for DDF, and reevaluates the end result).')
 
-    for msout, initial_h5parm in zip(msouts, new_h5parms):
-        loop3_dir = (os.path.dirname(os.path.dirname(msout + '/')) +
-                     '/loop3_' + os.path.basename(msout)[:-3])
-        loop3_h5s = combine_h5s(loop3_dir=loop3_dir)
-        update_list(initial_h5parm=initial_h5parm,
-                    incremental_h5parm=loop3_h5s,
-                    mtf=mtf,
-                    threshold=threshold)
+    # for msout, initial_h5parm in zip(msouts, new_h5parms):
+    #     loop3_dir = (os.path.dirname(os.path.dirname(msout + '/')) +
+    #                  '/loop3_' + os.path.basename(msout)[:-3])
+    #     loop3_h5s = combine_h5s(loop3_dir=loop3_dir)
+    #     update_list(initial_h5parm=initial_h5parm,
+    #                 incremental_h5parm=loop3_h5s,
+    #                 mtf=mtf,
+    #                 threshold=threshold)
 
 
 if __name__ == '__main__':
