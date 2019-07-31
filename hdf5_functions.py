@@ -2043,8 +2043,8 @@ def main():
 
     make_blank_mtf(mtf=mtf)
 
-    evaluate_solutions(h5parm=combined_132737_h5, mtf=mtf)
-    evaluate_solutions(h5parm=combined_133749_h5, mtf=mtf)
+    evaluate_solutions(h5parm=combined_132737_h5, mtf=mtf, threshold=threshold)
+    evaluate_solutions(h5parm=combined_133749_h5, mtf=mtf, threshold=threshold)
 
     new_h5parms = dir2phasesol_wrapper(mtf=mtf,
                                        ms=ms,
