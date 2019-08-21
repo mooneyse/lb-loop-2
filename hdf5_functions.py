@@ -1492,9 +1492,20 @@ def rejig_solsets(h5parm, is_tec=True, add_tec_to_phase=False):
     if add_tec_to_phase:  # convert tec to phase and add it to the phase
         # tec has no frequency axis so project it along the phase axis
         my_tec = sol000.getSoltab('tec000')
-        print(my_tec.val.shape,'asdfasdfasdf', h5parm)
+        # this is the tec soltab
+        # get the phase soltab now
+        # ge the frequencies of the phase
+        # feed those into the tec_to_phase
         tec_phase = tec_to_phase(tec=tec, frequency=frequencies)
+        # then i come out with an array of phase values and an array of tec phases of the same shape
+        # i might need to interpolate the two arrays onto the same time axis
+        # then add them straightforwardly
+        # then write these to the phase soltab values as phase001 maybe
+        # then remove phase000 and tec000 and rename phase001 to phase000 and leave lots of comments about this
 
+        # for testing:
+        # git pull && ll && rm ../init_final.h5 ../init_final-ddf.h5 && ipython
+        # from hdf5_functions import update_list; update_list(initial_h5parm='/data020/scratch/sean/letsgetloopy/init.h5', incremental_h5parm='/data020/scratch/sean/letsgetloopy/increm.h5', mtf='/data020/scratch/sean/letsgetloopy/mtf.txt', threshold=0.25, tec_included=True)
 
     # close h5parms and delete the old h5parm
     h1.close()
