@@ -1997,6 +1997,7 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
     # to produce one hdf5 with 1 solset, which has phase000, amplitude000,
     # and tec000
     print('Making final HDF5 file.')
+    print('debugging',combined_h5parm)
     rejigged_h5parm = rejig_solsets(h5parm=combined_h5parm,
                                     is_tec=tec_included)
 
