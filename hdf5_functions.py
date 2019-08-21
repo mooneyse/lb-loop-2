@@ -1907,9 +1907,11 @@ def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
         new_times = make_new_times(initial_time, incremental_time)
         # new_times go from the lowest minimum to the highest maximum on the
         # shortest interval
-        initial_sorted_val, initial_sorted_weight = sort_axes(initial_tec)
+        initial_sorted_val, initial_sorted_weight = sort_axes(initial_tec,
+                                                              tec=True)
         incremental_sorted_val, incremental_sorted_weight = sort_axes(
-                                                            incremental_tec)
+                                                            incremental_tec,
+                                                            tec=True)
         # sort_axes sorts the axis into the order I want and adds a direction
         # axis if there is not one
 
@@ -2106,10 +2108,10 @@ def main():
                'loop3B_v1.py ' + msout)
         os.system(cmd)
 
-    print('Then run combine_h5s (which puts the final loop 3 siolutions in ' +
+    print('Then run combine_h5s (which puts the final loop 3 solutions in ' +
           'one HDF5) and update_list (which adds the incremental loop 3' +
           'solutions to the intial solutions, gets the HDF5 solution sets in' +
-          ' a format suitable for DDF, and reevaluates the end result).')
+          ' a format suitable for DDF, and re-evaluates the end result).')
 
     # for msout, initial_h5parm in zip(msouts, new_h5parms):
     #     loop3_dir = (os.path.dirname(os.path.dirname(msout + '/')) +
