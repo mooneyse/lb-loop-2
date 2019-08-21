@@ -1290,7 +1290,7 @@ def sort_axes(soltab, tec=False):
     return reordered_values, reordered_weights
 
 
-def rejig_solsets(h5parm, is_tec=True):
+def rejig_solsets(h5parm, is_tec=True, add_tec_to_phase=False):
     """This is a specific funtion to take a h5parm with three solsets, where
     sol000 has phase solutions (phase000), sol001 has diagonal solutions
     (amplitude000 and phase000), and sol002 has tec solutions (tec000). It adds
@@ -1303,6 +1303,12 @@ def rejig_solsets(h5parm, is_tec=True):
     h5parm : string
         The filename of the h5parm with the three solsets, including the
         filepath.
+    is_tec : boolean
+        If true, the function exepcts TEC solutions to be in the HDF5 file too.
+        The default value is True.
+    add_tec_to_phase : boolean
+        If true, the function will convert the TEC solutions to phase solutions
+        and add them to the phase solutions. The default is False.
 
     Returns
     -------
@@ -1483,12 +1489,44 @@ def rejig_solsets(h5parm, is_tec=True):
     antenna_table = h2.getSolset('sol000').obj._f_get_child('antenna')
     antenna_table.append(antenna_soltab)
 
+    if add_tec_to_phase:  # convert tec to phase and add it to the phase
+        # tec has no frequency axis so project it along the phase axis
+        tec_phase = tec_to_phase(tec=tec, frequency=frequencies)
+
+
     # close h5parms and delete the old h5parm
     h1.close()
     h2.close()
     os.remove(h5parm)
 
     return new_h5parm
+
+
+def tec_to_phase(tec, frequency):
+    """Convert TEC solutions to phase solutions. See equation 7.5 of
+    https://imgur.com/95HukQw.
+
+    Parameters
+    ----------
+    tec : array
+        TEC solutions.
+
+    frequency : float, int, or array
+        Frequency axis. There can be a single or multiple axes.
+
+    Returns
+    -------
+    array
+        Phase solutions that the TEC has been converted to.
+    """
+    if type(frequency) is float:  # only one frequency axis
+        return -8.4479745e9 * tec / frequency
+
+    elif type(frequency) is np.ndarray:  # eg 120 MHz, 140 MHz, and 160 MHz
+        tec_phases = []
+        for f in frequency:
+            tec_phases.append(-8.4479745e9 * tec / f)
+        return tec_phases
 
 
 def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
