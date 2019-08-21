@@ -1492,7 +1492,7 @@ def rejig_solsets(h5parm, is_tec=True, add_tec_to_phase=False):
     if add_tec_to_phase:  # convert tec to phase and add it to the phase
         # tec has no frequency axis so project it along the phase axis
         my_tec = sol000.getSoltab('tec000')
-        print(my_tec.vals.shape,'asdfasdfasdf', h5parm)
+        print(my_tec.val.shape,'asdfasdfasdf', h5parm)
         tec_phase = tec_to_phase(tec=tec, frequency=frequencies)
 
 
