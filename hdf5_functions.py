@@ -1496,6 +1496,8 @@ def rejig_solsets(h5parm, is_tec=True, add_tec_to_phase=False):
         # get the phase soltab now
         # ge the frequencies of the phase
         # feed those into the tec_to_phase
+        # both tec and phase values will have an antenna axis, is that ok?
+        # we really only want the time axis. is the best thing to do to create an array of zeros of the right size and loop through ant and populate it like i did before?
         tec_phase = tec_to_phase(tec=tec, frequency=frequencies)
         # then i come out with an array of phase values and an array of tec phases of the same shape
         # i might need to interpolate the two arrays onto the same time axis
