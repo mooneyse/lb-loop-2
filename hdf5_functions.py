@@ -1,8 +1,12 @@
 #!/usr/bin/env python2.7
 
-'''A collection of functions for modifying HDF5 files. These functions form
-   loop 2 of the LOFAR long-baseline pipeline, which can be found at
-   https://github.com/lmorabit/long_baseline_pipeline.'''
+"""A collection of functions for modifying HDF5 files. These functions form
+loop 2 of the LOFAR long-baseline pipeline, which can be found at
+https://github.com/lmorabit/long_baseline_pipeline.
+
+Consider switching to interpolating LoSoTo solutions with NaN. Is there an
+easier way to add soltabs? Also, remove repeated code.
+"""
 
 from __future__ import print_function
 from multiprocessing import Pool
@@ -1516,10 +1520,11 @@ def rejig_solsets(h5parm, is_tec=True, add_tec_to_phase=False):
         # we will loop over antenna_new when adding the solutions
 
         # get the frequencies of the phase and feed those into tec_to_phase
-        tec_phase_value = tec_to_phase(tec=tec_interpolate_value,
-                                       phase=phase_interpolate_value,
-                                       frequency=phase.frequency)
+        tec_phase_value, tec_phase_weight = tec_to_phase(
+            tec=tec_interpolate_value, tec_weight=tec_interpolate_weight,
+            frequency=phase.frequency)
 
+        print('FFFFFFFFFFFFFF',phase.shape, tec_phase_value.shape, 'asdf')
         # both tec and phase values will have an antenna axis
         # tec_phase is an array of phase values the same shape as tec
         # i might need to interpolate the two arrays onto the same time axis
@@ -1541,18 +1546,19 @@ def rejig_solsets(h5parm, is_tec=True, add_tec_to_phase=False):
     return new_h5parm
 
 
-def tec_to_phase(tec, phase, frequency):
+def tec_to_phase(tec, tec_weight, frequency):
     """Convert TEC solutions to phase solutions. See equation 7.5 of
-    https://imgur.com/95HukQw.
+    https://imgur.com/95HukQw. For information on the H5parm format, see
+    appendix C.1 of https://arxiv.org/pdf/1811.07954.pdf. A weight of zero
+    indicates a flagged solution.
 
     Parameters
     ----------
     tec : array
         TEC solutions.
 
-    phase : array
-        Phase solutions. We use this only to see what shape the TEC solutions
-        should have.
+    tec_weight : array
+        Weights for TEC solutions.
 
     frequency : float, int, or array
         Frequency axis. There can be a single or multiple axes.
@@ -1565,18 +1571,23 @@ def tec_to_phase(tec, phase, frequency):
     t, _, a, d = tec.shape  # direction axis but no polarisation axis
     f = 1 if type(frequency) is float else len(frequency)  # if an array
     tec_phases = np.zeros([t, f, a, 2, d])  # added polarisation axis for phase
+    tec_phases_weights = np.zeros(tec_phases.shape)  # it will be the same size
 
     if type(frequency) is float:  # only one frequency axis
         # put the result into xx and yy
         tec_phases[:, 0, :, 0, :] = -8.4479745e9 * tec / frequency  # xx
-        tec_phases[:, 0, :, 1, :] = -8.4479745e9 * tec / frequency  # xx
+        tec_phases[:, 0, :, 1, :] = -8.4479745e9 * tec / frequency  # yy
+        tec_phases_weights[:, 0, :, 0, :] = tec_weight  # xx
+        tec_phases_weights[:, 0, :, 1, :] = tec_weight  # yy
 
-    elif type(phase.freq) is np.ndarray:  # eg 120 MHz, 140 MHz, and 160 MHz
+    elif type(frequency) is np.ndarray:  # eg 120 MHz, 140 MHz, and 160 MHz
         for f in range(len(frequency)):
-            tec_phases[:, f, :, 0, :] = -8.4479745e9 * tec / frequency[f]
-            tec_phases[:, f, :, 1, :] = -8.4479745e9 * tec / frequency[f]
+            tec_phases[:, f, :, 0, :] = -8.4479745e9 * tec / frequency[f]  # xx
+            tec_phases[:, f, :, 1, :] = -8.4479745e9 * tec / frequency[f]  # yy
+            tec_phases_weights[:, f, :, 0, :] = tec_weight  # xx
+            tec_phases_weights[:, f, :, 1, :] = tec_weight  # yy
 
-    return tec_phases
+    return tec_phases, tec_phases_weights
 
 
 def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
