@@ -1583,11 +1583,9 @@ def rejig_solsets(h5parm, is_tec=True, add_tec_to_phase=False):
             print('tec_phase_value_yy',tec_phase_value_yy.shape)
             print('tec_phase_weight_xx',tec_phase_weight_xx.shape)
             print('tec_phase_weight_yy',tec_phase_weight_xx.shape)
-            print('sqeezed', np.squeeze(tec_value_weight).shape)
-            print('sqeezed', np.squeeze(tec_phase_weight).shape)
-            sum_value_xx = ((tec_phase_value_xx * tec_phase_weight_xx) +
+            sum_value_xx[:, :, 0] = ((tec_phase_value_xx * tec_phase_weight_xx) +
                             (phase_value_xx * phase_weight_xx))
-            sum_value_yy = ((tec_phase_value_yy * tec_phase_weight_yy) +
+            sum_value_yy[:, :, 0] = ((tec_phase_value_yy * tec_phase_weight_yy) +
                             (phase_value_yy * phase_weight_yy))
             sum_weight_xx = tec_phase_weight_xx + phase_weight_xx
             sum_weight_yy = tec_phase_weight_yy + phase_weight_yy
