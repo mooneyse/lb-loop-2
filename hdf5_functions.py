@@ -1583,13 +1583,12 @@ def rejig_solsets(h5parm, is_tec=True, add_tec_to_phase=False):
             print('tec_phase_value_yy',tec_phase_value_yy.shape)
             print('tec_phase_weight_xx',tec_phase_weight_xx.shape)
             print('tec_phase_weight_yy',tec_phase_weight_xx.shape)
-            asdf = tec_phase_value_xx * tec_phase_weight_xx
-            fdsa = phase_value_xx[:,:,0] * phase_weight_xx[:,:,0]
-            print(asdf.shape,fdsa.shape)
-            sum_value_xx[:, :, 0] = ((asdf) +
-                            (fdsa))
-            sum_value_yy[:, :, 0] = ((tec_phase_value_yy * tec_phase_weight_yy) +
-                            (phase_value_yy * phase_weight_yy))
+            sum_value_xx = ((tec_phase_value_xx * tec_phase_weight_xx) +
+                            (phase_value_xx[:, :, 0] *
+                             phase_weight_xx[:, :, 0]))
+            sum_value_yy = ((tec_phase_value_yy * tec_phase_weight_yy) +
+                            (phase_value_yy[:, :, 0] *
+                             phase_weight_yy[:, :, 0]))
             sum_weight_xx = tec_phase_weight_xx + phase_weight_xx
             sum_weight_yy = tec_phase_weight_yy + phase_weight_yy
             # if either are not zero then the new weight should not be zero
