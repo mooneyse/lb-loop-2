@@ -1500,8 +1500,8 @@ def rejig_solsets(h5parm, is_tec=True, add_tec_to_phase=False):
         phase = sol000.getSoltab('phase000')  # this is the phase soltab
 
         # sort as time, frequency, antenna, polarisation [and direction]
-        tec_sort_value, tec_sort_weight = sort_axes(my_tec, tec=True)
-        phase_sort_value, phase_sort_weight = sort_axes(my_phase, tec=False)
+        tec_sort_value, tec_sort_weight = sort_axes(tec, tec=True)
+        phase_sort_value, phase_sort_weight = sort_axes(phase, tec=False)
 
         # get my_phase and my_tec on the same time axis
         time_new = make_new_times(tec.time, phase.time)
@@ -1624,7 +1624,7 @@ def rejig_solsets(h5parm, is_tec=True, add_tec_to_phase=False):
         # calibration paper
 
         # for testing:
-        # git pull && ll && rm ../init_final.h5 ../init_final-ddf.h5 && ipython
+        # git pull && ll .. && rm ../init_final.h5 ../init_final-ddf.h5 && ipython
         # from hdf5_functions import update_list; update_list(initial_h5parm='/data020/scratch/sean/letsgetloopy/init.h5', incremental_h5parm='/data020/scratch/sean/letsgetloopy/increm.h5', mtf='/data020/scratch/sean/letsgetloopy/mtf.txt', threshold=0.25, tec_included=True)
 
     # close h5parms and delete the old h5parm
