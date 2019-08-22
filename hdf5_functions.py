@@ -1589,8 +1589,8 @@ def rejig_solsets(h5parm, is_tec=True, add_tec_to_phase=False):
             sum_value_yy = ((tec_phase_value_yy * tec_phase_weight_yy) +
                             (phase_value_yy[:, :, 0] *
                              phase_weight_yy[:, :, 0]))
-            sum_weight_xx = tec_phase_weight_xx + phase_weight_xx
-            sum_weight_yy = tec_phase_weight_yy + phase_weight_yy
+            sum_weight_xx = tec_phase_weight_xx + phase_weight_xx[:, :, 0]
+            sum_weight_yy = tec_phase_weight_yy + phase_weight_yy[:, :, 0]
             # if either are not zero then the new weight should not be zero
             sum_weight_xx = np.where(sum_weight_xx >= 1, 1, 0)
             sum_weight_yy = np.where(sum_weight_yy >= 1, 1, 0)
