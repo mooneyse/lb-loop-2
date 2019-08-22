@@ -1491,19 +1491,43 @@ def rejig_solsets(h5parm, is_tec=True, add_tec_to_phase=False):
 
     if add_tec_to_phase:  # convert tec to phase and add it to the phase
         # tec has no frequency axis so project it along the phase axis
-        my_tec = sol000.getSoltab('tec000')
-        # this is the tec soltab
-        # get the phase soltab now
-        # ge the frequencies of the phase
-        # feed those into the tec_to_phase
-        # both tec and phase values will have an antenna axis, is that ok?
-        # we really only want the time axis. is the best thing to do to create an array of zeros of the right size and loop through ant and populate it like i did before?
-        tec_phase = tec_to_phase(tec=tec, frequency=frequencies)
-        # then i come out with an array of phase values and an array of tec phases of the same shape
+        tec = sol000.getSoltab('tec000')  # this is the tec soltab
+        phase = sol000.getSoltab('phase000')  # this is the phase soltab
+
+        # sort as time, frequency, antenna, polarisation [and direction]
+        tec_sort_value, tec_sort_weight = sort_axes(my_tec, tec=True)
+        phase_sort_value, phase_sort_weight = sort_axes(my_phase, tec=False)
+
+        # get my_phase and my_tec on the same time axis
+        time_new = make_new_times(tec.time, phase.time)
+        tec_interpolate_value = interpolate_time(tec_sort_value, tec.time,
+                                                 time_new)
+        tec_interpolate_weight = interpolate_time(tec_sort_weight, tec.time,
+                                                  time_new)
+        phase_interpolate_value = interpolate_time(phase_sort_value,
+                                                   phase.time, time_new)
+        phase_interpolate_weight = interpolate_time(phase_sort_weight,
+                                                    phase.time, time_new)
+
+        # get my_phase and my_tec on the same antenna axis
+        antenna_new = sorted(list(set(tec.ant.tolist() +
+                                      phase.ant.tolist())))
+        # tec_phase_value will have the same antenna axis as tec.antenna
+        # we will loop over antenna_new when adding the solutions
+
+        # get the frequencies of the phase and feed those into tec_to_phase
+        tec_phase_value = tec_to_phase(tec=tec_interpolate_value,
+                                       phase=phase_interpolate_value,
+                                       frequency=phase.frequency)
+
+        # both tec and phase values will have an antenna axis
+        # tec_phase is an array of phase values the same shape as tec
         # i might need to interpolate the two arrays onto the same time axis
         # then add them straightforwardly
         # then write these to the phase soltab values as phase001 maybe
         # then remove phase000 and tec000 and rename phase001 to phase000 and leave lots of comments about this
+
+        # we really only want the time axis. is the best thing to do to create an array of zeros of the right size and loop through ant and populate it like i did before?
 
         # for testing:
         # git pull && ll && rm ../init_final.h5 ../init_final-ddf.h5 && ipython
@@ -1517,7 +1541,7 @@ def rejig_solsets(h5parm, is_tec=True, add_tec_to_phase=False):
     return new_h5parm
 
 
-def tec_to_phase(tec, frequency):
+def tec_to_phase(tec, phase, frequency):
     """Convert TEC solutions to phase solutions. See equation 7.5 of
     https://imgur.com/95HukQw.
 
@@ -1525,6 +1549,10 @@ def tec_to_phase(tec, frequency):
     ----------
     tec : array
         TEC solutions.
+
+    phase : array
+        Phase solutions. We use this only to see what shape the TEC solutions
+        should have.
 
     frequency : float, int, or array
         Frequency axis. There can be a single or multiple axes.
@@ -1534,14 +1562,21 @@ def tec_to_phase(tec, frequency):
     array
         Phase solutions that the TEC has been converted to.
     """
-    if type(frequency) is float:  # only one frequency axis
-        return -8.4479745e9 * tec / frequency
+    t, _, a, d = tec.shape  # direction axis but no polarisation axis
+    f = 1 if type(frequency) is float else len(frequency)  # if an array
+    tec_phases = np.zeros([t, f, a, 2, d])  # added polarisation axis for phase
 
-    elif type(frequency) is np.ndarray:  # eg 120 MHz, 140 MHz, and 160 MHz
-        tec_phases = []
-        for f in frequency:
-            tec_phases.append(-8.4479745e9 * tec / f)
-        return tec_phases
+    if type(frequency) is float:  # only one frequency axis
+        # put the result into xx and yy
+        tec_phases[:, 0, :, 0, :] = -8.4479745e9 * tec / frequency  # xx
+        tec_phases[:, 0, :, 1, :] = -8.4479745e9 * tec / frequency  # xx
+
+    elif type(phase.freq) is np.ndarray:  # eg 120 MHz, 140 MHz, and 160 MHz
+        for f in range(len(frequency)):
+            tec_phases[:, f, :, 0, :] = -8.4479745e9 * tec / frequency[f]
+            tec_phases[:, f, :, 1, :] = -8.4479745e9 * tec / frequency[f]
+
+    return tec_phases
 
 
 def update_list(initial_h5parm, incremental_h5parm, mtf, threshold=0.25,
