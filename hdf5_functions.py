@@ -1585,7 +1585,7 @@ def rejig_solsets(h5parm, is_tec=True, add_tec_to_phase=False):
             print('tec_phase_weight_yy',tec_phase_weight_xx.shape)
             asdf = tec_phase_value_xx * tec_phase_weight_xx
             fdsa = phase_value_xx * phase_weight_xx
-            print(asdf.shape,fdsa.shape,sum_value_xx.shape)
+            print(asdf.shape,fdsa.shape)
             sum_value_xx[:, :, 0] = ((asdf) +
                             (fdsa))
             sum_value_yy[:, :, 0] = ((tec_phase_value_yy * tec_phase_weight_yy) +
