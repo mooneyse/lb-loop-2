@@ -1625,9 +1625,13 @@ def rejig_solsets(h5parm, is_tec=True, add_tec_to_phase=False):
         # interpolating by setting things to nan instead like in the
         # calibration paper
 
-        # for testing:
-        # git pull && ll .. && rm ../init_final.h5 ../init_final-ddf.h5 && ipython
+        # to test on cep3:
+        # module load lofar losoto && ipython
         # from hdf5_functions import update_list; update_list(initial_h5parm='/data020/scratch/sean/letsgetloopy/init.h5', incremental_h5parm='/data020/scratch/sean/letsgetloopy/increm.h5', mtf='/data020/scratch/sean/letsgetloopy/mtf.txt', threshold=0.25, tec_included=True)
+
+        # it works but one issue: i map tec solutions to both xx and yy when
+        # converting to phase, so now the coherence metric for those solutions
+        # will be perfectly 0
 
     # close h5parms and delete the old h5parm
     h1.close()
