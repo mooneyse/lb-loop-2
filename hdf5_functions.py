@@ -1506,9 +1506,9 @@ def rejig_solsets(h5parm, is_tec=True, add_tec_to_phase=False):
         # get my_phase and my_tec on the same time axis
         time_new = make_new_times(tec.time, phase.time)
         tec_interpolate_value = interpolate_time(tec_sort_value, tec.time,
-                                                 time_new)
+                                                 time_new, tec=True)
         tec_interpolate_weight = interpolate_time(tec_sort_weight, tec.time,
-                                                  time_new)
+                                                  time_new, tec=True)
         phase_interpolate_value = interpolate_time(phase_sort_value,
                                                    phase.time, time_new)
         phase_interpolate_weight = interpolate_time(phase_sort_weight,
