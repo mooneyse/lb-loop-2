@@ -5,7 +5,8 @@ loop 2 of the LOFAR long-baseline pipeline, which can be found at
 https://github.com/lmorabit/long_baseline_pipeline.
 
 Consider switching to interpolating LoSoTo solutions with NaN. Is there an
-easier way to add soltabs? Also, remove repeated code.
+easier way to add soltabs? Also, remove repeated code. Tidy docstrings. Swap
+range(len()) to enumerate.
 """
 
 from __future__ import print_function
@@ -278,7 +279,7 @@ def coherence_metric(xx, yy):
 
     try:
         xx, yy = interpolate_nan(xx), interpolate_nan(yy)
-    except:
+    except:  # TODO which exception is this?
         # if the values are all nan, they cannot be interpolated so return a
         # coherence value of nan also
         return np.nan
@@ -1522,17 +1523,105 @@ def rejig_solsets(h5parm, is_tec=True, add_tec_to_phase=False):
         # get the frequencies of the phase and feed those into tec_to_phase
         tec_phase_value, tec_phase_weight = tec_to_phase(
             tec=tec_interpolate_value, tec_weight=tec_interpolate_weight,
-            frequency=phase.frequency)
+            frequency=phase.freq)
+        # tec_phase_value is an array of phase values the same shape as tec
 
-        print('FFFFFFFFFFFFFF',phase.shape, tec_phase_value.shape, 'asdf')
-        # both tec and phase values will have an antenna axis
-        # tec_phase is an array of phase values the same shape as tec
-        # i might need to interpolate the two arrays onto the same time axis
-        # then add them straightforwardly
-        # then write these to the phase soltab values as phase001 maybe
-        # then remove phase000 and tec000 and rename phase001 to phase000 and leave lots of comments about this
+        # now we need to loop through antenna_new, the unique list of antennas
+        # for which there are tec_phase_value or phase solutions, and add them
+        empty_phase_value = np.zeros([len(time_new), len(phase.freq),
+                                     len(antenna_new), 2, 1])  # pol, dir
+        empty_phase_weight = np.zeros([len(time_new), len(phase.freq),
+                                      len(antenna_new), 2, 1])  # pol, dir
 
-        # we really only want the time axis. is the best thing to do to create an array of zeros of the right size and loop through ant and populate it like i did before?
+        for i, antenna in enumerate(antenna_new):
+            # initialise empty arrays in case we do not have both tec and phase
+            # solutions for every antenna (time, frequency, polarisation, and
+            # direction)
+            tec_phase_value_xx = np.zeros([len(time_new), len(phase.freq), 1,
+                                           1])
+            tec_phase_value_yy = np.zeros([len(time_new), len(phase.freq), 1,
+                                           1])
+            tec_phase_weight_xx = np.zeros([len(time_new), len(phase.freq), 1,
+                                            1])
+            tec_phase_weight_yy = np.zeros([len(time_new), len(phase.freq), 1,
+                                            1])
+            phase_value_xx = np.zeros([len(time_new), len(phase.freq), 1, 1])
+            phase_value_yy = np.zeros([len(time_new), len(phase.freq), 1, 1])
+            phase_weight_xx = np.zeros([len(time_new), len(phase.freq), 1, 1])
+            phase_weight_yy = np.zeros([len(time_new), len(phase.freq), 1, 1])
+
+            for j, antenna_tec in enumerate(tec.ant):
+                # there is a better way of doing this - check if it is in the
+                # array and if so return the index - change it throughout
+                if antenna == antenna_tec:  # we have tec solutions for it
+                    tec_phase_value_xx = tec_phase_value[:, :, j, 0, 0]
+                    tec_phase_value_yy = tec_phase_value[:, :, j, 1, 0]
+                    tec_phase_weight_xx = tec_phase_weight[:, :, j, 0, 0]
+                    tec_phase_weight_yy = tec_phase_weight[:, :, j, 1, 0]
+
+            for j, antenna_phase in enumerate(phase.ant):
+                if antenna == antenna_phase:  # we have phase solutions for it
+                    phase_value_xx = phase_interpolate_value[:, :, j, 0, :]
+                    phase_value_yy = phase_interpolate_value[:, :, j, 1, :]
+                    phase_weight_xx = phase_interpolate_weight[:, :, j, 0, :]
+                    phase_weight_yy = phase_interpolate_weight[:, :, j, 1, :]
+
+            # set nan to zero so x + nan = x, not nan
+            tec_phase_value_xx = np.nan_to_num(tec_phase_value_xx)
+            tec_phase_value_xx = np.nan_to_num(tec_phase_value_yy)
+            tec_phase_weight_xx = np.nan_to_num(tec_phase_weight_xx)
+            tec_phase_weight_yy = np.nan_to_num(tec_phase_weight_yy)
+            phase_value_xx = np.nan_to_num(phase_value_xx)
+            phase_value_yy = np.nan_to_num(phase_value_yy)
+            phase_weight_xx = np.nan_to_num(phase_weight_xx)
+            phase_weight_yy = np.nan_to_num(phase_weight_yy)
+
+            # now add the solutions
+            # when adding solutions they should be multiplied by the weight so
+            # if the weight is 0, the solution contributes 0, and 1 otherwise
+            sum_value_xx = ((tec_phase_value_xx * tec_phase_weight_xx) +
+                            (phase_value_xx * phase_weight_xx))
+            sum_value_yy = ((tec_phase_value_yy * tec_phase_weight_yy) +
+                            (phase_value_yy * phase_weight_yy))
+            sum_weight_xx = tec_phase_weight_xx + phase_weight_xx
+            sum_weight_yy = tec_phase_weight_yy + phase_weight_yy
+            # if either are not zero then the new weight should not be zero
+            sum_weight_xx = np.where(sum_weight_xx >= 1, 1, 0)
+            sum_weight_yy = np.where(sum_weight_yy >= 1, 1, 0)
+
+            # then populate the empty arrays
+            empty_phase_value[:, :, i, 0, 0] = sum_value_xx
+            empty_phase_value[:, :, i, 1, 0] = sum_value_yy
+            empty_phase_weight[:, :, i, 0, 0] = sum_weight_xx
+            empty_phase_weight[:, :, i, 1, 0] = sum_weight_yy
+            # now the for loop moves on to the next antenna
+
+        # at the end, reassign the now-full "empty" arrays
+        phase_value_sum = empty_phase_value
+        phase_weight_sum = empty_phase_weight
+
+        # NOTE so much repeated code here...
+
+        # write new tec + phase solutions to the solution set
+        phase_sum = sol000.makeSoltab('phase001',
+                                      axesNames=['time', 'freq', 'ant', 'pol',
+                                                 'dir'],
+                                      axesVals=[time_new, phase.freq,
+                                                antenna_new, phase.pol,
+                                                phase.dir],
+                                      vals=phase_value_sum,
+                                      weights=phase_weight_sum)
+
+        # now remove phase000 and tec000 and rename phase001 to phase000
+        print('Converted TEC to phase and added it to phase.')
+        tec.delete()
+        phase.delete()
+        phase_sum.rename('phase000')
+        print('Removed the TEC and phase soltabs and replaced phase000 with'
+              ' the new solutions.')
+        # NOTE interpolating weights, is that a good idea? change to
+        # interpolating by setting things to nan instead like in the
+        # calibration paper
 
         # for testing:
         # git pull && ll && rm ../init_final.h5 ../init_final-ddf.h5 && ipython
