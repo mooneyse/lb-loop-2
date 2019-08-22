@@ -1672,6 +1672,7 @@ def tec_to_phase(tec, tec_weight, frequency):
     elif type(frequency) is np.ndarray:  # eg 120 MHz, 140 MHz, and 160 MHz
         for f in range(len(frequency)):
             print('tec_phases shape',tec_phases.shape,'tec shape',tec.shape)
+            print('tec phases shape as given', tec_phases[:, f, :, 0, :].shape)
             tec_phases[:, f, :, 0, :] = -8.4479745e9 * tec / frequency[f]  # xx
             tec_phases[:, f, :, 1, :] = -8.4479745e9 * tec / frequency[f]  # yy
             tec_phases_weights[:, f, :, 0, :] = tec_weight  # xx
