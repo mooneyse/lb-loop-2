@@ -1664,19 +1664,19 @@ def tec_to_phase(tec, tec_weight, frequency):
 
     if type(frequency) is float:  # only one frequency axis
         # put the result into xx and yy
-        tec_phases[:, :, :, 0, :] = -8.4479745e9 * tec / frequency  # xx
-        tec_phases[:, :, :, 1, :] = -8.4479745e9 * tec / frequency  # yy
-        tec_phases_weights[:, :, :, 0, :] = tec_weight  # xx
-        tec_phases_weights[:, :, :, 1, :] = tec_weight  # yy
+        tec_phases[:, :, :, 0, :] = -8.4479745e9 * tec[:, 0, :, :] / frequency
+        tec_phases[:, :, :, 1, :] = -8.4479745e9 * tec[:, 0, :, :] / frequency
+        tec_phases_weights[:, :, :, 0, :] = tec_weight[:, 0, :, :]  # xx
+        tec_phases_weights[:, :, :, 1, :] = tec_weight[:, 0, :, :]  # yy
 
     elif type(frequency) is np.ndarray:  # eg 120 MHz, 140 MHz, and 160 MHz
         for f in range(len(frequency)):
             print('tec_phases shape',tec_phases.shape,'tec shape',tec.shape)
             print('tec phases shape as given', tec_phases[:, f, :, 0, :].shape)
-            tec_phases[:, f, :, 0, :] = -8.4479745e9 * tec / frequency[f]  # xx
-            tec_phases[:, f, :, 1, :] = -8.4479745e9 * tec / frequency[f]  # yy
-            tec_phases_weights[:, f, :, 0, :] = tec_weight  # xx
-            tec_phases_weights[:, f, :, 1, :] = tec_weight  # yy
+            tec_phases[:, f, :, 0, :] = -8.4479745e9 * tec[:, 0, :, :] / frequency[f]  # xx
+            tec_phases[:, f, :, 1, :] = -8.4479745e9 * tec[:, 0, :, :] / frequency[f]  # yy
+            tec_phases_weights[:, f, :, 0, :] = tec_weight[:, 0, :, :]  # xx
+            tec_phases_weights[:, f, :, 1, :] = tec_weight[:, 0, :, :]  # yy
 
     return tec_phases, tec_phases_weights
 
