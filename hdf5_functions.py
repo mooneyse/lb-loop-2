@@ -1575,8 +1575,8 @@ def tec_to_phase(tec, tec_weight, frequency):
 
     if type(frequency) is float:  # only one frequency axis
         # put the result into xx and yy
-        tec_phases[:, 0, :, 0, :] = -8.4479745e9 * tec / frequency  # xx
-        tec_phases[:, 0, :, 1, :] = -8.4479745e9 * tec / frequency  # yy
+        tec_phases[:, :, :, 0, :] = -8.4479745e9 * tec / frequency  # xx
+        tec_phases[:, :, :, 1, :] = -8.4479745e9 * tec / frequency  # yy
         tec_phases_weights[:, 0, :, 0, :] = tec_weight  # xx
         tec_phases_weights[:, 0, :, 1, :] = tec_weight  # yy
 
