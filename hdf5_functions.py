@@ -1579,6 +1579,12 @@ def rejig_solsets(h5parm, is_tec=True, add_tec_to_phase=False):
             # now add the solutions
             # when adding solutions they should be multiplied by the weight so
             # if the weight is 0, the solution contributes 0, and 1 otherwise
+            print('tec_phase_value_xx',tec_phase_value_xx.shape)
+            print('tec_phase_value_yy',tec_phase_value_yy.shape)
+            print('tec_phase_weight_xx',tec_phase_weight_xx.shape)
+            print('tec_phase_weight_yy',tec_phase_weight_xx.shape)
+            print('sqeezed', np.squeeze(tec_value_weight).shape)
+            print('sqeezed', np.squeeze(tec_phase_weight).shape)
             sum_value_xx = ((tec_phase_value_xx * tec_phase_weight_xx) +
                             (phase_value_xx * phase_weight_xx))
             sum_value_yy = ((tec_phase_value_yy * tec_phase_weight_yy) +
@@ -1671,10 +1677,10 @@ def tec_to_phase(tec, tec_weight, frequency):
 
     elif type(frequency) is np.ndarray:  # eg 120 MHz, 140 MHz, and 160 MHz
         for f in range(len(frequency)):
-            print('tec_phases shape',tec_phases.shape,'tec shape',tec.shape)
-            print('tec phases shape as given', tec_phases[:, f, :, 0, :].shape)
-            tec_phases[:, f, :, 0, :] = -8.4479745e9 * tec[:, 0, :, :] / frequency[f]  # xx
-            tec_phases[:, f, :, 1, :] = -8.4479745e9 * tec[:, 0, :, :] / frequency[f]  # yy
+            tec_phases[:, f, :, 0, :] = (-8.4479745e9 * tec[:, 0, :, :] /
+                                         frequency[f])  # specify freq tec axis
+            tec_phases[:, f, :, 1, :] = (-8.4479745e9 * tec[:, 0, :, :] /
+                                         frequency[f])
             tec_phases_weights[:, f, :, 0, :] = tec_weight[:, 0, :, :]  # xx
             tec_phases_weights[:, f, :, 1, :] = tec_weight[:, 0, :, :]  # yy
 
