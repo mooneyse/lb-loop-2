@@ -3,10 +3,6 @@
 """A collection of functions for modifying HDF5 files. These functions form
 loop 2 of the LOFAR long-baseline pipeline, which can be found at
 https://github.com/lmorabit/long_baseline_pipeline.
-
-Consider switching to interpolating LoSoTo solutions with NaN. Is there an
-easier way to add soltabs? Also, remove repeated code. Tidy docstrings. Swap
-range(len()) to enumerate.
 """
 
 from __future__ import print_function
@@ -27,6 +23,16 @@ import pyrap.tables as pt
 
 __author__ = 'Sean Mooney'
 __date__ = '01 June 2019'
+
+# TODO switch to interpolating LoSoTo solutions with NaN
+# TODO is there an easier way to add soltabs?
+# TODO remove repeated code, swap range(len()) to enumerate, etc
+# TODO tidy docstrings
+# TODO https://github.com/mooneyse/lb-loop-2/issues/11
+# TODO https://github.com/mooneyse/lb-loop-2/issues/10
+# TODO https://github.com/mooneyse/lb-loop-2/issues/9
+# TODO https://github.com/mooneyse/lb-loop-2/issues/6
+# TODO https://github.com/mooneyse/lb-loop-2/issues/5
 
 
 def dir_from_ms(ms, verbose=False):
