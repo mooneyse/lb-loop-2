@@ -1,1 +1,1 @@
-long_baseline_pipeline https://github.com/lmorabit/long_baseline_pipeline
+long_baseline_pipeline
